@@ -9,11 +9,11 @@ Field and table names marked ✔ were verified on bithawkdemo1 (2026-11-05).
 |----|-------|------|----------|------|--------|
 | IH-001 | Reports published to public | Administration | security | TableCheck | built |
 | IH-002 | Slow reports (> 5 s) | Performance | performance | TableCheck (advanced) | built |
-| IH-003 | Tables with > 10 custom client scripts | Maintenance | manageability | ScriptOnlyCheck | specified |
+| IH-003 | Tables with > 10 custom client scripts | Maintenance | manageability | ScriptOnlyCheck | built |
 | IH-004 | Data collector jobs with errors or warnings | Maintenance | manageability | TableCheck (advanced) | built |
 | IH-005 | Global UI scripts | Performance | performance | TableCheck | built |
 | IH-007 | Global client scripts | Performance | performance | TableCheck | built |
-| IH-008 | Import set rows > 5 million | Maintenance | performance | ScriptOnlyCheck | specified |
+| IH-008 | Import set rows > 5 million | Maintenance | performance | ScriptOnlyCheck | built |
 | IH-009 | Scripts using gs.sql | Maintenance | upgradability | ColumnTypeCheck | built |
 
 ---
@@ -37,7 +37,9 @@ Field and table names marked ✔ were verified on bithawkdemo1 (2026-11-05).
 
 - **Ideal:** At most 10 custom client scripts per table.
 - **Logic:** GlideAggregate on `sys_script_client`, grouped by `table`, filtered to active custom scripts. One finding per table with count > 10, showing the count in `finding_details`.
-- **Custom:** a script not delivered by a ServiceNow plugin or store app (agreed 2026-11-05). Exact detection to be confirmed during build.
+- **Custom:** a script not delivered by a ServiceNow plugin or store app (agreed 2026-11-05).
+- **Detection (built 2026-11-05):** custom if `sys_package` is a customer scoped app (`sys_app`), or if `sys_package=global` and a customer update (`sys_update_xml`, application global) exists for the script. Plugins (`sys_plugins`), store apps (`sys_store_app`) and the base system package never count. Catalog client scripts (`catalog_script_client`) are excluded.
+- **Known limits:** global rule not yet validated, because bithawkdemo1 has no global client scripts created by named users and `sys_metadata_customization` holds only one client script record. It counts customized ServiceNow scripts in global as custom, and misses global custom scripts whose update sets were deleted.
 - **Decision:** Active scripts only; inactive scripts do not count (agreed 2026-11-05).
 - **Resolution:** Consolidate client scripts, move logic to UI policies where possible, remove obsolete scripts.
 
