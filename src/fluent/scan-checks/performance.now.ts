@@ -15,8 +15,19 @@ export const ih002SlowReports = TableCheck({
     advanced: true,
     script: `(function(engine, current) {
     var avgSeconds = parseInt(current.getValue('recent_avg_execution_duration'), 10) / 1000;
-    engine.finding.setCurrentSource(current);
-    engine.finding.setValue('finding_details', 'Recent average run time ' + avgSeconds.toFixed(1) + ' s over ' + current.getValue('recent_number_executions') + ' recent run(s) on table ' + current.getValue('report_table'));
+    var details = 'Recent average run time ' + avgSeconds.toFixed(1) + ' s over ' + current.getValue('recent_number_executions') + ' recent run(s)';
+
+    // Link the finding to the report itself (sys_report or par_visualization), falling back to the stats record
+    var reportTable = current.getValue('report_table');
+    var report = reportTable ? new GlideRecord(reportTable) : null;
+    if (report && report.isValid() && report.get(current.getValue('report_sys_id'))) {
+        engine.finding.setCurrentSource(report);
+        details = details + ' (' + report.getClassDisplayValue() + ': ' + report.getDisplayValue() + ')';
+    } else {
+        engine.finding.setCurrentSource(current);
+    }
+
+    engine.finding.setValue('finding_details', details);
     engine.finding.increment();
 })(engine, current);`,
     resolutionDetails:

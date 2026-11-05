@@ -151,8 +151,10 @@ export const ih009GsSqlUsage = ColumnTypeCheck({
 
     var commentsRegex = /\\/\\*[\\s\\S]*?\\*\\/|([^:]|^)\\/\\/.*$/gm;
     var clean = columnValue.replace(commentsRegex, '$1');
-    if (searchRegex.test(clean))
+    if (searchRegex.test(clean)) {
+        engine.finding.setCurrentSource(current);
         engine.finding.increment();
+    }
 })(engine, current, columnValue);`,
     resolutionDetails:
         'Replace gs.sql with GlideRecord or GlideAggregate queries.',

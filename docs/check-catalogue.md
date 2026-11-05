@@ -29,7 +29,8 @@ Field and table names marked ✔ were verified on bithawkdemo1 (2026-11-05).
 
 - **Ideal:** Reports load in under 5 s.
 - **Logic:** `report_stats` where `recent_avg_execution_duration > 5000` and `recent_number_executions > 0` ✔. Reports that have not run recently are ignored. Unit is ms ✔ (largest run on bithawkdemo1: 210216 = 3.5 min). The finding details show the average in seconds.
-- **Note:** `report_stats` also holds stats for Platform Analytics visualizations (`par_visualization`), so these are reported as well. The finding points to the `report_stats` record, which references the report via `report_sys_id`.
+- **Note:** `report_stats` also holds stats for Platform Analytics visualizations (`par_visualization`), so these are reported as well.
+- **Link:** each finding links to the report itself: `report_table` holds the report's table (`sys_report` or `par_visualization`) and `report_sys_id` its sys_id ✔. If the report no longer exists, the finding falls back to the `report_stats` record (changed 2026-11-05 at user request).
 - **Decision:** Recent average, recently run reports only (agreed 2026-11-05).
 - **Resolution:** Add filters, indexes or a smaller date range; avoid dot-walked group-bys on large tables.
 

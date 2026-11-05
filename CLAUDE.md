@@ -16,6 +16,7 @@ ServiceNow Fluent app (scope `x_bits2_inst_hlth`, SDK 4.14.0) that delivers Inst
 - `$id`: `Now.ID['ih-NNN-kebab-name']`. Export name: `ihNNNCamelName`.
 - `name`: `IH-NNN <short title>` so all checks group together in Instance Scan.
 - Always set `description` (with the ideal state) and `resolutionDetails`.
+- Every finding must link to the record the user has to act on, whenever such a record exists (user requirement, 2026-11-05). In scripts, call `engine.finding.setCurrentSource(<that record>)` before `increment()`. If the check scans a helper table (stats, logs), resolve and link the real record (report, job, script), falling back to the scanned record.
 - Category: administration → `security` or `manageability`, maintenance → `manageability` or `upgradability`, performance → `performance`. The catalogue decides per check.
 - Priority: 2 for security and upgrade risks, 3 for performance and hygiene, unless the catalogue says otherwise.
 - Scripts are inline template strings, ES5 only (`var`, no arrow functions, no template literals inside the script). Escape backslashes in regexes (`\\s`) and check the built XML in `dist/app/update/` after a build.
