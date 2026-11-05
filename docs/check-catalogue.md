@@ -2,6 +2,15 @@
 
 Dropped: IH-006 Java package collection mode (2026-11-05).
 
+## Open items (as of 2026-11-05)
+
+- All 8 checks are deployed to bithawkdemo1. The user ran them; results look fine, but the demo instance has few findings.
+- Next: user runs `test-data/create-test-data.js` on bithawkdemo1, runs the checks, compares with the expected findings, then runs `remove-test-data.js`. Mark checks `validated` afterwards. The test scripts have not been run yet.
+- Proposed, not yet agreed: make thresholds (IH-002 5 s, IH-003 10 scripts, IH-008 5 million rows) configurable as system properties. This would also allow testing IH-008 with a low threshold.
+- Proposed, not yet agreed: IH-004 should also flag active jobs whose latest run is older than 7 days (seen on bithawkdemo1: latest run 2026-06-12).
+- Proposed, not yet agreed: group all checks in an "Instance Health" suite (needs a `Record()` on the suite table, verify first).
+- Later: run the checks on a real instance with real data (needs customer approval).
+
 Status values: `idea` → `specified` → `built` → `validated`.
 Field and table names marked ✔ were verified on bithawkdemo1 (2026-11-05).
 
