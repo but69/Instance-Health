@@ -1,0 +1,6 @@
+{
+    "scope": "x_bits2_inst_hlth",
+    "scopeId": "8bea6b1236d44ff988a0239e179f4d30",
+    "name": "Instance Health",
+    "tsconfigPath": "./src/server/tsconfig.json"
+}
