@@ -22,6 +22,10 @@ ServiceNow Fluent app (scope `x_bits2_inst_hlth`, SDK 4.14.0) that delivers Inst
 - Scripts are inline template strings, ES5 only (`var`, no arrow functions, no template literals inside the script). Escape backslashes in regexes (`\\s`) and check the built XML in `dist/app/update/` after a build.
 - Prefer condition-only `TableCheck` when every matching record is a finding. Use scripts only when needed.
 
+## Test data
+
+`test-data/create-test-data.js` and `remove-test-data.js` are background scripts (global scope) that create and remove positive and negative test records, all marked `IH-TEST` and captured in the update set "Instance Health - Test Data". They are not part of the app build. When a check is added or changed, extend both scripts with a matching test case.
+
 ## Workflow per batch
 
 1. Specify in the catalogue → 2. build → 3. deploy (user approval) → 4. run the checks on bithawkdemo1 and review findings → 5. tune thresholds, mark `validated`.
