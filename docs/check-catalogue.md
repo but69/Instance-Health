@@ -8,9 +8,9 @@ Field and table names marked ✔ were verified on bithawkdemo1 (2026-11-05).
 | ID | Check | Area | Category | Type | Status |
 |----|-------|------|----------|------|--------|
 | IH-001 | Reports published to public | Administration | security | TableCheck | built |
-| IH-002 | Slow reports (> 5 s) | Performance | performance | TableCheck | specified |
+| IH-002 | Slow reports (> 5 s) | Performance | performance | TableCheck (advanced) | built |
 | IH-003 | Tables with > 10 custom client scripts | Maintenance | manageability | ScriptOnlyCheck | specified |
-| IH-004 | Data collector jobs with errors or warnings | Maintenance | manageability | TableCheck (advanced) | specified |
+| IH-004 | Data collector jobs with errors or warnings | Maintenance | manageability | TableCheck (advanced) | built |
 | IH-005 | Global UI scripts | Performance | performance | TableCheck | built |
 | IH-007 | Global client scripts | Performance | performance | TableCheck | built |
 | IH-008 | Import set rows > 5 million | Maintenance | performance | ScriptOnlyCheck | specified |
@@ -28,7 +28,8 @@ Field and table names marked ✔ were verified on bithawkdemo1 (2026-11-05).
 ## IH-002 Slow reports
 
 - **Ideal:** Reports load in under 5 s.
-- **Logic:** `report_stats` where `recent_avg_execution_duration > 5000` and `recent_number_executions > 0` ✔. Reports that have not run recently are ignored. Unit assumed to be ms; verify against a real report during validation.
+- **Logic:** `report_stats` where `recent_avg_execution_duration > 5000` and `recent_number_executions > 0` ✔. Reports that have not run recently are ignored. Unit is ms ✔ (largest run on bithawkdemo1: 210216 = 3.5 min). The finding details show the average in seconds.
+- **Note:** `report_stats` also holds stats for Platform Analytics visualizations (`par_visualization`), so these are reported as well. The finding points to the `report_stats` record, which references the report via `report_sys_id`.
 - **Decision:** Recent average, recently run reports only (agreed 2026-11-05).
 - **Resolution:** Add filters, indexes or a smaller date range; avoid dot-walked group-bys on large tables.
 
@@ -43,7 +44,7 @@ Field and table names marked ✔ were verified on bithawkdemo1 (2026-11-05).
 ## IH-004 Data collector jobs with errors or warnings
 
 - **Ideal:** No PA data collector job ends with errors or warnings.
-- **Logic:** `sysauto_pa` where `active=true`, in advanced mode: read the latest `pa_job_logs` record for the job ✔ (`job`, `errors`, `warnings`, `completed`, `state`). Finding if `errors > 0` or `warnings > 0`. Only the latest run counts, so a job that has since been fixed is not reported.
+- **Logic:** `sysauto_pa` where `active=true`, in advanced mode: read the latest finished `pa_job_logs` record for the job (state not `collecting`) ✔ (`job`, `errors`, `warnings`, `completed`, `state`). Finding if `errors > 0`, `warnings > 0`, or state is `collected_error` / `collected_warning`. Only the latest run counts, so a job that has since been fixed is not reported.
 - **Resolution:** Open the job log rows (`pa_job_log_rows`) and fix the failing indicators or breakdowns.
 
 ## IH-005 Global UI scripts

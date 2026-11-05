@@ -13,6 +13,14 @@ declare global {
                         table: 'scan_table_check'
                         id: '1887f48f241840c1b90a8f3b35158391'
                     }
+                    'ih-002-slow-reports': {
+                        table: 'scan_table_check'
+                        id: '28d0a7a9c5c041fa8073f4df77651aba'
+                    }
+                    'ih-004-data-collector-job-issues': {
+                        table: 'scan_table_check'
+                        id: 'dd473c175d664f5e9b1fc4c38666aa2c'
+                    }
                     'ih-005-global-ui-scripts': {
                         table: 'scan_table_check'
                         id: '559304cfde2f422bb2870113ab0cb4b4'
