@@ -681,6 +681,10 @@ declare global {
                         table: 'scan_check_suite'
                         id: 'b152ddddafa943f0accb08142b5b42d6'
                     }
+                    'ih-ui-action-run-suite': {
+                        table: 'sys_ui_action'
+                        id: 'c63380c520d6419e8825bde3f82efaf9'
+                    }
                     package_json: {
                         table: 'sys_module'
                         id: '3375b34e79e4474bb7a9d8011059829a'
@@ -819,6 +823,19 @@ declare global {
                             name: 'x_bits2_inst_hlth_health_score'
                             element: 'health_score'
                             language: 'en'
+                        }
+                    },
+                    {
+                        table: 'sys_ui_action_role'
+                        id: '605eb3c46b2a48d9a3295e2a92a4bdc9'
+                        key: {
+                            sys_ui_action: 'c63380c520d6419e8825bde3f82efaf9'
+                            sys_user_role: {
+                                id: 'd7c37c23f2d14a3babfcfec3ba912af8'
+                                key: {
+                                    name: 'admin'
+                                }
+                            }
                         }
                     },
                     {

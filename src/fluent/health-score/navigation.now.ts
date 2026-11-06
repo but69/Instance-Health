@@ -1,4 +1,4 @@
-import { ApplicationMenu, Record } from '@servicenow/sdk/core'
+import { ApplicationMenu, Record, UiAction } from '@servicenow/sdk/core'
 import { x_bits2_inst_hlth_health_score } from './health-score.now'
 
 // Navigator menu "Instance Health" with the health scores and their trend (user request 2026-11-06).
@@ -10,6 +10,48 @@ export const instanceHealthMenu = ApplicationMenu({
     description: 'Health scores per run of the scan suite "Instance health" and their trend.',
     active: true,
     roles: ['admin'],
+})
+
+// List banner button on the health scores: starts the scan suite (user request 2026-11-06). The
+// health score of the run is calculated by the scheduled job up to 15 minutes after the scan ends.
+UiAction({
+    $id: Now.ID['ih-ui-action-run-suite'],
+    name: 'Run Instance Health Scan',
+    actionName: 'ih_run_instance_health_scan',
+    table: x_bits2_inst_hlth_health_score.name,
+    active: true,
+    hint: 'Starts the scan suite "Instance health"; the health score appears here when the scan is finished',
+    roles: ['admin'],
+    condition: "gs.hasRole('admin')",
+    list: {
+        showBannerButton: true,
+        style: 'primary',
+    },
+    script: `(function runInstanceHealthScan() {
+    var listUrl = 'x_bits2_inst_hlth_health_score_list.do?sysparm_query=ORDERBYDESCscan_date';
+    var suite = new GlideRecord('scan_check_suite');
+    if (!suite.get('name', 'Instance health')) {
+        gs.addErrorMessage('The scan suite "Instance health" does not exist.');
+        action.setRedirectURL(listUrl);
+        return;
+    }
+
+    // Do not start a second run while one is still in progress
+    var running = new GlideRecord('scan_suite_execution');
+    running.addQuery('suite', suite.getUniqueValue());
+    running.addQuery('result.state', 'in_progress');
+    running.setLimit(1);
+    running.query();
+    if (running.next()) {
+        gs.addInfoMessage('The scan suite "Instance health" is already running (' + running.result.getDisplayValue() + '). The health score appears in this list up to 15 minutes after it has finished.');
+        action.setRedirectURL(listUrl);
+        return;
+    }
+
+    new sn_instance_scan.ScanInstance().triggerSuiteScan(suite.getUniqueValue());
+    gs.addInfoMessage('The scan suite "Instance health" was started. The scan takes about 15 minutes; the health score appears in this list up to 15 minutes after it has finished.');
+    action.setRedirectURL(listUrl);
+})();`,
 })
 
 // Line chart: average health score per day (several runs on one day are averaged).
