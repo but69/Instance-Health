@@ -535,12 +535,31 @@ runInGlobal(function createInstanceHealthTestData() {
             gr.setValue(field, values[field]);
         var sysId = gr.insert();
         if (!sysId)
-            throw new Error('Insert into ' + table + ' failed: ' + JSON.stringify(values));
+            throw new Error('Insert into ' + table + ' failed (' + gr.getLastErrorMessage() + '): ' + JSON.stringify(values));
         created.push(table + ' ' + sysId);
         return sysId;
     }
-    insertWithoutRules('incident', { short_description: MARKER + ' IH-054 resolved without resolved by', caller_id: activeUser, opened_by: activeUser, state: '6' });
-    insertWithoutRules('problem', { short_description: MARKER + ' IH-055 closed without closed by', opened_by: activeUser, state: '107', active: 'false', closed_at: new GlideDateTime().getValue() });
+    // The data policy "Make close info mandatory when resolved or closed" needs a resolution code and close notes
+    var closeCode = new GlideRecord('sys_choice');
+    closeCode.addQuery('name', 'incident');
+    closeCode.addQuery('element', 'close_code');
+    closeCode.addQuery('inactive', false);
+    closeCode.setLimit(1);
+    closeCode.query();
+    var closeCodeValue = closeCode.next() ? closeCode.getValue('value') : '';
+    try {
+        insertWithoutRules('incident', { short_description: MARKER + ' IH-054 resolved without resolved by', caller_id: activeUser, opened_by: activeUser, state: '6',
+            close_code: closeCodeValue, close_notes: MARKER + ': test data for Instance Health, safe to delete' });
+    } catch (e) {
+        warnings.push('IH-054 incident: ' + e.message);
+    }
+    try {
+        // Data policies for closed problems: Assigned to, Resolution code and Close notes are mandatory
+        insertWithoutRules('problem', { short_description: MARKER + ' IH-055 closed without closed by', opened_by: activeUser, assigned_to: activeUser,
+            resolution_code: 'canceled', close_notes: MARKER + ': test data for Instance Health, safe to delete', state: '107', active: 'false', closed_at: new GlideDateTime().getValue() });
+    } catch (e) {
+        warnings.push('IH-055 problem: ' + e.message);
+    }
 
     // IH-059: scripted REST API with a resource without ACL authorization (positive) and one with
     // both settings (negative). Both require authentication, so nothing is public.
