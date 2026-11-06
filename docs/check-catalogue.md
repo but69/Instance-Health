@@ -38,6 +38,18 @@ Field and table names marked ✔ were verified on bithawkdemo1 (2026-11-05).
 | IH-017 | Transform map coalesces on non-indexed fields | Performance | performance | TableCheck (advanced) | built |
 | IH-018 | Tables without ACLs | Administration | security | ScriptOnlyCheck | built |
 | IH-019 | Read ACLs with GlideRecord / GlideAggregate | Performance | performance | TableCheck (advanced) | built |
+| IH-020 | SLA engine runs synchronously | Performance | performance | ScriptOnlyCheck | specified |
+| IH-021 | Business rules with outbound REST/SOAP must be async | Performance | performance | TableCheck (advanced) | specified |
+| IH-022 | Skipped items in the last upgrade | Maintenance | upgradability | ScriptOnlyCheck | specified |
+| IH-023 | Default rows per page at most 50 | Performance | performance | TableCheck (advanced) | specified |
+| IH-024 | Long running (slow) scripts | Performance | performance | TableCheck (advanced) | specified |
+| IH-025 | Differs from baseline: business rules | Maintenance | upgradability | ScriptOnlyCheck | specified |
+| IH-026 | Differs from baseline: script includes | Maintenance | upgradability | ScriptOnlyCheck | specified |
+| IH-027 | Differs from baseline: client scripts and UI scripts | Maintenance | upgradability | ScriptOnlyCheck | specified |
+| IH-028 | Differs from baseline: UI macros and UI pages | Maintenance | upgradability | ScriptOnlyCheck | specified |
+| IH-029 | Differs from baseline: UI actions | Maintenance | upgradability | ScriptOnlyCheck | specified |
+| IH-030 | Virtual CIs with assets | Administration | manageability | ScriptOnlyCheck | specified |
+| IH-031 | Computers and network gear without serial number | Administration | manageability | TableCheck | specified |
 
 ---
 
@@ -187,3 +199,71 @@ Measured on bithawkdemo1 (2026-11-06): no OOB Instance Scan check covers these t
 - **Measured:** 174 active read ACLs match, mostly OOB.
 - **Built:** conditions `operation.name=read^active=true^advanced=true^scriptLIKEGlide`, then every line with `new GlideRecord(`, `new GlideRecordSecure(` or `new GlideAggregate(` (GlideRecordSecure added: it queries as well). Queries hidden in called script includes are not detected.
 - **Resolution:** Use conditions or roles, cache results, or move the logic into a role or a scratchpad value.
+
+---
+
+## Batch 3: drafts received 2026-11-06
+
+Drafts from the user ("outcome: list of findings"), specified 2026-11-06. IH-021 follows the batch 2 code check rules (custom only, matching lines listed).
+Measured on bithawkdemo1 (2026-11-06): no OOB Instance Scan check covers these topics.
+
+## IH-020 SLA engine runs synchronously
+
+- **Ideal:** SLAs are processed synchronously (SLA engine 2011, business rule "Run SLAs"), not by the async "Process SLAs" rule.
+- **Logic:** property `com.snc.sla.engine.version` ✔ decides which task rule runs: "Process SLAs" (async, condition `== '2010'`, also the default when the property is missing) or "Run SLAs" (after, condition `== '2011'`) ✔. Finding if the value is not `2011`; link to the `sys_properties` record, or to the "Process SLAs" business rule if the property does not exist.
+- **Measured:** bithawkdemo1 has `2011`, so no finding. No test data: changing the property would switch the SLA engine of the demo instance.
+- **Resolution:** Set `com.snc.sla.engine.version` to `2011` after checking custom SLA logic that relies on the async engine.
+
+## IH-021 Business rules with outbound REST/SOAP must be async
+
+- **Ideal:** Business rules that call external systems run async, so the user does not wait for the remote system.
+- **Logic:** `sys_script` where `active=true` and `when` is not `async` / `async_always` ✔ (values on the instance: before, after, before_display, display, async, async_always, ...), script contains `RESTMessageV2`, `SOAPMessageV2`, `RESTMessage(`, `SOAPMessage(` or `GlideHTTPRequest` (after stripping comments). Lines listed as in batch 2.
+- **Measured:** 1 active non-async rule uses RESTMessageV2/SOAPMessageV2.
+- **Resolution:** Change the rule to async, or move the call to an event / script action or a flow.
+
+## IH-022 Skipped items in the last upgrade
+
+- **Ideal:** Every item skipped in the last platform upgrade has been reviewed.
+- **Logic:** latest `sys_upgrade_history` record with `to_version` starting with `glide-` ✔ (app installs also create history records). Its `sys_upgrade_history_log` rows ✔ with `disposition` 4 (Skipped), 9 (Skipped Error) or 10 (Skipped Manual Merge) ✔ and `resolution_status` empty or `not_reviewed` ✔. Link to the log row (it shows the diff and the merge options).
+- **Measured:** last upgrade 2026-10-31 (patch 5aw44): 311 skipped, 2 skipped with error, none reviewed.
+- **Decision:** one finding per unreviewed item (agreed 2026-11-06).
+- **Resolution:** Review each skipped item in the upgrade history: revert to the base system, merge, or keep the customization and mark it reviewed.
+
+## IH-023 Default rows per page at most 50
+
+- **Ideal:** The system default for rows per page (`sys_user_preference` `rowcount`, `system=true`, no user) is 50 or less.
+- **Logic:** `sys_user_preference` where `name=rowcount^system=true^userISEMPTY` ✔, advanced: finding if `parseInt(value) > 50`.
+- **Measured:** value 20, no finding.
+- **Resolution:** Set the system preference `rowcount` to 50 or less; large pages slow down every list.
+
+## IH-024 Long running (slow) scripts
+
+- **Ideal:** No script runs longer than the threshold on average.
+- **Logic:** `sys_script_pattern` ✔ (Slow Scripts: `average` in ms, `count`, `last`, `label`, `script_source_table`, `script_source`) where `average > threshold` and `last` within the period. Link to the script record (`script_source_table` + `script_source`), falling back to the pattern record (as IH-002).
+- **Measured:** average > 5 s: 49 overall, 20 seen in the last 30 days; > 10 s: 26 / 15. Mostly OOB: script actions 18, scripted REST 11, scheduled jobs 4, script includes 3, our own scan checks 3.
+- **Decision:** average > 5 s, last seen within 30 days, all scripts including ServiceNow code (agreed 2026-11-06).
+- **Resolution:** Optimize the script (queries, loops, indexes) or move it to an async context.
+
+## IH-025 to IH-029 Differs from baseline
+
+- **Ideal:** ServiceNow records are not modified; customizations are made by copying or extending.
+- **Logic:** `sys_metadata_customization` ✔ (`sys_metadata`, `author_type`) is the platform's own list of customized records. `author_type=ServiceNow` ✔ means a ServiceNow record that was changed (values: ServiceNow 1123, Custom 540, ToBeDetermined 308, Unknown 11). One finding per changed record, linked to it. Split by `sys_metadata.sys_class_name`:
+  - IH-025 `sys_script`, IH-026 `sys_script_include`, IH-027 `sys_script_client` + `sys_ui_script`, IH-028 `sys_ui_macro` + `sys_ui_page`, IH-029 `sys_ui_action`.
+- **Measured (all author types):** sys_script 33, sys_script_include 16, sys_script_client 27, sys_ui_script 2, sys_ui_macro 0, sys_ui_page 0, sys_ui_action 0.
+- **Note:** this table could also improve the IH-003 "custom" rule (known limit: customized ServiceNow scripts in global count as custom).
+- **Resolution:** Revert to the base system where possible, or document why the change is needed; changed records are skipped in upgrades.
+
+## IH-030 Virtual CIs with assets
+
+- **Ideal:** CIs flagged as virtual do not have an asset.
+- **Logic:** the `virtual` flag is not on `cmdb_ci`, but on about 200 classes (e.g. `cmdb_ci_computer`, `cmdb_ci_netgear`, `cmdb_ci_ot`, `cmdb_ci_nic`) ✔. ScriptOnlyCheck: find the top-most tables that define `virtual` (`sys_dictionary`), query each for `virtual=true^assetISNOTEMPTY`. Link to the CI.
+- **Measured:** 0 virtual CIs on bithawkdemo1.
+- **Resolution:** Remove the asset (retire or delete it) and check the model category, so virtual CIs do not create assets.
+
+## IH-031 Computers and network gear without serial number
+
+- **Ideal:** Every computer and network gear CI (all subclasses, discovered or not) has a serial number.
+- **Logic:** TableCheck on `cmdb_ci_hardware` with `sys_class_nameINSTANCEOFcmdb_ci_computer^ORsys_class_nameINSTANCEOFcmdb_ci_netgear^serial_numberISEMPTY^install_status!=7`. Link to the CI.
+- **Measured:** computers 107 of 855 without serial (95 not retired), network gear 9 of 9.
+- **Decision:** retired CIs (`install_status=7`) are excluded (agreed 2026-11-06).
+- **Resolution:** Populate the serial number (Discovery, import or manually); it is the main identification attribute for hardware.
