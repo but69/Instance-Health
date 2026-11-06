@@ -54,6 +54,29 @@ UiAction({
 })();`,
 })
 
+// List control: no "New" button on the health score list, records are only created by the
+// scheduled job (user request 2026-11-06). Record() sets no defaults, so all flags are explicit.
+Record({
+    $id: Now.ID['ih-list-control-health-score'],
+    table: 'sys_ui_list_control',
+    data: {
+        name: x_bits2_inst_hlth_health_score.name,
+        omit_new_button: true,
+        omit_edit_button: false,
+        omit_if_empty: false,
+        omit_columns_if_empty: false,
+        omit_count_views: false,
+        omit_related_list_count: false,
+        hierarchical_lists: false,
+        omit_links: false,
+        omit_filters: false,
+        disable_nlq: false,
+        omit_count: false,
+        omit_drilldown_link: false,
+        list_edit_insert_row: false,
+    },
+})
+
 // Line chart: average health score per day (several runs on one day are averaged).
 // Record() sets no platform defaults, so the display fields are set explicitly (values as in the
 // platform line chart "Service View - Completeness Trend"); without them the module stayed hidden.

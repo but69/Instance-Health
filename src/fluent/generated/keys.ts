@@ -345,6 +345,10 @@ declare global {
                         table: 'sysauto_script'
                         id: '5a84bf997e7f427ba5d787d95595d2e6'
                     }
+                    'ih-list-control-health-score': {
+                        table: 'sys_ui_list_control'
+                        id: '3fd79b40b5ef4ed7a0096e395ab36d3a'
+                    }
                     'ih-menu': {
                         table: 'sys_app_application'
                         id: '7ab5623b683c478dbaa6d49be3ee7611'
