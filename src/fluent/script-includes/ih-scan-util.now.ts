@@ -78,6 +78,18 @@ IHScanUtil.prototype = {
         engine.finding.increment();
     },
 
+    // IH-039, IH-061: reasons why a script condition is complex (user decision 2026-11-06:
+    // longer than 200 characters, a query, a statement separator or a function). [] if simple.
+    conditionComplexity: function(condition) {
+        var reasons = [];
+        if (!condition) return reasons;
+        if (condition.length > 200) reasons.push(condition.length + ' characters');
+        if (/\\bGlide(Record|Aggregate)/.test(condition)) reasons.push('database query');
+        if (condition.indexOf(';') > -1) reasons.push('several statements');
+        if (/\\bfunction\\b/.test(condition)) reasons.push('function');
+        return reasons;
+    },
+
     // IH-049, IH-050: resolve a scheduled job's run_as value. It is a sys_user reference, but some
     // jobs hold a user name ("admin") or an internal platform user ("system", "maint").
     // Returns { state: 'internal' | 'missing' | 'inactive' | 'active', user: GlideRecord or null }
@@ -152,7 +164,8 @@ IHScanUtil.prototype = {
 
     // IH-025 to IH-029: ServiceNow records that were changed, from the platform's own list
     // sys_metadata_customization (author_type ServiceNow = record shipped by ServiceNow)
-    reportBaselineChanges: function(engine, classNames) {
+    // skip (optional): function(record) returning true for records that must not be reported
+    reportBaselineChanges: function(engine, classNames, skip) {
         var changed = new GlideRecord('sys_metadata_customization');
         changed.addQuery('author_type', 'ServiceNow');
         changed.addQuery('sys_metadata.sys_class_name', 'IN', classNames.join(','));
@@ -161,6 +174,7 @@ IHScanUtil.prototype = {
             var className = changed.sys_metadata.sys_class_name + '';
             var record = new GlideRecord(className);
             if (!record.isValid() || !record.get(changed.getValue('sys_metadata'))) continue;
+            if (skip && skip(record)) continue;
             engine.finding.setCurrentSource(record);
             engine.finding.setValue('finding_details', 'ServiceNow ' + record.getClassDisplayValue() + ' changed by the customer (package ' +
                 record.sys_package.getDisplayValue() + ', last updated ' + record.getValue('sys_updated_on') + ' by ' + record.getValue('sys_updated_by') + ')');

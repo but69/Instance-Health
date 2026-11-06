@@ -78,6 +78,8 @@ runInGlobal(function removeInstanceHealthTestData() {
     deleteWhere('sys_ui_page', 'name', 'STARTSWITH', 'ih_test_', true);
     deleteWhere('sys_script_pattern', 'label', 'STARTSWITH', MARKER, false);
     deleteWhere('cmdb_ci_computer', 'name', 'STARTSWITH', MARKER, false);
+    deleteWhere('cmdb_ci_computer', 'serial_number', 'STARTSWITH', 'IHTEST-074', false);
+    deleteWhere('sys_trigger', 'name', 'STARTSWITH', MARKER, false);
     deleteWhere('alm_hardware', 'asset_tag', 'STARTSWITH', MARKER, false);
     deleteWhere('sys_ui_list_element', 'list_id.view.name', '=', 'ih_test', false);
     deleteWhere('sys_ui_list', 'view.name', '=', 'ih_test', true);

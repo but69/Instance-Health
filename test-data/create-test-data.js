@@ -3,7 +3,9 @@
 // Creates positive (must be found) and negative (must not be found) records for
 // IH-001 to IH-003, IH-005, IH-007, IH-009 to IH-017, IH-019, IH-021, IH-024 to IH-031,
 // IH-033, IH-035, IH-036, IH-038 to IH-044 (test users ih.test.*, the active one locked out),
-// IH-047 to IH-051, IH-054 to IH-057 and IH-059 (view ih_test, on-demand jobs, tasks marked IH-TEST).
+// IH-047 to IH-051, IH-054 to IH-057 and IH-059 (view ih_test, on-demand jobs, tasks marked IH-TEST),
+// IH-061, IH-064, IH-065, IH-067, IH-068, IH-072 and IH-074 to IH-076 (imports scheduled for 2099,
+// disabled trigger, computer without name marked by serial IHTEST-074).
 // Every record is marked with IH-TEST (script includes: name starts with IHTest, UI page:
 // ih_test_) and captured in the update set "Instance Health - Test Data". Records are created
 // in global with a customer update, so they count as custom for the checks that only report
@@ -576,6 +578,56 @@ runInGlobal(function createInstanceHealthTestData() {
         });
     }
 
+    // IH-061 and IH-076: active UI actions on cmn_location; the conditions are false, so they are
+    // never shown. IH-061: complex condition (positive), simple one (negative). IH-076: synchronous
+    // REST call (positive), executeAsync only (negative).
+    function uiAction(name, values) {
+        values.name = MARKER + ' ' + name;
+        values.table = 'cmn_location';
+        values.active = 'true';
+        values.client = 'false';
+        if (!values.condition) values.condition = 'false';
+        if (!values.script) values.script = '// ' + MARKER + ': test data for Instance Health, safe to delete';
+        return insert('sys_ui_action', values);
+    }
+    uiAction('IH-061 complex condition', { condition: 'false && (function() { var x = 1; return x > 1; })()' });
+    uiAction('IH-061 simple condition', {});
+    uiAction('IH-076 sync REST call', { script: 'var request = new sn_ws.RESTMessageV2();\nrequest.setEndpoint(\'https://example.invalid\');\nvar response = request.execute();' });
+    uiAction('IH-076 async REST call', { script: 'var request = new sn_ws.RESTMessageV2();\nrequest.setEndpoint(\'https://example.invalid\');\nrequest.executeAsync();' });
+
+    // IH-064: disabled trigger (never runs) with an error (positive)
+    tryInsert('IH-064 trigger', 'sys_trigger', { name: MARKER + ' IH-064 failing job', trigger_type: '2', last_error: MARKER + ': simulated error for Instance Health' });
+
+    // IH-065: script include flushing the cache (positive), only in a comment (negative)
+    insert('sys_script_include', scriptInclude('IHTestCacheFlush', 'IH-065 flushes the cache', '        gs.cacheFlush();'));
+    insert('sys_script_include', scriptInclude('IHTestCacheFlushCommented', 'IH-065 cache flush only in a comment', '        // gs.cacheFlush();\n        return null;'));
+
+    // IH-067: active user without login for 120 days (positive); ih.test.active (created today) and a
+    // web-service-only user with an old login (negative)
+    var oldLogin = new GlideDateTime();
+    oldLogin.addDaysUTC(-120);
+    insert('sys_user', { user_name: 'ih.test.nologin', first_name: MARKER, last_name: 'no login user', active: 'true', locked_out: 'true', last_login_time: oldLogin.getValue() });
+    insert('sys_user', { user_name: 'ih.test.webservice', first_name: MARKER, last_name: 'web service user', active: 'true', locked_out: 'true', web_service_access_only: 'true', last_login_time: oldLogin.getValue() });
+
+    // IH-068: grouped list report with 20 s recent average (positive; also reported by IH-002)
+    var groupedReport = insert('sys_report', { title: MARKER + ' IH-068 grouped list report', table: 'incident', type: 'list', field_list: 'number,short_description', group: 'state', roles: '' });
+    insert('report_stats', { report_table: 'sys_report', report_sys_id: groupedReport, recent_avg_execution_duration: 20000, average_execution_duration: 20000, recent_number_executions: 2, number_executions_total: 2 });
+
+    // IH-072: after rule calling current.update() (positive), async rule with the call only in a comment (negative)
+    insert('sys_script', testRule('IH-072 after rule current.update', 'cmn_location', 'after', '    current.update();'));
+    insert('sys_script', testRule('IH-072 async rule commented', 'cmn_location', 'async', '    // current.update();'));
+
+    // IH-074: computer without name (positive), marked by its serial number
+    insert('cmdb_ci_computer', { name: '', serial_number: 'IHTEST-074-1' });
+
+    // IH-075: one-time imports in 2099 (never run before removal): two at the same time (positive), one later (negative)
+    function scheduledImport(name, start) {
+        return tryInsert(name, 'scheduled_import_set', { name: MARKER + ' ' + name, active: 'true', run_type: 'once', run_start: start });
+    }
+    scheduledImport('IH-075 import A', '2099-01-01 00:00:00');
+    scheduledImport('IH-075 import B', '2099-01-01 00:00:00');
+    scheduledImport('IH-075 import C', '2099-01-02 00:00:00');
+
     // Check that the records really landed in global and the public report is published
     var check = new GlideRecord('sys_report');
     if (!check.get(publicReport) || String(check.is_published) != 'true' || check.getValue('sys_scope') != 'global')
@@ -630,6 +682,16 @@ runInGlobal(function createInstanceHealthTestData() {
     gs.print('  IH-056: task "' + MARKER + ' IH-056 active with closed date" found');
     gs.print('  IH-057: both IH-035 duplicate update sets found, the unique one (with description) not found');
     gs.print('  IH-059: resource "' + MARKER + ' IH-059 without ACL" found, "... with ACL" not found');
+    gs.print('  IH-060, IH-062, IH-063, IH-069 to IH-071, IH-073: no test data (instance settings, schema changes or real findings)');
+    gs.print('  IH-061: UI action "' + MARKER + ' IH-061 complex condition" found, simple one not found');
+    gs.print('  IH-064: trigger "' + MARKER + ' IH-064 failing job" found');
+    gs.print('  IH-065: IHTestCacheFlush found (line 5), IHTestCacheFlushCommented not found');
+    gs.print('  IH-067: ih.test.nologin found, ih.test.active and ih.test.webservice not found');
+    gs.print('  IH-068: report "' + MARKER + ' IH-068 grouped list report" found (also in IH-002 with 20.0 s)');
+    gs.print('  IH-072: "' + MARKER + ' IH-072 after rule current.update" found (line 3), async one not found');
+    gs.print('  IH-074: computer with serial IHTEST-074-1 found');
+    gs.print('  IH-075: "' + MARKER + ' IH-075 import A" and "... import B" found, import C not found');
+    gs.print('  IH-076: UI action "' + MARKER + ' IH-076 sync REST call" found, async one not found');
     gs.print('  IH-001 to IH-009 test script includes and client scripts must not appear in IH-010 to IH-016.');
     gs.print('');
     for (var w = 0; w < warnings.length; w++)

@@ -237,6 +237,70 @@ declare global {
                         table: 'scan_table_check'
                         id: '2f73f6bfa42f425c992763e6a57f575b'
                     }
+                    'ih-060-security-ui-filter': {
+                        table: 'scan_table_check'
+                        id: '7556cfd143c4448998989ba126952231'
+                    }
+                    'ih-061-ui-action-complex-conditions': {
+                        table: 'scan_table_check'
+                        id: 'e035070d1e67466db10aaf6f65610850'
+                    }
+                    'ih-062-large-remote-tables': {
+                        table: 'scan_table_check'
+                        id: '624c1a1bbe0e48b5ab28ea1bd8c63044'
+                    }
+                    'ih-063-jobs-longer-than-interval': {
+                        table: 'scan_script_only_check'
+                        id: '4924bbc8f46f4ec2b76cab48207ba558'
+                    }
+                    'ih-064-scheduled-job-errors': {
+                        table: 'scan_table_check'
+                        id: '748555f1bec5479e8ee2b530b6a63ce6'
+                    }
+                    'ih-065-cache-flush': {
+                        table: 'scan_column_type_check'
+                        id: '3199c6083c784e0f8c205bd35d45b751'
+                    }
+                    'ih-067-users-without-login': {
+                        table: 'scan_table_check'
+                        id: 'd7a1f52f123541df9d1574a4ef043c15'
+                    }
+                    'ih-068-slow-grouped-list-reports': {
+                        table: 'scan_table_check'
+                        id: 'bd8a15523cd64e0a814c90bdaba62a6a'
+                    }
+                    'ih-069-changed-dictionary-entries': {
+                        table: 'scan_script_only_check'
+                        id: '981ed83f449f4038af5ce7a8adc51ecc'
+                    }
+                    'ih-070-update-set-audit': {
+                        table: 'scan_script_only_check'
+                        id: 'a7a313ed934c424b889a728ed564695a'
+                    }
+                    'ih-071-ci-classes-with-custom-fields': {
+                        table: 'scan_script_only_check'
+                        id: '2a909c2435c9410b8feefe2e940f5afd'
+                    }
+                    'ih-072-current-update-in-business-rules': {
+                        table: 'scan_table_check'
+                        id: '9c7d9ed06334473a82467215739f138b'
+                    }
+                    'ih-073-unique-location-names': {
+                        table: 'scan_script_only_check'
+                        id: 'bdfafd8e22724b0fbff4cabe70f60849'
+                    }
+                    'ih-074-cis-without-name': {
+                        table: 'scan_table_check'
+                        id: 'aa6cbebd5b2f4a6b84eda663aa7fc1d9'
+                    }
+                    'ih-075-concurrent-scheduled-imports': {
+                        table: 'scan_script_only_check'
+                        id: '6ef7d7ea72744c04bb1557e949406fd4'
+                    }
+                    'ih-076-ui-action-outbound-calls': {
+                        table: 'scan_table_check'
+                        id: '67735ffe5c2a453a88b996afe10cbb03'
+                    }
                     'ih-scan-util': {
                         table: 'sys_script_include'
                         id: 'ab660315d1c14bb184dc5c20bc21f75c'

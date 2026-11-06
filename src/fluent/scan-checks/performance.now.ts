@@ -335,6 +335,220 @@ export const ih037BusinessRuleCallstack = TableCheck({
         'Set glide.businessrule.callstack to false or delete the property.',
 })
 
+// IH-062: custom remote tables that return 1000 rows or more (ServiceNow remote tables are not
+// queried, their scripts can call external systems; user decision)
+export const ih062LargeRemoteTables = TableCheck({
+    $id: Now.ID['ih-062-large-remote-tables'],
+    name: 'IH-062 Remote tables with 1000 rows or more',
+    active: true,
+    category: 'performance',
+    priority: '3',
+    shortDescription: 'Finds custom remote tables that return 1000 rows or more',
+    description:
+        'Remote tables build their rows in a script on every query. Large result sets make lists, reports and portal widgets on these tables slow. Only custom remote tables are queried, because querying runs the remote table script. Ideal state: remote tables return fewer than 1000 rows.',
+    table: 'sys_script_vtable',
+    conditions: 'active=true',
+    advanced: true,
+    script: `(function(engine, current) {
+    var LIMIT = 1000;
+    if (!new x_bits2_inst_hlth.IHScanUtil().isCustom(current)) return;
+    var rows = new GlideRecord(current.getValue('table'));
+    if (!rows.isValid()) return;
+    rows.setLimit(LIMIT);
+    rows.query();
+    var count = 0;
+    while (rows.next()) count++;
+    if (count < LIMIT) return;
+    engine.finding.setCurrentSource(current);
+    engine.finding.setValue('finding_details', 'Remote table ' + current.getValue('table') + ' returns at least ' + LIMIT + ' rows');
+    engine.finding.increment();
+})(engine, current);`,
+    resolutionDetails:
+        'Filter the remote table script: use the query conditions, pagination or a narrower data source so it returns only the rows needed.',
+})
+
+// IH-063: recurring jobs (trigger type Repeat or Interval) whose average run time over the last
+// 7 days (sys_scheduler_job_history, "Recurring.<name>", ms) is longer than the interval
+// (user decision 2026-11-06: average, not the longest run, so short spikes are not reported)
+export const ih063JobsLongerThanInterval = ScriptOnlyCheck({
+    $id: Now.ID['ih-063-jobs-longer-than-interval'],
+    name: 'IH-063 Scheduled jobs running longer than their interval',
+    active: true,
+    category: 'performance',
+    priority: '3',
+    shortDescription: 'Finds recurring jobs that run longer than their repeat interval',
+    description:
+        'A job that runs longer than its interval on average is still running when the next run is due; runs pile up and block scheduler workers. Compares the repeat interval of recurring jobs with their average run time over the last 7 days; short spikes are not reported. Ideal state: every recurring job finishes before its next run.',
+    script: `(function(engine) {
+    var since = new GlideDateTime();
+    since.addDaysUTC(-7);
+    var stats = {};
+    var history = new GlideAggregate('sys_scheduler_job_history');
+    history.addQuery('sys_created_on', '>=', since.getValue());
+    history.addQuery('job_classification', 'STARTSWITH', 'Recurring.');
+    history.groupBy('job_classification');
+    history.addAggregate('SUM', 'total');
+    history.addAggregate('SUM', 'count');
+    history.addAggregate('MAX', 'max_duration');
+    history.query();
+    while (history.next()) {
+        var runs = parseFloat(history.getAggregate('SUM', 'count')) || 0;
+        if (runs == 0) continue;
+        stats[history.getValue('job_classification')] = {
+            average: (parseFloat(history.getAggregate('SUM', 'total')) || 0) / runs,
+            longest: parseFloat(history.getAggregate('MAX', 'max_duration')) || 0,
+            runs: runs
+        };
+    }
+
+    var trigger = new GlideRecord('sys_trigger');
+    trigger.addQuery('trigger_type', 'IN', '1,10');
+    trigger.addNotNullQuery('repeat');
+    trigger.query();
+    while (trigger.next()) {
+        // repeat is stored as a date-time from 1970-01-01 (UTC), e.g. 1970-01-01 01:00:00 = 1 hour
+        var interval = new GlideDateTime(trigger.getValue('repeat')).getNumericValue();
+        if (interval <= 0) continue;
+        var stat = stats['Recurring.' + trigger.getValue('name')];
+        if (!stat || stat.average <= interval) continue;
+        var job = null;
+        if (trigger.getValue('document') && trigger.getValue('document_key')) {
+            job = new GlideRecord(trigger.getValue('document'));
+            if (!job.isValid() || !job.get(trigger.getValue('document_key'))) job = null;
+        }
+        engine.finding.setCurrentSource(job || trigger);
+        engine.finding.setValue('finding_details', 'Job ' + trigger.getValue('name') + ' runs every ' + (interval / 1000) + ' s but takes ' + (stat.average / 1000).toFixed(1) + ' s on average over ' + stat.runs + ' run(s) in 7 days (longest ' + (stat.longest / 1000).toFixed(1) + ' s)');
+        engine.finding.increment();
+    }
+})(engine);`,
+    resolutionDetails:
+        'Optimize the job (fewer records per run, indexes) or increase its repeat interval so it finishes before the next run.',
+})
+
+// IH-065: cache flush calls in custom scripts
+export const ih065CacheFlush = ColumnTypeCheck({
+    $id: Now.ID['ih-065-cache-flush'],
+    name: 'IH-065 Scripts that flush the cache',
+    active: true,
+    category: 'performance',
+    priority: '3',
+    shortDescription: 'Finds custom scripts that flush the system cache',
+    description:
+        'gs.cacheFlush() and GlideCacheManager.flush() empty the system cache; every user is slower until it is rebuilt, and on multi-node instances the flush is repeated on every node. Only custom scripts are checked; every matching line is listed. Ideal state: no script flushes the cache.',
+    columnType: 'script',
+    script: `(function(engine, current, columnValue) {
+    if (!columnValue || (columnValue.indexOf('cacheFlush') == -1 && columnValue.indexOf('GlideCacheManager') == -1)) return;
+    var regex = /\\bgs\\s*\\.\\s*cacheFlush\\s*\\(|\\bGlideCacheManager\\s*\\.\\s*flush\\b/;
+    new x_bits2_inst_hlth.IHScanUtil().checkScript(engine, current, columnValue, regex);
+})(engine, current, columnValue);`,
+    resolutionDetails:
+        'Remove the cache flush; the platform invalidates the affected caches when records change. If a cache really has to be cleared, clear only that cache.',
+})
+
+// IH-068: list reports with a group by, recent average 15 s or more, run in the last 60 days
+export const ih068SlowGroupedListReports = TableCheck({
+    $id: Now.ID['ih-068-slow-grouped-list-reports'],
+    name: 'IH-068 Slow list reports with group by',
+    active: true,
+    category: 'performance',
+    priority: '3',
+    shortDescription: 'Finds list reports with a group by that ran in the last 60 days and take 15 seconds or more',
+    description:
+        'List reports with a group by over large data sets load the database heavily. Reports list reports with a group by whose recent average run time is 15 seconds or more and that ran in the last 60 days (all slow reports over 5 seconds: IH-002). Ideal state: grouped list reports run in under 15 seconds.',
+    table: 'report_stats',
+    conditions: 'recent_avg_execution_duration>=15000^report_table=sys_report',
+    advanced: true,
+    script: `(function(engine, current) {
+    var since = new GlideDateTime();
+    since.addDaysUTC(-60);
+    if (new GlideDateTime(current.getValue('sys_updated_on')).before(since)) return;
+    var report = new GlideRecord('sys_report');
+    if (!report.get(current.getValue('report_sys_id'))) return;
+    if (report.getValue('type') != 'list' || !report.getValue('group')) return;
+    var avgSeconds = parseInt(current.getValue('recent_avg_execution_duration'), 10) / 1000;
+    engine.finding.setCurrentSource(report);
+    engine.finding.setValue('finding_details', 'List report on ' + report.getValue('table') + ' grouped by ' + report.getValue('group') + ': recent average ' + avgSeconds.toFixed(1) + ' s');
+    engine.finding.increment();
+})(engine, current);`,
+    resolutionDetails:
+        'Remove the group by or limit the data set with filters or a shorter period; consider a chart or aggregate report instead.',
+})
+
+// IH-075: active scheduled imports (without parent) that share their schedule with another one
+export const ih075ConcurrentScheduledImports = ScriptOnlyCheck({
+    $id: Now.ID['ih-075-concurrent-scheduled-imports'],
+    name: 'IH-075 Scheduled imports at the same time',
+    active: true,
+    category: 'performance',
+    priority: '3',
+    shortDescription: 'Finds active scheduled imports that are scheduled at the same time',
+    description:
+        'Imports that start together compete for scheduler workers and database locks and can process dependent data in the wrong order. Compares the schedule (run type, time, day, period) of active scheduled imports; child imports run after their parent and are ignored, as are on-demand imports. Ideal state: scheduled imports start at different times or are chained.',
+    script: `(function(engine) {
+    function key(imp) {
+        var type = imp.getValue('run_type');
+        var time = (imp.getValue('run_time') || '').substring(11);
+        if (type == 'on_demand') return '';
+        if (type == 'daily') return 'daily ' + time;
+        if (type == 'weekly') return 'weekly day ' + imp.getValue('run_dayofweek') + ' ' + time;
+        if (type == 'monthly') return 'monthly day ' + imp.getValue('run_dayofmonth') + ' ' + time;
+        if (type == 'periodically') return 'every ' + imp.getValue('run_period') + ' from ' + imp.getValue('run_start');
+        // A one-time import without start date has no schedule (seen on bithawkdemo1)
+        if (type == 'once') return imp.getValue('run_start') ? 'once at ' + imp.getValue('run_start') : '';
+        return type + ' ' + imp.getValue('run_start') + ' ' + time;
+    }
+    var groups = {};
+    var imp = new GlideRecord('scheduled_import_set');
+    imp.addActiveQuery();
+    imp.addNullQuery('parent');
+    imp.query();
+    while (imp.next()) {
+        var k = key(imp);
+        if (!k) continue;
+        if (!groups[k]) groups[k] = [];
+        groups[k].push(imp.getUniqueValue());
+    }
+    for (var k2 in groups) {
+        if (groups[k2].length < 2) continue;
+        for (var i = 0; i < groups[k2].length; i++) {
+            var record = new GlideRecord('scheduled_import_set');
+            if (!record.get(groups[k2][i])) continue;
+            engine.finding.setCurrentSource(record);
+            engine.finding.setValue('finding_details', 'Scheduled ' + k2 + ' together with ' + (groups[k2].length - 1) + ' other import(s)');
+            engine.finding.increment();
+        }
+    }
+})(engine);`,
+    resolutionDetails:
+        'Stagger the start times, or chain dependent imports with the Parent field so they run one after another.',
+})
+
+// IH-076: synchronous outbound calls in custom server-side UI actions (business rules: IH-021)
+export const ih076UiActionOutboundCalls = TableCheck({
+    $id: Now.ID['ih-076-ui-action-outbound-calls'],
+    name: 'IH-076 UI actions with synchronous outbound calls',
+    active: true,
+    category: 'performance',
+    priority: '3',
+    shortDescription: 'Finds custom server-side UI actions that call REST or SOAP services synchronously',
+    description:
+        'A UI action that calls an external system synchronously makes the user wait for that system and fails when it is down. UI actions that only use executeAsync() are not reported. Only custom UI actions are checked; every matching line is listed. Ideal state: UI actions trigger outbound calls asynchronously.',
+    table: 'sys_ui_action',
+    conditions: 'active=true^client=false^scriptLIKERESTMessage^ORscriptLIKESOAPMessage^ORscriptLIKEGlideHTTPRequest',
+    advanced: true,
+    script: `(function(engine, current) {
+    var util = new x_bits2_inst_hlth.IHScanUtil();
+    if (!util.isCustom(current)) return;
+    var script = util.stripComments(current.getValue('script'));
+    if (/\\.executeAsync\\s*\\(/.test(script) && !/\\.execute\\s*\\(/.test(script)) return;
+    var lines = util.matchingLines(current.getValue('script'), /\\b(RESTMessageV2|SOAPMessageV2|RESTMessage|SOAPMessage|GlideHTTPRequest)\\s*\\(/);
+    if (lines.length > 0)
+        util.reportLines(engine, current, lines, 'UI action on ' + (current.getValue('table') || 'global'));
+})(engine, current);`,
+    resolutionDetails:
+        'Trigger the call asynchronously (event and script action, flow, or executeAsync()) and tell the user that the request was sent.',
+})
+
 // IH-023: system default of rows per page (preference rowcount without user)
 export const ih023DefaultRowsPerPage = TableCheck({
     $id: Now.ID['ih-023-default-rows-per-page'],

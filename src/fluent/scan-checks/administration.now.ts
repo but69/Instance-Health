@@ -145,6 +145,136 @@ export const ih031MissingSerialNumbers = TableCheck({
         'Populate the serial number through Discovery, an import or manually, and check the identification rules of the class.',
 })
 
+// IH-060: glide.security.ui.filter must not exist or must be false (user's draft)
+export const ih060SecurityUiFilter = TableCheck({
+    $id: Now.ID['ih-060-security-ui-filter'],
+    name: 'IH-060 Property glide.security.ui.filter set to true',
+    active: true,
+    category: 'security',
+    priority: '2',
+    shortDescription: 'Checks that glide.security.ui.filter does not exist or is false',
+    description:
+        'glide.security.ui.filter should not exist or be set to false. Ideal state: the property does not exist or is false.',
+    table: 'sys_properties',
+    conditions: 'name=glide.security.ui.filter^value=true',
+    resolutionDetails:
+        'Delete the property glide.security.ui.filter or set it to false.',
+})
+
+// IH-067: active, non-web-service users without login for 90 days (or never, created 90+ days ago)
+export const ih067UsersWithoutLogin = TableCheck({
+    $id: Now.ID['ih-067-users-without-login'],
+    name: 'IH-067 Active user accounts without login',
+    active: true,
+    category: 'security',
+    priority: '2',
+    shortDescription: 'Finds active user accounts that have not logged in for 90 days',
+    description:
+        'Unused active accounts keep their roles and data access and are a target for misuse. Reports active users (not web service only) whose last login is older than 90 days, or who never logged in and were created more than 90 days ago. Ideal state: unused accounts are deactivated.',
+    table: 'sys_user',
+    conditions: 'active=true^web_service_access_only=false',
+    advanced: true,
+    script: `(function(engine, current) {
+    var DAYS = 90;
+    var since = new GlideDateTime();
+    since.addDaysUTC(-DAYS);
+    var lastLogin = current.getValue('last_login_time');
+    var details;
+    if (lastLogin) {
+        if (!new GlideDateTime(lastLogin).before(since)) return;
+        details = 'Last login ' + lastLogin;
+    } else {
+        if (!new GlideDateTime(current.getValue('sys_created_on')).before(since)) return;
+        details = 'Never logged in, created ' + current.getValue('sys_created_on');
+    }
+    engine.finding.setCurrentSource(current);
+    engine.finding.setValue('finding_details', details + ' (no login for more than ' + DAYS + ' days)');
+    engine.finding.increment();
+})(engine, current);`,
+    resolutionDetails:
+        'Deactivate the account through the offboarding process (remove roles and group memberships), or mark technical accounts as web service only.',
+})
+
+// IH-070: the update set table must be audited (only sys_update_set, user decision)
+export const ih070UpdateSetAudit = ScriptOnlyCheck({
+    $id: Now.ID['ih-070-update-set-audit'],
+    name: 'IH-070 Update set table not audited',
+    active: true,
+    category: 'security',
+    priority: '2',
+    shortDescription: 'Checks that changes to update sets are audited',
+    description:
+        'Without auditing on sys_update_set, nobody can trace who changed the state, name or content of an update set. Ideal state: auditing is enabled on the sys_update_set table.',
+    script: `(function(engine) {
+    var collection = new GlideRecord('sys_dictionary');
+    collection.addQuery('name', 'sys_update_set');
+    collection.addNullQuery('element');
+    collection.query();
+    if (!collection.next() || collection.audit == true) return;
+    engine.finding.setCurrentSource(collection);
+    engine.finding.setValue('finding_details', 'Auditing is disabled on table sys_update_set');
+    engine.finding.increment();
+})(engine);`,
+    resolutionDetails:
+        'Enable Audit on the dictionary collection entry of sys_update_set.',
+})
+
+// IH-073: share of unique location names (should be 100 %); one summary finding below 100 %
+export const ih073UniqueLocationNames = ScriptOnlyCheck({
+    $id: Now.ID['ih-073-unique-location-names'],
+    name: 'IH-073 Share of unique location names',
+    active: true,
+    category: 'manageability',
+    priority: '3',
+    shortDescription: 'Reports the share of unique location names when it is below 100%',
+    description:
+        'Locations are matched by name in imports, integrations and forms; duplicate names lead to wrong references. The finding shows the share of unique names and the duplicate names. Ideal state: 100% of location names are unique.',
+    script: `(function(engine) {
+    var total = new GlideAggregate('cmn_location');
+    total.addAggregate('COUNT');
+    total.query();
+    var count = total.next() ? parseInt(total.getAggregate('COUNT'), 10) : 0;
+    if (count == 0) return;
+
+    var names = new GlideAggregate('cmn_location');
+    names.groupBy('name');
+    names.addAggregate('COUNT');
+    names.query();
+    var unique = 0;
+    var duplicates = [];
+    while (names.next()) {
+        unique++;
+        var n = parseInt(names.getAggregate('COUNT'), 10);
+        if (n > 1) duplicates.push('"' + names.getValue('name') + '" x' + n);
+    }
+    if (unique >= count) return;
+
+    var table = new GlideRecord('sys_db_object');
+    if (!table.get('name', 'cmn_location')) return;
+    engine.finding.setCurrentSource(table);
+    engine.finding.setValue('finding_details', (unique * 100 / count).toFixed(1) + '% unique location names (' + unique + ' names for ' + count + ' locations). Duplicates: ' + duplicates.slice(0, 20).join(', ') + (duplicates.length > 20 ? ', ...' : ''));
+    engine.finding.increment();
+})(engine);`,
+    resolutionDetails:
+        'Merge duplicate locations (move references to the one that stays) or give them distinct names.',
+})
+
+// IH-074: hardware, application and VM instance CIs (incl. subclasses) without name
+export const ih074CisWithoutName = TableCheck({
+    $id: Now.ID['ih-074-cis-without-name'],
+    name: 'IH-074 Hardware, application and VM instance CIs without name',
+    active: true,
+    category: 'manageability',
+    priority: '3',
+    shortDescription: 'Finds hardware, application and VM instance CIs without a name',
+    description:
+        'CIs without a name cannot be found or selected by users and break identification and reports. Checks hardware, application and VM instance classes including their subclasses. Ideal state: every such CI has a name.',
+    table: 'cmdb_ci',
+    conditions: 'nameISEMPTY^sys_class_nameINSTANCEOFcmdb_ci_hardware^ORsys_class_nameINSTANCEOFcmdb_ci_appl^ORsys_class_nameINSTANCEOFcmdb_ci_vm_instance',
+    resolutionDetails:
+        'Set the name (from Discovery, the import source or manually) and check the identification rules of the class.',
+})
+
 // IH-048: catalog tasks without requested item or request
 export const ih048OrphanedCatalogTasks = TableCheck({
     $id: Now.ID['ih-048-orphaned-catalog-tasks'],

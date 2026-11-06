@@ -81,23 +81,23 @@ Field and table names marked ✔ were verified on bithawkdemo1 (2026-11-05).
 | IH-057 | Update sets without description | Maintenance | manageability | TableCheck | built |
 | IH-058 | Share of active CIs not discovered or updated for 60 days | Administration | manageability | ScriptOnlyCheck | built |
 | IH-059 | Scripted REST resources without security | Administration | security | TableCheck (advanced) | built |
-| IH-060 | Property glide.security.ui.filter set to true | Administration | security | TableCheck | specified |
-| IH-061 | UI actions with complex conditions | Maintenance | manageability | TableCheck (advanced) | specified |
-| IH-062 | Remote tables with 1000 rows or more | Performance | performance | TableCheck (advanced) | specified |
-| IH-063 | Scheduled jobs running longer than their interval | Performance | performance | ScriptOnlyCheck | specified |
-| IH-064 | Scheduled jobs with errors | Maintenance | manageability | TableCheck (advanced) | specified |
-| IH-065 | Scripts that flush the cache | Performance | performance | ColumnTypeCheck | specified |
+| IH-060 | Property glide.security.ui.filter set to true | Administration | security | TableCheck | built |
+| IH-061 | UI actions with complex conditions | Maintenance | manageability | TableCheck (advanced) | built |
+| IH-062 | Remote tables with 1000 rows or more | Performance | performance | TableCheck (advanced) | built |
+| IH-063 | Scheduled jobs running longer than their interval | Performance | performance | ScriptOnlyCheck | built |
+| IH-064 | Scheduled jobs with errors | Maintenance | manageability | TableCheck (advanced) | built |
+| IH-065 | Scripts that flush the cache | Performance | performance | ColumnTypeCheck | built |
 | IH-066 | Scheduled reports run as an invalid or inactive user | Administration | security | — | dropped |
-| IH-067 | Active user accounts without login | Administration | security | TableCheck (advanced) | specified |
-| IH-068 | Slow list reports with group by | Performance | performance | TableCheck (advanced) | specified |
-| IH-069 | Changed ServiceNow dictionary entries | Maintenance | upgradability | ScriptOnlyCheck | specified |
-| IH-070 | Update set table not audited | Administration | security | ScriptOnlyCheck | specified |
-| IH-071 | ServiceNow CI classes with more than 10 custom fields | Maintenance | upgradability | ScriptOnlyCheck | specified |
-| IH-072 | current.update() in business rules | Maintenance | manageability | TableCheck (advanced) | specified |
-| IH-073 | Share of unique location names | Administration | manageability | ScriptOnlyCheck | specified |
-| IH-074 | Hardware, application and VM instance CIs without name | Administration | manageability | TableCheck | specified |
-| IH-075 | Scheduled imports at the same time | Performance | performance | ScriptOnlyCheck | specified |
-| IH-076 | UI actions with synchronous outbound calls | Performance | performance | TableCheck (advanced) | specified |
+| IH-067 | Active user accounts without login | Administration | security | TableCheck (advanced) | built |
+| IH-068 | Slow list reports with group by | Performance | performance | TableCheck (advanced) | built |
+| IH-069 | Changed ServiceNow dictionary entries | Maintenance | upgradability | ScriptOnlyCheck | built |
+| IH-070 | Update set table not audited | Administration | security | ScriptOnlyCheck | built |
+| IH-071 | ServiceNow CI classes with more than 10 custom fields | Maintenance | upgradability | ScriptOnlyCheck | built |
+| IH-072 | current.update() in business rules | Maintenance | manageability | TableCheck (advanced) | built |
+| IH-073 | Share of unique location names | Administration | manageability | ScriptOnlyCheck | built |
+| IH-074 | Hardware, application and VM instance CIs without name | Administration | manageability | TableCheck | built |
+| IH-075 | Scheduled imports at the same time | Performance | performance | ScriptOnlyCheck | built |
+| IH-076 | UI actions with synchronous outbound calls | Performance | performance | TableCheck (advanced) | built |
 
 ---
 
@@ -551,6 +551,8 @@ Overlap with OOB checks (bithawkdemo1, 2026-11-06): `sn_vsc` "Review Public REST
 
 ## Batch 6: drafts received 2026-11-06
 
+**Built 2026-11-06**, not deployed yet. Dry run in the app scope (built scripts, stub engine, no findings written) on bithawkdemo1: IH-060 0, IH-061 0, IH-062 0, IH-063 0, IH-064 6, IH-067 147, IH-068 0, IH-069 9, IH-070 0, IH-071 0, IH-072 0, IH-073 1 (98.8 %), IH-074 0, IH-075 0, IH-076 0. IH-065 (ColumnTypeCheck) tested locally (7 cases). Helper additions: `IHScanUtil.conditionComplexity()` (IH-039 now uses it too) and an exclusion callback for `reportBaselineChanges()`. Test data covers IH-061, IH-064, IH-065, IH-067, IH-068, IH-072 and IH-074 to IH-076; none for IH-060, IH-062, IH-063, IH-069 to IH-071 and IH-073 (instance settings, schema changes, or enough real findings).
+
 Drafts from the user ("same procedure as before"), specified 2026-11-06. Code checks follow the batch 2 rules (custom only, matching lines listed). IH-060, IH-061, IH-063 to IH-065, IH-068, IH-069 and IH-071 to IH-076 follow the proposals below without an explicit decision; the user can still change them. IH-066 was dropped.
 Overlaps with own checks: IH-002 (slow reports > 5 s) vs IH-068, IH-014 (before rules with update/insert) vs IH-072, IH-021 (outbound calls in business rules) vs IH-076, IH-049/050 vs IH-066. OOB: `sn_vsc` "Check UI Action Conditions Before Execution" and "UI Action visibility" concern UI action security, not condition complexity.
 
@@ -579,8 +581,9 @@ Overlaps with own checks: IH-002 (slow reports > 5 s) vs IH-068, IH-014 (before 
 ## IH-063 Scheduled jobs running longer than their interval
 
 - **Ideal:** A recurring job finishes before its next run is due.
-- **Logic:** `sys_trigger` ✔ with a repeat interval (`repeat`): finding if the last `processing_duration` or the maximum duration of the last 7 days in `sys_scheduler_job_history` ✔ (`job_classification` "Recurring.<name>", `max_duration` in ms, 15-minute windows) is longer than the interval. Link to the job record (`document` / `document_key`), else the trigger.
-- **Measured:** 501 repeating triggers with a duration, 0 longer than their interval; history 149,605 rows (7 days).
+- **Logic:** `sys_trigger` ✔ of type Repeat (1) or Interval (10) with a repeat interval (`repeat`, stored as a date-time from 1970-01-01 UTC, e.g. `1970-01-01 01:00:00` = 1 hour; for other trigger types it means something else). Average run time over the last 7 days from `sys_scheduler_job_history` ✔ (`job_classification` "Recurring.<trigger name>", sum of `total` / sum of `count`, ms; 546 of 1,013 history classes match a trigger name). Finding if the average is longer than the interval; details also show the longest run. Link to the job record (`document` / `document_key`), else the trigger.
+- **Measured:** by last run 0, by longest run in 7 days 41 (mostly ServiceNow event handlers running every 2 s with spikes up to 6 s), by 7-day average 0.
+- **Decision:** 7-day average, so short spikes are not reported (agreed 2026-11-06).
 - **Resolution:** Optimize the job or increase its interval.
 
 ## IH-064 Scheduled jobs with errors
@@ -621,7 +624,7 @@ Overlaps with own checks: IH-002 (slow reports > 5 s) vs IH-068, IH-014 (before 
 
 - **Ideal:** ServiceNow dictionary entries are not changed (use dictionary overrides instead).
 - **Logic:** as IH-025 to IH-029 (`sys_metadata_customization`, `author_type=ServiceNow`) for `sys_dictionary`. Entries on `u_` tables or `u_` fields are skipped (seen: `u_sys_choice.u_table` marked as ServiceNow).
-- **Measured:** 20, all with a customer update.
+- **Measured:** 20, all with a customer update. Built (2026-11-06): 9 findings; the other 11 are `u_` fields added by the customer to ServiceNow tables, which the platform list also marks as ServiceNow.
 - **Resolution:** Revert the change and use a dictionary override on the child table where possible.
 
 ## IH-070 Update set tables not audited
@@ -664,7 +667,7 @@ Overlaps with own checks: IH-002 (slow reports > 5 s) vs IH-068, IH-014 (before 
 
 - **Ideal:** Scheduled imports do not start at the same time.
 - **Logic:** active `scheduled_import_set` ✔ without parent (child imports run after their parent): build a schedule key from `run_type`, time of day, day of week / month and period (`once`: start date and time; `on_demand` ignored). One finding per import that shares its key with another import.
-- **Measured:** 4 active scheduled imports, all `once` (KG picker jobs).
+- **Measured:** 4 active scheduled imports, all `once` (KG picker jobs) without a start date. The first build reported them as "same time" (all empty); one-time imports without start date have no schedule and are ignored since (2026-11-06): 0 findings.
 - **Resolution:** Stagger the start times or chain the imports (parent / child).
 
 ## IH-076 UI actions with synchronous outbound calls

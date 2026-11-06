@@ -332,15 +332,11 @@ export const ih039ComplexConditions = TableCheck({
     conditions: 'active=true^conditionISNOTEMPTY',
     advanced: true,
     script: `(function(engine, current) {
-    var MAX_LENGTH = 200;
+    var util = new x_bits2_inst_hlth.IHScanUtil();
     var condition = current.getValue('condition');
-    var reasons = [];
-    if (condition.length > MAX_LENGTH) reasons.push(condition.length + ' characters');
-    if (/\\bGlide(Record|Aggregate)/.test(condition)) reasons.push('database query');
-    if (condition.indexOf(';') > -1) reasons.push('several statements');
-    if (/\\bfunction\\b/.test(condition)) reasons.push('function');
+    var reasons = util.conditionComplexity(condition);
     if (reasons.length == 0) return;
-    if (!new x_bits2_inst_hlth.IHScanUtil().isCustom(current)) return;
+    if (!util.isCustom(current)) return;
     engine.finding.setCurrentSource(current);
     engine.finding.setValue('finding_details', 'Complex condition (' + reasons.join(', ') + '): ' + condition.substring(0, 300) + (condition.length > 300 ? '...' : ''));
     engine.finding.increment();
@@ -461,6 +457,147 @@ export const ih057UpdateSetWithoutDescription = TableCheck({
     conditions: 'descriptionISEMPTY^name!=Default',
     resolutionDetails:
         'Describe the content and purpose of the update set, for example the story number and a short summary.',
+})
+
+// IH-061: complex conditions on custom UI actions (same rule as IH-039)
+export const ih061UiActionComplexConditions = TableCheck({
+    $id: Now.ID['ih-061-ui-action-complex-conditions'],
+    name: 'IH-061 UI actions with complex conditions',
+    active: true,
+    category: 'manageability',
+    priority: '3',
+    shortDescription: 'Finds custom UI actions with long or scripted conditions',
+    description:
+        'UI action conditions are evaluated for every record shown in a form or list, so queries and long scripts there slow down every page. A condition is complex when it is longer than 200 characters or contains a query (GlideRecord, GlideAggregate), a statement separator (;) or a function. Only custom UI actions are checked. Ideal state: UI action conditions are short expressions.',
+    table: 'sys_ui_action',
+    conditions: 'active=true^conditionISNOTEMPTY',
+    advanced: true,
+    script: `(function(engine, current) {
+    var util = new x_bits2_inst_hlth.IHScanUtil();
+    var condition = current.getValue('condition');
+    var reasons = util.conditionComplexity(condition);
+    if (reasons.length == 0) return;
+    if (!util.isCustom(current)) return;
+    engine.finding.setCurrentSource(current);
+    engine.finding.setValue('finding_details', 'Complex condition on ' + (current.getValue('table') || 'global') + ' (' + reasons.join(', ') + '): ' + condition.substring(0, 300) + (condition.length > 300 ? '...' : ''));
+    engine.finding.increment();
+})(engine, current);`,
+    resolutionDetails:
+        'Move the logic into a script include function and call it from a short condition.',
+})
+
+// IH-064: scheduled jobs with an error on their trigger; linked to the job when it exists
+export const ih064ScheduledJobErrors = TableCheck({
+    $id: Now.ID['ih-064-scheduled-job-errors'],
+    name: 'IH-064 Scheduled jobs with errors',
+    active: true,
+    category: 'manageability',
+    priority: '3',
+    shortDescription: 'Finds scheduled jobs whose last run failed or that have an error count',
+    description:
+        'A failing scheduled job silently stops doing its work (cleanup, imports, calculations). Uses the error information of the scheduler trigger (sys_trigger). Ideal state: scheduled jobs run without errors.',
+    table: 'sys_trigger',
+    conditions: 'last_errorISNOTEMPTY^ORerror_count>0',
+    advanced: true,
+    script: `(function(engine, current) {
+    var details = (current.getValue('error_count') > 0 ? current.getValue('error_count') + ' error(s)' : 'Last run failed') +
+        (current.getValue('last_error') ? ': ' + current.getValue('last_error').substring(0, 500) : '');
+    var job = null;
+    if (current.getValue('document') && current.getValue('document_key')) {
+        job = new GlideRecord(current.getValue('document'));
+        if (!job.isValid() || !job.get(current.getValue('document_key'))) job = null;
+    }
+    engine.finding.setCurrentSource(job || current);
+    engine.finding.setValue('finding_details', 'Job ' + current.getValue('name') + ': ' + details);
+    engine.finding.increment();
+})(engine, current);`,
+    resolutionDetails:
+        'Fix the job script or configuration (for "Unable to find the specified job handler", the plugin or job definition is missing); deactivate or delete obsolete jobs.',
+})
+
+// IH-069: changed ServiceNow dictionary entries; u_ tables and u_ fields are skipped because the
+// platform list marks some of them as ServiceNow (seen: u_sys_choice.u_table)
+export const ih069ChangedDictionaryEntries = ScriptOnlyCheck({
+    $id: Now.ID['ih-069-changed-dictionary-entries'],
+    name: 'IH-069 Changed ServiceNow dictionary entries',
+    active: true,
+    category: 'upgradability',
+    priority: '2',
+    shortDescription: 'Finds ServiceNow dictionary entries that were changed by the customer',
+    description:
+        'Changed ServiceNow dictionary entries are skipped by upgrades and can break when ServiceNow changes the field. Uses the platform list of customized records; entries on u_ tables or u_ fields are ignored. Ideal state: ServiceNow dictionary entries are not changed; dictionary overrides are used instead.',
+    script: `(function(engine) {
+    new x_bits2_inst_hlth.IHScanUtil().reportBaselineChanges(engine, ['sys_dictionary'], function(entry) {
+        return (entry.getValue('name') || '').indexOf('u_') == 0 || (entry.getValue('element') || '').indexOf('u_') == 0;
+    });
+})(engine);`,
+    resolutionDetails:
+        'Revert the dictionary entry to the base system version and use a dictionary override on the child table where possible.',
+})
+
+// IH-071: ServiceNow CI classes with more than 10 custom fields (u_ fields or fields from a customer app)
+export const ih071CiClassesWithCustomFields = ScriptOnlyCheck({
+    $id: Now.ID['ih-071-ci-classes-with-custom-fields'],
+    name: 'IH-071 ServiceNow CI classes with more than 10 custom fields',
+    active: true,
+    category: 'upgradability',
+    priority: '3',
+    shortDescription: 'Finds ServiceNow CI classes with more than 10 custom fields',
+    description:
+        'Many custom attributes on ServiceNow CI classes make the CMDB hard to maintain, are not filled by Discovery and complicate upgrades. Counts u_ fields and fields from customer applications on CI classes that come from ServiceNow. Ideal state: at most 10 custom fields per ServiceNow CI class.',
+    script: `(function(engine) {
+    var MAX_FIELDS = 10;
+    var fieldsByClass = {};
+    var field = new GlideRecord('sys_dictionary');
+    field.addQuery('name', 'STARTSWITH', 'cmdb_ci');
+    field.addNotNullQuery('element');
+    field.addQuery('sys_class_name', 'sys_dictionary');
+    field.query();
+    while (field.next()) {
+        var element = field.getValue('element');
+        var custom = element.indexOf('u_') == 0 ||
+            (element.indexOf('x_') == 0 && field.sys_package.sys_class_name + '' == 'sys_app');
+        if (!custom) continue;
+        var table = field.getValue('name');
+        if (!fieldsByClass[table]) fieldsByClass[table] = [];
+        fieldsByClass[table].push(element);
+    }
+    for (var name in fieldsByClass) {
+        if (fieldsByClass[name].length <= MAX_FIELDS) continue;
+        var ciClass = new GlideRecord('sys_db_object');
+        if (!ciClass.get('name', name)) continue;
+        if (ciClass.sys_package.sys_class_name + '' == 'sys_app') continue;
+        engine.finding.setCurrentSource(ciClass);
+        engine.finding.setValue('finding_details', 'CI class ' + name + ' has ' + fieldsByClass[name].length + ' custom fields (limit ' + MAX_FIELDS + '): ' + fieldsByClass[name].slice(0, 30).join(', '));
+        engine.finding.increment();
+    }
+})(engine);`,
+    resolutionDetails:
+        'Review the custom fields: use existing attributes, move class-specific data to a custom child class, or store related data in a separate table.',
+})
+
+// IH-072: current.update() in custom business rules that are not before rules (before rules: IH-014)
+export const ih072CurrentUpdateInBusinessRules = TableCheck({
+    $id: Now.ID['ih-072-current-update-in-business-rules'],
+    name: 'IH-072 current.update() in business rules',
+    active: true,
+    category: 'manageability',
+    priority: '3',
+    shortDescription: 'Finds custom after, async and display business rules that call current.update()',
+    description:
+        'current.update() in a business rule saves the record again and runs all business rules a second time, which can cause loops and duplicate notifications. Before rules are covered by IH-014. Only custom business rules are checked; every matching line is listed. Ideal state: no business rule calls current.update().',
+    table: 'sys_script',
+    conditions: 'active=true^when!=before^scriptLIKEcurrent.update(',
+    advanced: true,
+    script: `(function(engine, current) {
+    var util = new x_bits2_inst_hlth.IHScanUtil();
+    if (!util.isCustom(current)) return;
+    var lines = util.matchingLines(current.getValue('script'), /\\bcurrent\\s*\\.\\s*update\\s*\\(/);
+    if (lines.length > 0)
+        util.reportLines(engine, current, lines, 'Business rule (' + (current.getValue('when') || 'no when') + ') on ' + current.getValue('collection'));
+})(engine, current);`,
+    resolutionDetails:
+        'Set the values in a before rule instead, or move the logic so that current does not need to be saved again.',
 })
 
 // IH-022: summary of the last platform upgrade (the per-item log sys_upgrade_history_log cannot be
