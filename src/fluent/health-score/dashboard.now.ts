@@ -1,13 +1,21 @@
 import { Dashboard } from '@servicenow/sdk/core'
 
 // Platform Analytics dashboard "Instance Health" (user request 2026-11-06): filter on top to choose the
-// trend lines, trend chart with drilldown, and the list of health scores (each row opens the record).
+// trend lines, the trend chart (no drilldown, user request 2026-11-06) and below it the list of all
+// health scores with the columns of the "Health Scores" list (default view).
 // The chart reads x_bits2_inst_hlth_health_score_value (one row per scan and trend line), because a
 // dashboard filter selects records by a field value; the lines are the values of "dimension".
 const VALUE_TABLE = 'x_bits2_inst_hlth_health_score_value'
 const SCORE_TABLE = 'x_bits2_inst_hlth_health_score'
 // sys_id of the platform role admin (same on every instance)
 const ADMIN_ROLE = '2831a114c611228501d4ea6c309d626d'
+// UX components (sys_ux_macroponent). SDK 4.14.0 resolves 'line' to its sys_id but writes 'filter' and
+// 'list-simple' unresolved, which broke both widgets ("unknown error", no filter). Platform sys_ids:
+const COMPONENT_FILTER = '226449101138d0dff1abe0e1566c8b2a' // Filter
+const COMPONENT_LIST_SIMPLE = '2b1c080881e05dc63b917044290b233f' // List - Simple
+// Columns of the "Health Scores" list, default view, in its order (sys_ui_list_element positions 0-9)
+const SCORE_LIST_COLUMNS =
+    'checks_evaluated,checks_failed,details,findings,health_score,knock_out,knock_out_checks,scan_date,scan_result,score_manageability'
 
 export const instanceHealthDashboard = Dashboard({
     $id: Now.ID['ih-dashboard'],
@@ -18,19 +26,25 @@ export const instanceHealthDashboard = Dashboard({
         widgets: [
             {
                 $id: Now.ID['ih-dashboard-filter-trend-lines'],
-                component: 'filter',
+                component: COMPONENT_FILTER,
                 componentProps: {
+                    filterId: 'ih-filter-trend-lines',
                     filterName: 'Trend lines',
                     filterComponentType: 'multiselect',
                     isDashboard: true,
                     enableClearFilter: true,
+                    enableResetToDefault: false,
                     isShowSelectedValueInPill: true,
                     defaultSelectedItems: [],
+                    dateFilterView: 'calendar-reldates',
+                    sort: 'ASC',
+                    maxElements: 500,
+                    cascadeScope: 'top_layout',
                     datasource: { type: 'table', payload: { table: VALUE_TABLE, field: 'dimension', fieldType: 'choice' } },
                     targets: [{ type: 'table', payload: { table: VALUE_TABLE, field: 'dimension', fieldType: 'choice' } }],
                 },
-                width: 24,
-                height: 6,
+                width: 16,
+                height: 3,
                 position: { x: 0, y: 0 },
             },
         ],
@@ -47,7 +61,7 @@ export const instanceHealthDashboard = Dashboard({
                         headerTitle: 'Instance Health Score Trend',
                         showHeader: true,
                         showBorder: true,
-                        description: 'Average score per scan date. Click a point to open the scores behind it.',
+                        description: 'Average score per scan date. Choose the trend lines with the filter "Trend lines" above.',
                         dataSources: [{ sourceType: 'table', tableOrViewName: VALUE_TABLE, filterQuery: '', id: 'ds_values' }],
                         groupBy: [
                             {
@@ -68,7 +82,8 @@ export const instanceHealthDashboard = Dashboard({
                         showLegend: true,
                         legendPosition: 'bottom',
                         showYGrid: true,
-                        enableDrilldown: true,
+                        // No click-through to a list (user request 2026-11-06)
+                        enableDrilldown: false,
                         followFilters: true,
                         filterConfigurations: '@state.parFilters',
                     },
@@ -77,21 +92,35 @@ export const instanceHealthDashboard = Dashboard({
                     position: { x: 0, y: 0 },
                 },
                 {
+                    // All health scores (one per scan result), newest first
                     $id: Now.ID['ih-dashboard-score-list'],
-                    component: 'list-simple',
+                    component: COMPONENT_LIST_SIMPLE,
                     componentProps: {
                         listTitle: 'Health scores',
                         table: SCORE_TABLE,
                         query: 'ORDERBYDESCscan_date',
                         fixedQuery: '',
-                        columns: 'scan_result,scan_date,health_score,score_uncapped,knock_out_checks,score_security,score_performance,score_manageability,score_upgradability',
-                        limit: 20,
-                        maxColumns: 9,
+                        columnPreferenceKey: '',
+                        columns: SCORE_LIST_COLUMNS,
+                        maxColumns: 10,
+                        followFilters: true,
+                        isDashboard: true,
                         showBorder: true,
+                        bare: false,
                         wordWrap: false,
+                        maxCharLimit: 4000,
+                        hideViewAll: false,
+                        hideLinks: false,
+                        hideInlineEditing: true,
+                        hidePersonalization: true,
+                        hideTitleRowCount: false,
+                        hideLastRefreshedText: true,
+                        hideRefreshButton: false,
+                        hideHeader: false,
+                        hideTitle: false,
                     },
                     width: 48,
-                    height: 12,
+                    height: 16,
                     position: { x: 0, y: 20 },
                 },
             ],
