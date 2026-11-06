@@ -52,6 +52,19 @@ Field and table names marked ✔ were verified on bithawkdemo1 (2026-11-05).
 | IH-029 | Differs from baseline: UI actions | Maintenance | upgradability | ScriptOnlyCheck | built |
 | IH-030 | Virtual CIs with assets | Administration | manageability | ScriptOnlyCheck | built |
 | IH-031 | Computers and network gear without serial number | Administration | manageability | TableCheck | built |
+| IH-032 | Create Asset business rules active | Administration | manageability | ScriptOnlyCheck | specified |
+| IH-033 | CIs with an invalid discovery source | Administration | manageability | TableCheck (advanced) | specified |
+| IH-034 | Impersonation in production | Administration | security | ScriptOnlyCheck | specified |
+| IH-035 | Update sets with duplicate names | Maintenance | manageability | ScriptOnlyCheck | specified |
+| IH-036 | Knowledge bases without retire workflow | Administration | manageability | TableCheck | specified |
+| IH-037 | Business rule call stack logging enabled | Performance | performance | TableCheck | specified |
+| IH-038 | Script includes that update current | Maintenance | manageability | TableCheck (advanced) | specified |
+| IH-039 | Business rules with complex script conditions | Maintenance | manageability | TableCheck (advanced) | specified |
+| IH-040 | Inactive users in groups | Administration | security | TableCheck | specified |
+| IH-041 | Groups with an inactive manager | Administration | manageability | TableCheck | specified |
+| IH-042 | Groups without members | Administration | manageability | TableCheck (advanced) | specified |
+| IH-043 | Roles assigned directly to users | Administration | security | TableCheck | specified |
+| IH-044 | Groups with roles without a group type | Administration | security | TableCheck (advanced) | specified |
 
 ---
 
@@ -274,3 +287,107 @@ Measured on bithawkdemo1 (2026-11-06): no OOB Instance Scan check covers these t
 - **Measured:** computers 107 of 855 without serial (95 not retired), network gear 9 of 9.
 - **Decision:** retired CIs (`install_status=7`) are excluded (agreed 2026-11-06).
 - **Resolution:** Populate the serial number (Discovery, import or manually); it is the main identification attribute for hardware.
+
+---
+
+## Batch 4: drafts received 2026-11-06
+
+Drafts from the user ("same setup as the previous checks": catalogue first, custom-only for code checks with matching lines, link to the record to act on, test data, dry run before deploy), specified 2026-11-06. IH-032, IH-034 to IH-038 and IH-040 to IH-042 follow the proposals below without an explicit decision; the user can still change them.
+Overlap with OOB checks (bithawkdemo1, 2026-11-06): `sn_access_analyzer` "Users with Direct Role Assignments (Bypassing Groups)" (active) covers IH-043; `sn_vsc` "Restrict Impersonation to Admin" and "Log User Impersonation" cover other impersonation aspects than IH-034.
+
+## IH-032 Create Asset business rules active
+
+- **Ideal:** The Asset Management rules that create assets for CIs are active.
+- **Logic:** `sys_script` on `cmdb_ci` named "Create Asset on insert" and "Create asset on model change" ✔ (both before, package Asset Management). One finding per rule that is inactive, linked to the rule. No finding if Asset Management is not installed (rules missing).
+- **Measured:** both active.
+- **Resolution:** Activate the rule; without it, new CIs get no asset and asset and CMDB data drift apart.
+
+## IH-033 CIs with an invalid discovery source
+
+- **Ideal:** Every discovery source set on a CI is a value from the `discovery_source` choice list.
+- **Logic:** `cmdb_ci` where `discovery_source` is not empty and not an active choice (`sys_choice` `cmdb_ci.discovery_source`, 42 values ✔). Retired CIs excluded (as IH-031). One finding per CI, linked to the CI.
+- **Decision:** CIs without a discovery source are not a finding (user, 2026-11-06).
+- **Measured:** 2,823 CIs empty (not reported), all non-empty values valid (ServiceNow 319, Other Automated 50, AutoDev 1, ServiceWatch 1), so no finding.
+- **Rename:** title changed to "CIs with an invalid discovery source".
+- **Resolution:** Set the discovery source in every import, integration and manual process (e.g. `ImportSet`, `Manual Entry`); it tells which source owns the CI.
+
+## IH-034 Impersonation in production
+
+- **Ideal:** Impersonation is switched off on production instances.
+- **Logic:** if `glide.installation.production` ✔ is `true` and `glide.ui.impersonate_button.enable` ✔ is not `false`: finding linked to the property `glide.ui.impersonate_button.enable`. Details list the users with the `impersonator` role.
+- **Measured:** bithawkdemo1 is flagged production (`glide.installation.production=true`), impersonate button enabled, 2 `impersonator` role entries (Nextwave Service User, one inherited).
+- **Note:** the property hides the impersonate button; admins can still impersonate by other means. The role holders are the second lever.
+- **Resolution:** Set `glide.ui.impersonate_button.enable` to `false` on production and remove the `impersonator` role where it is not needed.
+
+## IH-035 Update sets with duplicate names
+
+- **Ideal:** Every update set has a unique name.
+- **Logic:** GlideAggregate on `sys_update_set` grouped by `name`, count > 1, name `Default` excluded (every application has one). One finding per update set in a duplicate group, linked to the update set.
+- **Measured:** 30 update sets (without Default), 2 duplicate names: "Checkpoint" ×7 (complete, app `x_bits2_quackology`, created by a user), "System Administrator" ×2 (in progress, global and `x_bits2_pcp_demo`).
+- **Resolution:** Rename the update sets with a unique, meaningful name (e.g. story number and short title).
+
+## IH-036 Knowledge bases without retire workflow
+
+- **Ideal:** Every active knowledge base has a retire workflow.
+- **Logic:** `kb_knowledge_base` where `active=true^retire_workflowISEMPTY` ✔. (No flow fields on this instance: `retire_flow` does not exist.)
+- **Measured:** 7 of 7 active knowledge bases have no retire workflow.
+- **Resolution:** Assign a retire workflow (e.g. "Knowledge - Instant Retire" or an approval workflow).
+
+## IH-037 Business rule call stack logging enabled
+
+- **Ideal:** `glide.businessrule.callstack` is `false` (default when not set).
+- **Logic:** `sys_properties` where `name=glide.businessrule.callstack^value=true`.
+- **Measured:** property not set, no finding.
+- **Resolution:** Set the property to `false` (or delete it); call stack logging is for debugging only and slows down every transaction.
+
+## IH-038 Script includes that update current
+
+- **Ideal:** Business rules do not update `current` indirectly through a script include (this escapes the `current.update()` check IH-014).
+- **Logic (heuristic):** custom active business rules whose script passes `current` to a script include (`new X(...current...)`, `new X().m(...current...)`, `X.m(...current...)`). The script include `X` is looked up by name; finding if its script calls `.update(` on one of its function parameters (`function(a, b) { ... a.update() ... }`). Finding on the business rule, details: BR line and script include name. Custom only, lines listed.
+- **Limits:** misses updates through `this.<field>.update()` and nested calls.
+- **Resolution:** Set values on `current` in the business rule (before rule) instead of calling `update()` in the script include, or pass a copy.
+
+## IH-039 Business rules with complex script conditions
+
+- **Ideal:** Business rule conditions are short expressions; logic belongs in the script.
+- **Logic:** custom active `sys_script` with a non-empty `condition` that is complex. Proposed: longer than 200 characters, or contains a query (`GlideRecord` / `GlideAggregate`), a statement separator `;` or a `function`.
+- **Measured:** 6 custom conditions on bithawkdemo1, none complex (all business rules: 2,527 with condition, 66 longer than 200, 7 with GlideRecord, 114 with `;`).
+- **Decision:** complex = longer than 200 characters, or contains `GlideRecord` / `GlideAggregate`, `;` or `function` (agreed 2026-11-06).
+- **Resolution:** Use the condition builder or a short expression; move complex logic into the script or a script include.
+
+## IH-040 Inactive users in groups
+
+- **Ideal:** Active groups have no inactive members.
+- **Logic:** `sys_user_grmember` where `user.active=false^group.active=true`. One finding per membership, linked to the membership record.
+- **Measured:** 2.
+- **Resolution:** Remove the membership; inactive members distort assignment and approval lists.
+
+## IH-041 Groups with an inactive manager
+
+- **Ideal:** Every active group has an active manager.
+- **Logic:** `sys_user_group` where `active=true^manager.active=false`. Link to the group.
+- **Measured:** 0.
+- **Resolution:** Assign an active manager.
+
+## IH-042 Groups without members
+
+- **Ideal:** Every active group has at least one member.
+- **Logic:** `sys_user_group` where `active=true`, advanced: finding if no `sys_user_grmember` exists for the group.
+- **Measured:** 30 of 79 active groups.
+- **Resolution:** Add members or deactivate the group.
+
+## IH-043 Roles assigned directly to users
+
+- **Ideal:** Users get roles only through groups.
+- **Logic:** `sys_user_has_role` where `inherited=false^granted_byISEMPTY^user.active=true`, excluding `snc_internal` / `snc_external` (assigned by the platform to every user). Link to the role assignment.
+- **Measured:** 646 direct assignments, all `snc_internal`; 0 after the exclusion.
+- **Decision:** build it although the OOB Access Analyzer check covers the topic, so all health checks are in one place (agreed 2026-11-06).
+- **Resolution:** Remove the direct role and add the user to a group that has the role.
+
+## IH-044 Groups with roles without a group type
+
+- **Ideal:** Groups that grant roles have a group type (e.g. "Authorization"), so role-granting groups are recognizable.
+- **Logic:** active groups with at least one `sys_group_has_role` record and an empty `type`. Link to the group.
+- **Decision:** any group type is enough; no specific type name is required (agreed 2026-11-06). Title changed to "Groups with roles without a group type".
+- **Measured:** 30 active groups with roles: 12 have some type, 18 none. Existing types: Agile Team, itil, survey, Knowledge, catalog, human_resources, schedule_visible_externally, schedule_visible_internally, hr_vendors; no "Authorization" type.
+- **Resolution:** Create the group type and set it on all role-granting groups; groups for assignment only should not hold roles.
