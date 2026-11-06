@@ -1,6 +1,6 @@
 # Instance Health: Check Catalogue
 
-Dropped: IH-006 Java package collection mode (2026-11-05), IH-045 priority 1 skipped upgrade items (2026-11-06).
+Dropped: IH-006 Java package collection mode (2026-11-05), IH-045 priority 1 skipped upgrade items (2026-11-06), IH-066 scheduled reports run as invalid or inactive user (2026-11-06, covered by IH-049/IH-050).
 
 ## Open items (as of 2026-11-06)
 
@@ -81,6 +81,23 @@ Field and table names marked ✔ were verified on bithawkdemo1 (2026-11-05).
 | IH-057 | Update sets without description | Maintenance | manageability | TableCheck | built |
 | IH-058 | Share of active CIs not discovered or updated for 60 days | Administration | manageability | ScriptOnlyCheck | built |
 | IH-059 | Scripted REST resources without security | Administration | security | TableCheck (advanced) | built |
+| IH-060 | Property glide.security.ui.filter set to true | Administration | security | TableCheck | specified |
+| IH-061 | UI actions with complex conditions | Maintenance | manageability | TableCheck (advanced) | specified |
+| IH-062 | Remote tables with 1000 rows or more | Performance | performance | TableCheck (advanced) | specified |
+| IH-063 | Scheduled jobs running longer than their interval | Performance | performance | ScriptOnlyCheck | specified |
+| IH-064 | Scheduled jobs with errors | Maintenance | manageability | TableCheck (advanced) | specified |
+| IH-065 | Scripts that flush the cache | Performance | performance | ColumnTypeCheck | specified |
+| IH-066 | Scheduled reports run as an invalid or inactive user | Administration | security | — | dropped |
+| IH-067 | Active user accounts without login | Administration | security | TableCheck (advanced) | specified |
+| IH-068 | Slow list reports with group by | Performance | performance | TableCheck (advanced) | specified |
+| IH-069 | Changed ServiceNow dictionary entries | Maintenance | upgradability | ScriptOnlyCheck | specified |
+| IH-070 | Update set table not audited | Administration | security | ScriptOnlyCheck | specified |
+| IH-071 | ServiceNow CI classes with more than 10 custom fields | Maintenance | upgradability | ScriptOnlyCheck | specified |
+| IH-072 | current.update() in business rules | Maintenance | manageability | TableCheck (advanced) | specified |
+| IH-073 | Share of unique location names | Administration | manageability | ScriptOnlyCheck | specified |
+| IH-074 | Hardware, application and VM instance CIs without name | Administration | manageability | TableCheck | specified |
+| IH-075 | Scheduled imports at the same time | Performance | performance | ScriptOnlyCheck | specified |
+| IH-076 | UI actions with synchronous outbound calls | Performance | performance | TableCheck (advanced) | specified |
 
 ---
 
@@ -529,3 +546,130 @@ Overlap with OOB checks (bithawkdemo1, 2026-11-06): `sn_vsc` "Review Public REST
 - **Measured:** 2,538 active resources: 60 without authentication, 203 without ACL authorization, all ServiceNow; 0 custom.
 - **Decision:** custom resources only (same rule as the code checks); ServiceNow endpoints are covered by the OOB check "Review Public REST API Endpoints" (agreed 2026-11-06).
 - **Resolution:** Enable "Requires authentication" and "Requires ACL authorization", or document why the endpoint must be public.
+
+---
+
+## Batch 6: drafts received 2026-11-06
+
+Drafts from the user ("same procedure as before"), specified 2026-11-06. Code checks follow the batch 2 rules (custom only, matching lines listed). IH-060, IH-061, IH-063 to IH-065, IH-068, IH-069 and IH-071 to IH-076 follow the proposals below without an explicit decision; the user can still change them. IH-066 was dropped.
+Overlaps with own checks: IH-002 (slow reports > 5 s) vs IH-068, IH-014 (before rules with update/insert) vs IH-072, IH-021 (outbound calls in business rules) vs IH-076, IH-049/050 vs IH-066. OOB: `sn_vsc` "Check UI Action Conditions Before Execution" and "UI Action visibility" concern UI action security, not condition complexity.
+
+## IH-060 Property glide.security.ui.filter set to true
+
+- **Ideal:** `glide.security.ui.filter` does not exist or is `false` (user's draft).
+- **Logic:** `sys_properties` where `name=glide.security.ui.filter^value=true`.
+- **Measured:** property does not exist, no finding.
+- **Resolution:** Delete the property or set it to `false`.
+
+## IH-061 UI actions with complex conditions
+
+- **Ideal:** UI action conditions are short expressions.
+- **Logic:** as IH-039 on `sys_ui_action` (`active=true^conditionISNOTEMPTY`): longer than 200 characters, or contains `GlideRecord` / `GlideAggregate`, `;` or `function`. Custom only.
+- **Measured:** all UI actions: 3,195 with condition, 147 longer than 200, 126 with a query, 264 with `;`; custom: 0.
+- **Resolution:** Move the logic into a script include function and call it from a short condition.
+
+## IH-062 Remote tables with 1000 rows or more
+
+- **Ideal:** Remote tables return fewer than 1000 rows.
+- **Logic:** remote table definitions `sys_script_vtable` ✔ (82 active, all ServiceNow apps). Counting rows runs the remote table's script, which can call external systems. Proposal: custom remote tables only; query each with `setLimit(1000)` and report when 1000 rows come back.
+- **Measured:** 0 custom remote tables.
+- **Decision:** custom remote tables only, so ServiceNow remote table scripts (with external calls) are not run by the scan (agreed 2026-11-06).
+- **Resolution:** Filter the remote table script (pagination, query conditions) so it returns only the rows needed.
+
+## IH-063 Scheduled jobs running longer than their interval
+
+- **Ideal:** A recurring job finishes before its next run is due.
+- **Logic:** `sys_trigger` ✔ with a repeat interval (`repeat`): finding if the last `processing_duration` or the maximum duration of the last 7 days in `sys_scheduler_job_history` ✔ (`job_classification` "Recurring.<name>", `max_duration` in ms, 15-minute windows) is longer than the interval. Link to the job record (`document` / `document_key`), else the trigger.
+- **Measured:** 501 repeating triggers with a duration, 0 longer than their interval; history 149,605 rows (7 days).
+- **Resolution:** Optimize the job or increase its interval.
+
+## IH-064 Scheduled jobs with errors
+
+- **Ideal:** Scheduled jobs run without errors.
+- **Logic:** `sys_trigger` ✔ where `last_errorISNOTEMPTY^ORerror_count>0`. Link to the job record, details show the error.
+- **Measured:** 6 with a last error, 1 with an error count.
+- **Resolution:** Fix the job script or its configuration; deactivate obsolete jobs.
+
+## IH-065 Scripts that flush the cache
+
+- **Ideal:** No script flushes the system cache.
+- **Logic:** ColumnTypeCheck on `script` columns, regex `gs\.cacheFlush\s*\(` or `GlideCacheManager\.flush`. Custom only, lines listed.
+- **Measured:** `cacheFlush` in 20 business rules and 5 script includes, all ServiceNow; custom 0.
+- **Resolution:** Remove the call; a cache flush slows down all users until the cache is rebuilt.
+
+## IH-066 Scheduled reports run as an invalid or inactive user
+
+- **Observation:** scheduled reports are `sysauto_report` ✔, a subtable of `sysauto`. IH-049 (deleted user) and IH-050 (inactive user) query `sysauto` and therefore already include scheduled reports. bithawkdemo1 has no scheduled reports.
+- **Decision: dropped (2026-11-06),** covered by IH-049 and IH-050; the number IH-066 is not reused.
+
+## IH-067 Active user accounts without login
+
+- **Ideal:** Users who no longer log in are deactivated.
+- **Logic:** `sys_user` where `active=true^web_service_access_only=false` and the last login is older than the limit, or never logged in and created before the limit. Link to the user.
+- **Measured (90 days):** 27 with a last login older than 90 days, 120 never logged in and created more than 90 days ago (713 active users, 664 never logged in, many demo users).
+- **Decision:** 90 days, users who never logged in included when created more than 90 days ago (agreed 2026-11-06).
+- **Resolution:** Deactivate the account (and remove roles and group memberships through offboarding).
+
+## IH-068 Slow list reports with group by
+
+- **Ideal:** List reports with a group by run in under 15 seconds.
+- **Logic:** as IH-002, `report_stats` where `recent_avg_execution_duration>=15000`, report table `sys_report` with `type=list` and a `group`, last run (stats `sys_updated_on`) within 60 days. Link to the report.
+- **Measured:** 5 reports ≥ 15 s, none a list report with group by.
+- **Resolution:** Remove the group by or limit the data set (filters, shorter period).
+
+## IH-069 Changed ServiceNow dictionary entries
+
+- **Ideal:** ServiceNow dictionary entries are not changed (use dictionary overrides instead).
+- **Logic:** as IH-025 to IH-029 (`sys_metadata_customization`, `author_type=ServiceNow`) for `sys_dictionary`. Entries on `u_` tables or `u_` fields are skipped (seen: `u_sys_choice.u_table` marked as ServiceNow).
+- **Measured:** 20, all with a customer update.
+- **Resolution:** Revert the change and use a dictionary override on the child table where possible.
+
+## IH-070 Update set tables not audited
+
+- **Ideal:** Changes to update sets are audited.
+- **Logic:** collection entry of `sys_update_set` (`sys_dictionary`, empty element): finding if `audit` is false. Linked to the collection entry.
+- **Decision:** only `sys_update_set` (agreed 2026-11-06).
+- **Measured:** `sys_update_set` audited; `sys_remote_update_set`, `sys_update_xml`, `sys_update_version` not.
+- **Resolution:** Enable auditing on the table (dictionary collection entry).
+
+## IH-071 ServiceNow CI classes with more than 10 custom fields
+
+- **Ideal:** ServiceNow CI classes carry few custom attributes.
+- **Logic:** CI classes (`sys_db_object` named `cmdb_ci*`, not `u_` and not from a customer app) with more than 10 custom fields (`sys_dictionary` elements starting with `u_` or a customer scope prefix). One finding per class with the count and field names.
+- **Measured:** 0 classes with custom fields.
+- **Resolution:** Use existing attributes, a custom child class, or related tables instead of many custom fields.
+
+## IH-072 current.update() in business rules
+
+- **Ideal:** Business rules never call `current.update()`.
+- **Logic:** custom active business rules that are not `before` (before rules are covered by IH-014), lines with `current.update(` after stripping comments.
+- **Measured:** 109 active business rules use it (9 before), all ServiceNow; custom 0.
+- **Resolution:** Use a before rule to set values on current, or `setWorkflow(false)` with care in after rules.
+
+## IH-073 Share of unique location names
+
+- **Ideal:** 100 % of location names are unique.
+- **Logic:** `cmn_location` total vs. distinct names. One summary finding linked to the `cmn_location` table when below 100 %, details show the share and the duplicate names.
+- **Measured:** 427 locations, 422 unique names (98.8 %), 5 names twice (e.g. "815 E Street, San Diego,CA").
+- **Resolution:** Merge or rename the duplicate locations.
+
+## IH-074 Hardware, application and VM instance CIs without name
+
+- **Ideal:** Every hardware, application and VM instance CI has a name.
+- **Logic:** `cmdb_ci` where `nameISEMPTY` and class is `cmdb_ci_hardware`, `cmdb_ci_appl` or `cmdb_ci_vm_instance` or below (`INSTANCEOF`).
+- **Measured:** 0.
+- **Resolution:** Name the CI (identification and reports depend on it).
+
+## IH-075 Scheduled imports at the same time
+
+- **Ideal:** Scheduled imports do not start at the same time.
+- **Logic:** active `scheduled_import_set` ✔ without parent (child imports run after their parent): build a schedule key from `run_type`, time of day, day of week / month and period (`once`: start date and time; `on_demand` ignored). One finding per import that shares its key with another import.
+- **Measured:** 4 active scheduled imports, all `once` (KG picker jobs).
+- **Resolution:** Stagger the start times or chain the imports (parent / child).
+
+## IH-076 UI actions with synchronous outbound calls
+
+- **Ideal:** UI actions do not call external systems synchronously (business rules: IH-021).
+- **Logic:** custom active server-side UI actions (`client=false`) whose script contains `RESTMessageV2`, `SOAPMessageV2`, `RESTMessage(`, `SOAPMessage(` or `GlideHTTPRequest` (lines listed), unless the call is `executeAsync()`.
+- **Measured:** 3 such UI actions, all ServiceNow; custom 0.
+- **Resolution:** Trigger the call asynchronously (event, flow or `executeAsync()`) and inform the user.
