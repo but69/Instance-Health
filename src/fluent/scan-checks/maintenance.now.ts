@@ -259,6 +259,44 @@ export const ih016DuplicateScriptIncludes = ScriptOnlyCheck({
         'Rename or delete the duplicate script include so every API name is unique, and update the callers.',
 })
 
+// IH-022: summary of the last platform upgrade (the per-item log sys_upgrade_history_log cannot be
+// read from other scopes); items that need a review = skipped and different + errors + manual merges
+export const ih022UpgradeSkippedItems = ScriptOnlyCheck({
+    $id: Now.ID['ih-022-upgrade-skipped-items'],
+    name: 'IH-022 Skipped items in the last upgrade',
+    active: true,
+    category: 'upgradability',
+    priority: '2',
+    shortDescription: 'Reports the last platform upgrade if skipped items still need a review',
+    description:
+        'An upgrade skips ServiceNow records that the customer changed. Skipped records that differ from the new version, skipped records with errors and manual merges must be reviewed, otherwise fixes of the upgrade are missing. Skipped records that already match the new version are not counted. Uses the summary of the last platform upgrade. Ideal state: no skipped item needs a review.',
+    script: `(function(engine) {
+    var upgrade = new GlideRecord('sys_upgrade_history');
+    upgrade.addQuery('to_version', 'STARTSWITH', 'glide-');
+    upgrade.orderByDesc('sys_created_on');
+    upgrade.setLimit(1);
+    upgrade.query();
+    if (!upgrade.next()) return;
+
+    function count(field) {
+        return parseInt(upgrade.getValue(field), 10) || 0;
+    }
+    var different = count('skipped_and_different');
+    var errors = count('skipped_error');
+    var manualMerge = count('skipped_manual_merge');
+    var toReview = different + errors + manualMerge;
+    if (toReview == 0) return;
+
+    engine.finding.setCurrentSource(upgrade);
+    engine.finding.setValue('finding_details', toReview + ' skipped item(s) to review in the upgrade to ' + upgrade.getValue('to_version') +
+        ' (finished ' + upgrade.getValue('upgrade_finished') + '): ' + different + ' skipped and different, ' + errors + ' skipped with error, ' +
+        manualMerge + ' manual merge. ' + count('skipped_and_not_different') + ' further skipped item(s) already match the new version.');
+    engine.finding.increment();
+})(engine);`,
+    resolutionDetails:
+        'Open the upgrade history, filter the skipped records that differ, have errors or need a manual merge, and for each one revert to the base system, merge the changes, or keep the customization and mark it reviewed.',
+})
+
 // IH-025 to IH-029: ServiceNow records changed by the customer (sys_metadata_customization,
 // author_type ServiceNow), one check per record type group
 

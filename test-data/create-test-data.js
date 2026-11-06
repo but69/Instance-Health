@@ -257,7 +257,8 @@ runInGlobal(function createInstanceHealthTestData() {
     // after rule updating another record (negative). Condition false: they never run.
     insert('sys_script', testRule('IH-014 before rule with update', 'cmn_location', 'before',
         '    var other = new GlideRecord(\'cmn_location\');\n    other.update();'));
-    insert('sys_script', testRule('IH-014 before rule without update', 'cmn_location', 'before',
+    // sys_script.name holds at most 40 characters including the "IH-TEST " prefix
+    insert('sys_script', testRule('IH-014 before rule no update', 'cmn_location', 'before',
         '    current.setValue(\'street\', current.getValue(\'street\'));'));
     insert('sys_script', testRule('IH-014 after rule with update', 'cmn_location', 'after',
         '    var other = new GlideRecord(\'cmn_location\');\n    other.update();'));
@@ -380,7 +381,7 @@ runInGlobal(function createInstanceHealthTestData() {
         }
     }
     markCustomized('IH-025 positive', 'sys_script', 'name', MARKER + ' IH-014 before rule with update', 'ServiceNow');
-    markCustomized('IH-025 negative', 'sys_script', 'name', MARKER + ' IH-014 before rule without update', 'Custom');
+    markCustomized('IH-025 negative', 'sys_script', 'name', MARKER + ' IH-014 before rule no update', 'Custom');
     markCustomized('IH-026 positive', 'sys_script_include', 'name', 'IHTestUnique', 'ServiceNow');
     markCustomized('IH-027 positive', 'sys_script_client', 'name', MARKER + ' IH-011 asynchronous ajax', 'ServiceNow');
     markCustomized('IH-028 positive', 'sys_ui_page', 'sys_id', uiPageId, 'ServiceNow');
@@ -431,7 +432,7 @@ runInGlobal(function createInstanceHealthTestData() {
     gs.print('  IH-020, IH-022, IH-023: no test data (would change instance-wide settings / needs an upgrade)');
     gs.print('  IH-021: "' + MARKER + ' IH-021 after rule with REST call" found (line 3), async one not found');
     gs.print('  IH-024: "' + MARKER + ' IH-024 slow recent" found, linked to script include IHTestUnique; slow old and fast recent not found');
-    gs.print('  IH-025: "' + MARKER + ' IH-014 before rule with update" found, "... without update" not found');
+    gs.print('  IH-025: "' + MARKER + ' IH-014 before rule with update" found, "' + MARKER + ' IH-014 before rule no update" not found');
     gs.print('  IH-026: IHTestUnique found; IH-027: "' + MARKER + ' IH-011 asynchronous ajax" found');
     gs.print('  IH-028: UI page ih_test_ih028_page found; IH-029: UI action "' + MARKER + ' IH-029 UI action" found');
     gs.print('  IH-030: "' + MARKER + ' IH-030 virtual with asset" found, "... without asset" not found');

@@ -89,6 +89,10 @@ declare global {
                         table: 'scan_table_check'
                         id: '6cf35a4d3be14a6b8fab4a60407207d3'
                     }
+                    'ih-022-upgrade-skipped-items': {
+                        table: 'scan_script_only_check'
+                        id: 'ddfdd37d084c4c308a5eca6d4df10909'
+                    }
                     'ih-023-default-rows-per-page': {
                         table: 'scan_table_check'
                         id: 'd7766e499d2a4c2d930e2133f8cf4a86'
