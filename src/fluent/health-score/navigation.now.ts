@@ -77,6 +77,15 @@ Record({
     },
 })
 
+// Base colors of the Reporting plugin (sys_report_color), same sys_ids on every instance
+const REPORT_COLORS = {
+    black: '65b30218a9fe3dba0120df8611520d97',
+    crimson: '65b3022ca9fe3dba00b0c2a1508ad489',
+    royalBlue: '65b30395a9fe3dba00175667ec52620d',
+    forestGreen: '65b3027ca9fe3dba00d5b649d600fe09',
+    darkOrange: '65b30254a9fe3dba00b44ce0710382b3',
+}
+
 // Line chart: average health score per day (several runs on one day are averaged).
 // Record() sets no platform defaults, so the display fields are set explicitly (values as in the
 // platform line chart "Service View - Completeness Trend"); without them the module stayed hidden.
@@ -96,6 +105,8 @@ export const healthScoreTrendReport = Record({
         legend_vertical_alignment: 'bottom',
         show_marker: true,
         set_color: 'one_color',
+        series_name_text: 'Health score',
+        color: REPORT_COLORS.black,
         y_axis_display_grid: true,
         x_axis_display_grid: false,
         y_axis_label_size: 11,
@@ -125,6 +136,113 @@ export const healthScoreTrendReport = Record({
         user: 'GLOBAL',
         roles: ['admin'],
         is_published: false,
+    },
+})
+
+// Additional lines of the trend report, one dataset (sys_report_layer) per category score
+// (user request 2026-11-06). Record() sets no defaults, so all display flags are explicit.
+Record({
+    $id: Now.ID['ih-report-layer-security'],
+    table: 'sys_report_layer',
+    data: {
+        report: healthScoreTrendReport,
+        sequence: 1,
+        series_name_text: 'Security',
+        color: REPORT_COLORS.crimson,
+        type: 'line',
+        source_type: 'table',
+        table: x_bits2_inst_hlth_health_score.name,
+        trend_field: 'scan_date',
+        interval: 'date',
+        aggregate: 'AVG',
+        sumfield: 'score_security',
+        set_color: 'one_color',
+        compute_percent: 'aggregate',
+        show_marker: true,
+        show_chart_data_label: false,
+        show_data_label_position_middle: false,
+        allow_data_label_overlap: false,
+        show_2nd_y_axis: false,
+        bar_unstack: false,
+        use_null_in_trend: false,
+    },
+})
+Record({
+    $id: Now.ID['ih-report-layer-performance'],
+    table: 'sys_report_layer',
+    data: {
+        report: healthScoreTrendReport,
+        sequence: 2,
+        series_name_text: 'Performance',
+        color: REPORT_COLORS.royalBlue,
+        type: 'line',
+        source_type: 'table',
+        table: x_bits2_inst_hlth_health_score.name,
+        trend_field: 'scan_date',
+        interval: 'date',
+        aggregate: 'AVG',
+        sumfield: 'score_performance',
+        set_color: 'one_color',
+        compute_percent: 'aggregate',
+        show_marker: true,
+        show_chart_data_label: false,
+        show_data_label_position_middle: false,
+        allow_data_label_overlap: false,
+        show_2nd_y_axis: false,
+        bar_unstack: false,
+        use_null_in_trend: false,
+    },
+})
+Record({
+    $id: Now.ID['ih-report-layer-manageability'],
+    table: 'sys_report_layer',
+    data: {
+        report: healthScoreTrendReport,
+        sequence: 3,
+        series_name_text: 'Manageability',
+        color: REPORT_COLORS.forestGreen,
+        type: 'line',
+        source_type: 'table',
+        table: x_bits2_inst_hlth_health_score.name,
+        trend_field: 'scan_date',
+        interval: 'date',
+        aggregate: 'AVG',
+        sumfield: 'score_manageability',
+        set_color: 'one_color',
+        compute_percent: 'aggregate',
+        show_marker: true,
+        show_chart_data_label: false,
+        show_data_label_position_middle: false,
+        allow_data_label_overlap: false,
+        show_2nd_y_axis: false,
+        bar_unstack: false,
+        use_null_in_trend: false,
+    },
+})
+Record({
+    $id: Now.ID['ih-report-layer-upgradability'],
+    table: 'sys_report_layer',
+    data: {
+        report: healthScoreTrendReport,
+        sequence: 4,
+        series_name_text: 'Upgradability',
+        color: REPORT_COLORS.darkOrange,
+        type: 'line',
+        source_type: 'table',
+        table: x_bits2_inst_hlth_health_score.name,
+        trend_field: 'scan_date',
+        interval: 'date',
+        aggregate: 'AVG',
+        sumfield: 'score_upgradability',
+        set_color: 'one_color',
+        compute_percent: 'aggregate',
+        show_marker: true,
+        show_chart_data_label: false,
+        show_data_label_position_middle: false,
+        allow_data_label_overlap: false,
+        show_2nd_y_axis: false,
+        bar_unstack: false,
+        use_null_in_trend: false,
     },
 })
 

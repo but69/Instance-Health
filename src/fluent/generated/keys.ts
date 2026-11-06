@@ -365,6 +365,22 @@ declare global {
                         table: 'sys_report'
                         id: 'a8e15075f41f4ff9a1c5a979b5f74f86'
                     }
+                    'ih-report-layer-manageability': {
+                        table: 'sys_report_layer'
+                        id: '6ad98decd09c4cd18446b913b22e6a40'
+                    }
+                    'ih-report-layer-performance': {
+                        table: 'sys_report_layer'
+                        id: '5a9e5ee5367d45e090bf27fd885bc75d'
+                    }
+                    'ih-report-layer-security': {
+                        table: 'sys_report_layer'
+                        id: 'b158d1bee46f4d159e4e436a1f76652e'
+                    }
+                    'ih-report-layer-upgradability': {
+                        table: 'sys_report_layer'
+                        id: 'a3ffa9887d4b44ae89c1b9758416c0c5'
+                    }
                     'ih-scan-util': {
                         table: 'sys_script_include'
                         id: 'ab660315d1c14bb184dc5c20bc21f75c'
