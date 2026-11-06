@@ -345,6 +345,22 @@ declare global {
                         table: 'sysauto_script'
                         id: '5a84bf997e7f427ba5d787d95595d2e6'
                     }
+                    'ih-menu': {
+                        table: 'sys_app_application'
+                        id: '7ab5623b683c478dbaa6d49be3ee7611'
+                    }
+                    'ih-module-health-score-trend': {
+                        table: 'sys_app_module'
+                        id: '47c35ef5cee843768c1166d989aa636a'
+                    }
+                    'ih-module-health-scores': {
+                        table: 'sys_app_module'
+                        id: '98f7c6e7cd014fdf87f5e28ec8181530'
+                    }
+                    'ih-report-health-score-trend': {
+                        table: 'sys_report'
+                        id: 'a8e15075f41f4ff9a1c5a979b5f74f86'
+                    }
                     'ih-scan-util': {
                         table: 'sys_script_include'
                         id: 'ab660315d1c14bb184dc5c20bc21f75c'
