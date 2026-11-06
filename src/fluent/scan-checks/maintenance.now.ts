@@ -12,15 +12,7 @@ export const ih003TooManyClientScripts = ScriptOnlyCheck({
         'Many client scripts on one table slow down forms and are hard to maintain. Counts active client scripts from customer scoped apps, and global client scripts that have a customer update. Scripts from ServiceNow plugins and store apps, inactive scripts and catalog client scripts do not count. Ideal state: at most 10 custom client scripts per table.',
     script: `(function(engine) {
     var MAX_SCRIPTS = 10;
-
-    var globalCustomerUpdates = {};
-    var upd = new GlideAggregate('sys_update_xml');
-    upd.addQuery('name', 'STARTSWITH', 'sys_script_client_');
-    upd.addQuery('application', 'global');
-    upd.groupBy('name');
-    upd.query();
-    while (upd.next())
-        globalCustomerUpdates[upd.getValue('name')] = true;
+    var util = new x_bits2_inst_hlth.IHScanUtil();
 
     var counts = {};
     var cs = new GlideRecord('sys_script_client');
@@ -29,10 +21,7 @@ export const ih003TooManyClientScripts = ScriptOnlyCheck({
     cs.addNotNullQuery('table');
     cs.query();
     while (cs.next()) {
-        var packageClass = cs.sys_package.sys_class_name + '';
-        var isCustom = packageClass == 'sys_app' ||
-            (cs.getValue('sys_package') == 'global' && globalCustomerUpdates[cs.getValue('sys_update_name')] === true);
-        if (!isCustom) continue;
+        if (!util.isCustom(cs)) continue;
         var tableName = cs.getValue('table');
         counts[tableName] = (counts[tableName] || 0) + 1;
     }
@@ -158,4 +147,114 @@ export const ih009GsSqlUsage = ColumnTypeCheck({
 })(engine, current, columnValue);`,
     resolutionDetails:
         'Replace gs.sql with GlideRecord or GlideAggregate queries.',
+})
+
+// IH-012: instance URLs (any instance) in custom scripts
+export const ih012HardCodedInstanceUrl = ColumnTypeCheck({
+    $id: Now.ID['ih-012-hard-coded-instance-url'],
+    name: 'IH-012 Hard-coded instance URL',
+    active: true,
+    category: 'manageability',
+    priority: '3',
+    shortDescription: 'Finds custom scripts that contain a ServiceNow instance URL',
+    description:
+        'Hard-coded instance URLs point to the wrong instance after a clone or when code moves between instances. Only custom scripts are checked; every matching line is listed. Ideal state: URLs are built from the property glide.servlet.uri.',
+    columnType: 'script',
+    script: `(function(engine, current, columnValue) {
+    if (!columnValue || columnValue.indexOf('.com') == -1) return;
+    var regex = /https?:\\/\\/[a-z0-9-]+\\.(service-now|servicenowservices)\\.com/i;
+    new x_bits2_inst_hlth.IHScanUtil().checkScript(engine, current, columnValue, regex);
+})(engine, current, columnValue);`,
+    resolutionDetails:
+        'Build the URL from gs.getProperty(\'glide.servlet.uri\') or the instance_name property, or store external URLs in a system property.',
+})
+
+// IH-013: quoted 32-character hex strings (sys_ids) in custom scripts
+export const ih013HardCodedSysIds = ColumnTypeCheck({
+    $id: Now.ID['ih-013-hard-coded-sys-ids'],
+    name: 'IH-013 Hard-coded sys_ids in scripts',
+    active: true,
+    category: 'manageability',
+    priority: '3',
+    shortDescription: 'Finds custom scripts that contain literal sys_ids',
+    description:
+        'Literal sys_ids break when the referenced record does not exist on another instance and hide what the code depends on. Only custom scripts are checked; every matching line is listed. Ideal state: no script contains a literal sys_id.',
+    columnType: 'script',
+    script: `(function(engine, current, columnValue) {
+    if (!columnValue) return;
+    var regex = /['"][0-9a-f]{32}['"]/i;
+    new x_bits2_inst_hlth.IHScanUtil().checkScript(engine, current, columnValue, regex);
+})(engine, current, columnValue);`,
+    resolutionDetails:
+        'Store the value in a system property, look the record up by a stable key (name, number), or reference it through configuration.',
+})
+
+// IH-014: update()/insert() in custom before business rules (current.update() included)
+export const ih014BeforeRuleUpdates = TableCheck({
+    $id: Now.ID['ih-014-before-rule-updates'],
+    name: 'IH-014 Before business rules that update or insert records',
+    active: true,
+    category: 'manageability',
+    priority: '3',
+    shortDescription: 'Finds custom before business rules that call update() or insert()',
+    description:
+        'Before business rules should only change the current record, which is saved anyway. Calling update() or insert() there writes other records before the current one is saved, or saves current twice. Only custom rules are checked; every matching line is listed. Ideal state: before rules only set values on current.',
+    table: 'sys_script',
+    conditions: 'when=before^active=true^scriptLIKEupdate^ORscriptLIKEinsert',
+    advanced: true,
+    script: `(function(engine, current) {
+    var util = new x_bits2_inst_hlth.IHScanUtil();
+    if (!util.isCustom(current)) return;
+    var lines = util.matchingLines(current.getValue('script'), /\\.\\s*(update|insert)\\s*\\(/);
+    if (lines.length > 0)
+        util.reportLines(engine, current, lines, 'Before business rule on ' + current.getValue('collection'));
+})(engine, current);`,
+    resolutionDetails:
+        'Move updates and inserts of other records to an after or async business rule; for the current record, set the values without calling current.update().',
+})
+
+// IH-016: same api_name used by more than one script include; reported if a member is custom
+export const ih016DuplicateScriptIncludes = ScriptOnlyCheck({
+    $id: Now.ID['ih-016-duplicate-script-includes'],
+    name: 'IH-016 Script includes with duplicate names',
+    active: true,
+    category: 'manageability',
+    priority: '3',
+    shortDescription: 'Finds script includes that share their API name with another script include',
+    description:
+        'When two script includes have the same API name (same name in the same scope), it is undefined which one is loaded. The same name in different scopes is allowed and not reported. A duplicate group is reported when at least one member is custom; each member is a finding. Ideal state: every API name is unique.',
+    script: `(function(engine) {
+    var util = new x_bits2_inst_hlth.IHScanUtil();
+
+    var dup = new GlideAggregate('sys_script_include');
+    dup.addNotNullQuery('api_name');
+    dup.groupBy('api_name');
+    dup.addAggregate('COUNT');
+    dup.addHaving('COUNT', '>', '1');
+    dup.query();
+    while (dup.next()) {
+        var apiName = dup.getValue('api_name');
+        var members = [];
+        var anyCustom = false;
+        var si = new GlideRecord('sys_script_include');
+        si.addQuery('api_name', apiName);
+        si.orderBy('sys_created_on');
+        si.query();
+        while (si.next()) {
+            members.push(si.getUniqueValue());
+            if (util.isCustom(si)) anyCustom = true;
+        }
+        if (!anyCustom) continue;
+
+        for (var i = 0; i < members.length; i++) {
+            var member = new GlideRecord('sys_script_include');
+            if (!member.get(members[i])) continue;
+            engine.finding.setCurrentSource(member);
+            engine.finding.setValue('finding_details', 'API name ' + apiName + ' is used by ' + members.length + ' script includes (' + member.sys_package.getDisplayValue() + ', ' + (member.active == true ? 'active' : 'inactive') + ')');
+            engine.finding.increment();
+        }
+    }
+})(engine);`,
+    resolutionDetails:
+        'Rename or delete the duplicate script include so every API name is unique, and update the callers.',
 })
