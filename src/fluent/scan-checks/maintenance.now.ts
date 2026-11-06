@@ -259,6 +259,96 @@ export const ih016DuplicateScriptIncludes = ScriptOnlyCheck({
         'Rename or delete the duplicate script include so every API name is unique, and update the callers.',
 })
 
+// IH-035: update sets sharing a name ("Default" excluded, every application has one)
+export const ih035DuplicateUpdateSetNames = ScriptOnlyCheck({
+    $id: Now.ID['ih-035-duplicate-update-set-names'],
+    name: 'IH-035 Update sets with duplicate names',
+    active: true,
+    category: 'manageability',
+    priority: '3',
+    shortDescription: 'Finds update sets that share their name with another update set',
+    description:
+        'Update sets with the same name are easily mixed up when they are moved, previewed and committed. "Default" is ignored because every application has one. Each update set of a duplicate group is a finding. Ideal state: every update set has a unique name.',
+    script: `(function(engine) {
+    var dup = new GlideAggregate('sys_update_set');
+    dup.addQuery('name', '!=', 'Default');
+    dup.groupBy('name');
+    dup.addAggregate('COUNT');
+    dup.addHaving('COUNT', '>', '1');
+    dup.query();
+    while (dup.next()) {
+        var name = dup.getValue('name');
+        var count = dup.getAggregate('COUNT');
+        var set = new GlideRecord('sys_update_set');
+        set.addQuery('name', name);
+        set.query();
+        while (set.next()) {
+            engine.finding.setCurrentSource(set);
+            engine.finding.setValue('finding_details', 'Name "' + name + '" is used by ' + count + ' update sets (this one: ' + set.getDisplayValue('state') + ', application ' + set.application.getDisplayValue() + ', created ' + set.getValue('sys_created_on') + ')');
+            engine.finding.increment();
+        }
+    }
+})(engine);`,
+    resolutionDetails:
+        'Rename the update sets with a unique, meaningful name, for example the story number and a short title.',
+})
+
+// IH-038: business rules passing current to a script include that calls update() on a parameter
+// (escapes the current.update() check IH-014); heuristic in IHScanUtil.findIndirectCurrentUpdates
+export const ih038IndirectCurrentUpdate = TableCheck({
+    $id: Now.ID['ih-038-indirect-current-update'],
+    name: 'IH-038 Script includes that update current',
+    active: true,
+    category: 'manageability',
+    priority: '3',
+    shortDescription: 'Finds custom business rules that pass current to a script include which updates it',
+    description:
+        'Calling update() on current inside a business rule saves the record again and runs all business rules a second time. When the call is hidden in a script include, it is not found by the current.update() check. Reports custom business rules that pass current to a script include whose functions call update() on a parameter. Heuristic: updates through stored fields (this.record.update()) or nested calls are not found. Ideal state: business rules never update current through a script include.',
+    table: 'sys_script',
+    conditions: 'active=true^scriptLIKEcurrent',
+    advanced: true,
+    script: `(function(engine, current) {
+    var util = new x_bits2_inst_hlth.IHScanUtil();
+    if (!util.isCustom(current)) return;
+    var lines = util.findIndirectCurrentUpdates(current.getValue('script'));
+    if (lines.length > 0)
+        util.reportLines(engine, current, lines, 'Business rule (' + (current.getValue('when') || 'no when') + ') on ' + current.getValue('collection'));
+})(engine, current);`,
+    resolutionDetails:
+        'In a before rule, set the values on current and let the platform save it; in other rules, avoid updating current or pass the values the script include needs instead of the record.',
+})
+
+// IH-039: complex script conditions on custom business rules (user decision: length or logic)
+export const ih039ComplexConditions = TableCheck({
+    $id: Now.ID['ih-039-complex-conditions'],
+    name: 'IH-039 Business rules with complex script conditions',
+    active: true,
+    category: 'manageability',
+    priority: '3',
+    shortDescription: 'Finds custom business rules with long or scripted conditions',
+    description:
+        'The condition of a business rule is evaluated on every matching transaction and is hard to read and debug. A condition is complex when it is longer than 200 characters or contains a query (GlideRecord, GlideAggregate), a statement separator (;) or a function. Only custom business rules are checked. Ideal state: conditions are short expressions; logic belongs in the script.',
+    table: 'sys_script',
+    conditions: 'active=true^conditionISNOTEMPTY',
+    advanced: true,
+    script: `(function(engine, current) {
+    var MAX_LENGTH = 200;
+    var condition = current.getValue('condition');
+    var reasons = [];
+    if (condition.length > MAX_LENGTH) reasons.push(condition.length + ' characters');
+    if (/\\bGlide(Record|Aggregate)/.test(condition)) reasons.push('database query');
+    if (condition.indexOf(';') > -1) reasons.push('several statements');
+    if (/\\bfunction\\b/.test(condition)) reasons.push('function');
+    if (reasons.length == 0) return;
+    if (!new x_bits2_inst_hlth.IHScanUtil().isCustom(current)) return;
+    engine.finding.setCurrentSource(current);
+    engine.finding.setValue('finding_details', 'Complex condition (' + reasons.join(', ') + '): ' + condition.substring(0, 300) + (condition.length > 300 ? '...' : ''));
+    engine.finding.increment();
+})(engine, current);`,
+    resolutionDetails:
+        'Use the condition builder or a short expression and move the logic into the script or a script include.',
+})
+
 // IH-022: summary of the last platform upgrade (the per-item log sys_upgrade_history_log cannot be
 // read from other scopes); items that need a review = skipped and different + errors + manual merges
 export const ih022UpgradeSkippedItems = ScriptOnlyCheck({

@@ -129,6 +129,58 @@ declare global {
                         table: 'scan_table_check'
                         id: '9e08d231115c43dc8e924363997021ab'
                     }
+                    'ih-032-create-asset-rules': {
+                        table: 'scan_script_only_check'
+                        id: 'c66f6db2c6fc4f748c8b3aed9982feac'
+                    }
+                    'ih-033-invalid-discovery-source': {
+                        table: 'scan_script_only_check'
+                        id: '5cd1b5e8b2594c9bb105229605a172b1'
+                    }
+                    'ih-034-impersonation-in-production': {
+                        table: 'scan_script_only_check'
+                        id: '4a6de08673c14e4bb3f7ff09366cea74'
+                    }
+                    'ih-035-duplicate-update-set-names': {
+                        table: 'scan_script_only_check'
+                        id: '6c46c7dfd39445608528c142620a04b7'
+                    }
+                    'ih-036-knowledge-base-retire-workflow': {
+                        table: 'scan_table_check'
+                        id: '07fabbb7c7744d54be8685c0d6bdec71'
+                    }
+                    'ih-037-business-rule-callstack': {
+                        table: 'scan_table_check'
+                        id: '96eb4e3ca6d54786be9bc20019c3dd45'
+                    }
+                    'ih-038-indirect-current-update': {
+                        table: 'scan_table_check'
+                        id: '3c19da8d722e4e249147e118d5529dd2'
+                    }
+                    'ih-039-complex-conditions': {
+                        table: 'scan_table_check'
+                        id: '73cdb483780546a69197ef370d06ee78'
+                    }
+                    'ih-040-inactive-group-members': {
+                        table: 'scan_table_check'
+                        id: '94eb01012dfa446ca1896b1b733850e3'
+                    }
+                    'ih-041-inactive-group-manager': {
+                        table: 'scan_table_check'
+                        id: '83f6c05000644a0580d58462f69b165f'
+                    }
+                    'ih-042-groups-without-members': {
+                        table: 'scan_table_check'
+                        id: 'ecc7d9f404844f698cc64fadfb51557d'
+                    }
+                    'ih-043-direct-role-assignments': {
+                        table: 'scan_table_check'
+                        id: '066f561c35274b5b86c4c7b06f9bfef9'
+                    }
+                    'ih-044-role-groups-without-type': {
+                        table: 'scan_table_check'
+                        id: '4e10ab8932cd4daa814430039b278589'
+                    }
                     'ih-scan-util': {
                         table: 'sys_script_include'
                         id: 'ab660315d1c14bb184dc5c20bc21f75c'

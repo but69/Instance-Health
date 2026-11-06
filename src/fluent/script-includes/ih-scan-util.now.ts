@@ -78,6 +78,65 @@ IHScanUtil.prototype = {
         engine.finding.increment();
     },
 
+    // IH-038: lines of a business rule script that pass current to a script include which calls
+    // update() on one of its function parameters. Returns "line N: <code> -> <include>: <param>.update()"
+    findIndirectCurrentUpdates: function(script) {
+        var lines = this.stripComments(script + '').split('\\n');
+        var original = (script + '').split('\\n');
+        var passesCurrent = /\\([^()]*\\bcurrent\\b(?!\\s*\\.)/;
+        var callee = /\\bnew\\s+([A-Za-z_$][\\w$]*(?:\\.[A-Za-z_$][\\w$]*)?)\\s*\\(|\\b([A-Z][\\w$]*)\\s*\\.\\s*[A-Za-z_$][\\w$]*\\s*\\(/g;
+        var out = [];
+        for (var i = 0; i < lines.length; i++) {
+            if (!passesCurrent.test(lines[i])) continue;
+            callee.lastIndex = 0;
+            var match;
+            while ((match = callee.exec(lines[i])) !== null) {
+                var name = (match[1] || match[2]).split('.').pop();
+                var updated = this._includeUpdatesParameter(name);
+                if (updated)
+                    out.push('line ' + (i + 1) + ': ' + (original[i] || '').replace(/^\\s+|\\s+$/g, '').substring(0, this.MAX_LINE_LENGTH) +
+                        ' -> script include ' + name + ': ' + updated);
+            }
+        }
+        return out;
+    },
+
+    // Returns e.g. "record.update() (line 5)" if a function of the script include calls update() on
+    // one of its parameters, '' otherwise. Cached per name.
+    _includeUpdatesParameter: function(name) {
+        if (!this._includeCache) this._includeCache = {};
+        if (this._includeCache.hasOwnProperty(name)) return this._includeCache[name];
+        var result = '';
+        var include = new GlideRecord('sys_script_include');
+        include.addQuery('name', name);
+        include.addActiveQuery();
+        include.query();
+        if (include.next()) {
+            var lines = this.stripComments(include.getValue('script') || '').split('\\n');
+            var params = {};
+            var fn = /function\\s*[A-Za-z_$]*[\\w$]*\\s*\\(([^)]*)\\)/g;
+            var all = lines.join('\\n');
+            var f;
+            while ((f = fn.exec(all)) !== null) {
+                var names = f[1].split(',');
+                for (var p = 0; p < names.length; p++) {
+                    var param = names[p].replace(/^\\s+|\\s+$/g, '');
+                    if (/^[A-Za-z_$][\\w$]*$/.test(param)) params[param] = true;
+                }
+            }
+            for (var i = 0; i < lines.length && !result; i++) {
+                for (var param2 in params) {
+                    if (new RegExp('\\\\b' + param2.replace(/\\$/g, '\\\\$') + '\\\\s*\\\\.\\\\s*update\\\\s*\\\\(').test(lines[i])) {
+                        result = param2 + '.update() (line ' + (i + 1) + ')';
+                        break;
+                    }
+                }
+            }
+        }
+        this._includeCache[name] = result;
+        return result;
+    },
+
     // IH-025 to IH-029: ServiceNow records that were changed, from the platform's own list
     // sys_metadata_customization (author_type ServiceNow = record shipped by ServiceNow)
     reportBaselineChanges: function(engine, classNames) {

@@ -319,6 +319,22 @@ export const ih021SyncOutboundCalls = TableCheck({
         'Change the business rule to async, or trigger the call through an event and script action or a flow.',
 })
 
+// IH-037: business rule call stack logging (debug setting) switched on
+export const ih037BusinessRuleCallstack = TableCheck({
+    $id: Now.ID['ih-037-business-rule-callstack'],
+    name: 'IH-037 Business rule call stack logging enabled',
+    active: true,
+    category: 'performance',
+    priority: '3',
+    shortDescription: 'Checks that glide.businessrule.callstack is not set to true',
+    description:
+        'glide.businessrule.callstack writes the call stack of business rules to the log. It is meant for debugging and slows down every transaction. Ideal state: the property is false or not set.',
+    table: 'sys_properties',
+    conditions: 'name=glide.businessrule.callstack^value=true',
+    resolutionDetails:
+        'Set glide.businessrule.callstack to false or delete the property.',
+})
+
 // IH-023: system default of rows per page (preference rowcount without user)
 export const ih023DefaultRowsPerPage = TableCheck({
     $id: Now.ID['ih-023-default-rows-per-page'],

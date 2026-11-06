@@ -52,19 +52,19 @@ Field and table names marked ✔ were verified on bithawkdemo1 (2026-11-05).
 | IH-029 | Differs from baseline: UI actions | Maintenance | upgradability | ScriptOnlyCheck | built |
 | IH-030 | Virtual CIs with assets | Administration | manageability | ScriptOnlyCheck | built |
 | IH-031 | Computers and network gear without serial number | Administration | manageability | TableCheck | built |
-| IH-032 | Create Asset business rules active | Administration | manageability | ScriptOnlyCheck | specified |
-| IH-033 | CIs with an invalid discovery source | Administration | manageability | TableCheck (advanced) | specified |
-| IH-034 | Impersonation in production | Administration | security | ScriptOnlyCheck | specified |
-| IH-035 | Update sets with duplicate names | Maintenance | manageability | ScriptOnlyCheck | specified |
-| IH-036 | Knowledge bases without retire workflow | Administration | manageability | TableCheck | specified |
-| IH-037 | Business rule call stack logging enabled | Performance | performance | TableCheck | specified |
-| IH-038 | Script includes that update current | Maintenance | manageability | TableCheck (advanced) | specified |
-| IH-039 | Business rules with complex script conditions | Maintenance | manageability | TableCheck (advanced) | specified |
-| IH-040 | Inactive users in groups | Administration | security | TableCheck | specified |
-| IH-041 | Groups with an inactive manager | Administration | manageability | TableCheck | specified |
-| IH-042 | Groups without members | Administration | manageability | TableCheck (advanced) | specified |
-| IH-043 | Roles assigned directly to users | Administration | security | TableCheck | specified |
-| IH-044 | Groups with roles without a group type | Administration | security | TableCheck (advanced) | specified |
+| IH-032 | Create Asset business rules active | Administration | manageability | ScriptOnlyCheck | built |
+| IH-033 | CIs with an invalid discovery source | Administration | manageability | TableCheck (advanced) | built |
+| IH-034 | Impersonation in production | Administration | security | ScriptOnlyCheck | built |
+| IH-035 | Update sets with duplicate names | Maintenance | manageability | ScriptOnlyCheck | built |
+| IH-036 | Knowledge bases without retire workflow | Administration | manageability | TableCheck (advanced) | built |
+| IH-037 | Business rule call stack logging enabled | Performance | performance | TableCheck | built |
+| IH-038 | Script includes that update current | Maintenance | manageability | TableCheck (advanced) | built |
+| IH-039 | Business rules with complex script conditions | Maintenance | manageability | TableCheck (advanced) | built |
+| IH-040 | Inactive users in groups | Administration | security | TableCheck | built |
+| IH-041 | Groups with an inactive manager | Administration | manageability | TableCheck | built |
+| IH-042 | Groups without members | Administration | manageability | TableCheck (advanced) | built |
+| IH-043 | Roles assigned directly to users | Administration | security | TableCheck | built |
+| IH-044 | Groups with roles without a group type | Administration | security | TableCheck (advanced) | built |
 
 ---
 
@@ -293,6 +293,8 @@ Measured on bithawkdemo1 (2026-11-06): no OOB Instance Scan check covers these t
 ## Batch 4: drafts received 2026-11-06
 
 Drafts from the user ("same setup as the previous checks": catalogue first, custom-only for code checks with matching lines, link to the record to act on, test data, dry run before deploy), specified 2026-11-06. IH-032, IH-034 to IH-038 and IH-040 to IH-042 follow the proposals below without an explicit decision; the user can still change them.
+
+**Built 2026-11-06**, not deployed yet. Dry run in the app scope (built scripts, stub engine, no findings written) on bithawkdemo1: IH-032 0, IH-033 0, IH-034 1, IH-035 9, IH-036 7, IH-037 0, IH-038 1, IH-039 0, IH-040 2, IH-041 0, IH-042 30, IH-043 0, IH-044 18. Test data: test users `ih.test.active` (locked out) and `ih.test.inactive`, test groups, memberships, a direct role (`personalize_choices`), knowledge bases, update sets, computers with discovery sources, and business rules / script includes for IH-038 and IH-039. No test data for IH-032, IH-034, IH-037 (instance-wide settings).
 Overlap with OOB checks (bithawkdemo1, 2026-11-06): `sn_access_analyzer` "Users with Direct Role Assignments (Bypassing Groups)" (active) covers IH-043; `sn_vsc` "Restrict Impersonation to Admin" and "Log User Impersonation" cover other impersonation aspects than IH-034.
 
 ## IH-032 Create Asset business rules active
@@ -329,8 +331,9 @@ Overlap with OOB checks (bithawkdemo1, 2026-11-06): `sn_access_analyzer` "Users 
 ## IH-036 Knowledge bases without retire workflow
 
 - **Ideal:** Every active knowledge base has a retire workflow.
-- **Logic:** `kb_knowledge_base` where `active=true^retire_workflowISEMPTY` ✔. (No flow fields on this instance: `retire_flow` does not exist.)
-- **Measured:** 7 of 7 active knowledge bases have no retire workflow.
+- **Logic:** `kb_knowledge_base` where `active=true` ✔, advanced: finding if `retire_workflow` is empty or references a `wf_workflow` record that does not exist. (No flow fields on this instance: `retire_flow` does not exist.)
+- **Measured:** 7 of 7 active knowledge bases: 1 empty, 6 reference a deleted workflow (`3d18ef12…` 5×, `3bf3fb92…` 1×; the display value is empty, the record is missing in `wf_workflow`).
+- **Changed while building (2026-11-06):** the condition-only version (`retire_workflowISEMPTY`) found only 1; broken references are reported as well, with the reason in the details.
 - **Resolution:** Assign a retire workflow (e.g. "Knowledge - Instant Retire" or an approval workflow).
 
 ## IH-037 Business rule call stack logging enabled
@@ -345,6 +348,8 @@ Overlap with OOB checks (bithawkdemo1, 2026-11-06): `sn_access_analyzer` "Users 
 - **Ideal:** Business rules do not update `current` indirectly through a script include (this escapes the `current.update()` check IH-014).
 - **Logic (heuristic):** custom active business rules whose script passes `current` to a script include (`new X(...current...)`, `new X().m(...current...)`, `X.m(...current...)`). The script include `X` is looked up by name; finding if its script calls `.update(` on one of its function parameters (`function(a, b) { ... a.update() ... }`). Finding on the business rule, details: BR line and script include name. Custom only, lines listed.
 - **Limits:** misses updates through `this.<field>.update()` and nested calls.
+- **Built:** heuristic in `IHScanUtil.findIndirectCurrentUpdates()`, tested locally with stubbed script includes (positive: `new X().m(current)`, `X.m(current)`, `new global.X().m(current)`; negative: include updates another record, `current.field` passed, commented code, unknown include).
+- **Real hit on bithawkdemo1:** async rule "AMAG - Vehicle Registration - Create CI" on `sc_req_item` passes `current` to `c_VehicleRegistration.registerFromRequestItem()`, which updates its parameter.
 - **Resolution:** Set values on `current` in the business rule (before rule) instead of calling `update()` in the script include, or pass a copy.
 
 ## IH-039 Business rules with complex script conditions

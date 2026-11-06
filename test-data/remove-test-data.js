@@ -79,6 +79,13 @@ runInGlobal(function removeInstanceHealthTestData() {
     deleteWhere('sys_script_pattern', 'label', 'STARTSWITH', MARKER, false);
     deleteWhere('cmdb_ci_computer', 'name', 'STARTSWITH', MARKER, false);
     deleteWhere('alm_hardware', 'asset_tag', 'STARTSWITH', MARKER, false);
+    deleteWhere('sys_user_has_role', 'user.user_name', 'STARTSWITH', 'ih.test.', false);
+    deleteWhere('sys_group_has_role', 'group.name', 'STARTSWITH', MARKER, false);
+    deleteWhere('sys_user_grmember', 'group.name', 'STARTSWITH', MARKER, false);
+    deleteWhere('sys_user_group', 'name', 'STARTSWITH', MARKER, false);
+    deleteWhere('sys_user', 'user_name', 'STARTSWITH', 'ih.test.', false);
+    deleteWhere('kb_knowledge_base', 'title', 'STARTSWITH', MARKER, false);
+    deleteWhere('sys_update_set', 'name', 'STARTSWITH', MARKER + ' ', false);
 
     // Customization rows of the deleted test records (synthetic rows for IH-025 to IH-029)
     if (removedSysIds.length > 0)

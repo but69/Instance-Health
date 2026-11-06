@@ -1,14 +1,15 @@
 // Instance Health: create test data for the scan checks
 // Run in System Definition > Scripts - Background, scope global, as admin.
 // Creates positive (must be found) and negative (must not be found) records for
-// IH-001 to IH-003, IH-005, IH-007, IH-009 to IH-017, IH-019, IH-021 and IH-024 to IH-031.
+// IH-001 to IH-003, IH-005, IH-007, IH-009 to IH-017, IH-019, IH-021, IH-024 to IH-031,
+// IH-033, IH-035, IH-036 and IH-038 to IH-044 (test users ih.test.*, the active one locked out).
 // Every record is marked with IH-TEST (script includes: name starts with IHTest, UI page:
 // ih_test_) and captured in the update set "Instance Health - Test Data". Records are created
 // in global with a customer update, so they count as custom for the checks that only report
 // custom code. IH-024 and IH-025 to IH-029 use synthetic statistics / customization rows.
 // Not covered: IH-004 and IH-008 (need a failing PA job / 5 million rows), IH-018 (would
-// need a new table; the instance has real findings), IH-020 and IH-023 (instance-wide
-// settings), IH-022 (needs a platform upgrade).
+// need a new table; the instance has real findings), IH-020, IH-023, IH-032, IH-034 and
+// IH-037 (instance-wide settings), IH-022 (needs a platform upgrade).
 // Test business rules have condition "false" and test ACLs sit on a non-existent field,
 // so none of them ever runs or decides access.
 // Remove everything again with remove-test-data.js.
@@ -405,6 +406,85 @@ runInGlobal(function createInstanceHealthTestData() {
     computer('IH-031 retired no serial', { install_status: '7' });
     computer('IH-031 with serial', { serial_number: 'IHTEST-031-1' });
 
+    // IH-033: invalid discovery source (positive), valid one and retired CI with invalid one (negative).
+    // Serial numbers set so IH-031 does not report these computers.
+    computer('IH-033 invalid source', { discovery_source: MARKER + ' invalid', serial_number: 'IHTEST-033-1' });
+    computer('IH-033 valid source', { discovery_source: 'ManualEntry', serial_number: 'IHTEST-033-2' });
+    computer('IH-033 retired invalid source', { discovery_source: MARKER + ' invalid', serial_number: 'IHTEST-033-3', install_status: '7' });
+
+    // IH-035: two update sets with the same name (positive), one unique (negative); state complete
+    insert('sys_update_set', { name: MARKER + ' IH-035 duplicate name', application: 'global', state: 'complete' });
+    insert('sys_update_set', { name: MARKER + ' IH-035 duplicate name', application: 'global', state: 'complete' });
+    insert('sys_update_set', { name: MARKER + ' IH-035 unique name', application: 'global', state: 'complete' });
+
+    // IH-036: active knowledge base without retire workflow (positive), with one and inactive (negative)
+    var kbWorkflow = new GlideRecord('wf_workflow');
+    kbWorkflow.addQuery('table', 'kb_knowledge');
+    kbWorkflow.setLimit(1);
+    kbWorkflow.query();
+    var kbBase = { owner: gs.getUserID(), active: 'true' };
+    function knowledgeBase(title, values) {
+        var v = { title: MARKER + ' ' + title, owner: kbBase.owner, active: kbBase.active };
+        for (var k in values) v[k] = values[k];
+        return tryInsert(title, 'kb_knowledge_base', v);
+    }
+    knowledgeBase('IH-036 KB without retire workflow', {});
+    if (kbWorkflow.next())
+        knowledgeBase('IH-036 KB with retire workflow', { retire_workflow: kbWorkflow.getUniqueValue() });
+    else
+        warnings.push('IH-036: no workflow on kb_knowledge found, negative case with retire workflow not created');
+    knowledgeBase('IH-036 KB inactive', { active: 'false' });
+
+    // IH-038: business rules passing current to a script include that updates its parameter
+    // (positive) and to one that only reads it (negative). Condition false: they never run.
+    insert('sys_script_include', scriptInclude('IHTestUpdatesParam', 'IH-038 updates its parameter',
+        '        return null;\n    },\n    touch: function(record) {\n        record.update();'));
+    insert('sys_script_include', scriptInclude('IHTestReadsParam', 'IH-038 only reads its parameter',
+        '        return null;\n    },\n    read: function(record) {\n        return record.getValue(\'name\');'));
+    insert('sys_script', testRule('IH-038 calls updating include', 'cmn_location', 'before',
+        '    new IHTestUpdatesParam().touch(current);'));
+    insert('sys_script', testRule('IH-038 calls reading include', 'cmn_location', 'before',
+        '    new IHTestReadsParam().read(current);'));
+
+    // IH-039: complex condition (positive); all other test rules have the simple condition "false".
+    // The condition short-circuits, so the function is never called.
+    var complexRule = testRule('IH-039 complex condition', 'cmn_location', 'before', '    // nothing');
+    complexRule.condition = 'false && (function() { var x = 1; return x > 1; })()';
+    insert('sys_script', complexRule);
+
+    // IH-040 to IH-044: test users (active one is locked out), groups, memberships and roles
+    var activeUser = insert('sys_user', { user_name: 'ih.test.active', first_name: MARKER, last_name: 'active user', active: 'true', locked_out: 'true' });
+    var inactiveUser = insert('sys_user', { user_name: 'ih.test.inactive', first_name: MARKER, last_name: 'inactive user', active: 'false' });
+    function group(name, values) {
+        values.name = MARKER + ' ' + name;
+        values.active = 'true';
+        values.description = MARKER + ': test data for Instance Health, safe to delete';
+        return insert('sys_user_group', values);
+    }
+    function member(groupId, userId) {
+        insert('sys_user_grmember', { group: groupId, user: userId });
+    }
+    var testRole = new GlideRecord('sys_user_role');
+    testRole.get('name', 'personalize_choices');
+
+    var g40 = group('IH-040 inactive member', { manager: activeUser });
+    member(g40, inactiveUser);
+    member(g40, activeUser);
+    var g41 = group('IH-041 inactive manager', { manager: inactiveUser });
+    member(g41, activeUser);
+    group('IH-042 without members', { manager: activeUser });
+    var g44a = group('IH-044 role without type', { manager: activeUser });
+    member(g44a, activeUser);
+    insert('sys_group_has_role', { group: g44a, role: testRole.getUniqueValue() });
+    var catalogType = new GlideRecord('sys_user_group_type');
+    catalogType.get('name', 'catalog');
+    var g44b = group('IH-044 role with type', { manager: activeUser, type: catalogType.getUniqueValue() });
+    member(g44b, activeUser);
+    insert('sys_group_has_role', { group: g44b, role: testRole.getUniqueValue() });
+    // IH-043: direct role for the active test user (positive); the roles inherited from the
+    // IH-044 groups are the negative case
+    insert('sys_user_has_role', { user: activeUser, role: testRole.getUniqueValue() });
+
     // Check that the records really landed in global and the public report is published
     var check = new GlideRecord('sys_report');
     if (!check.get(publicReport) || String(check.is_published) != 'true' || check.getValue('sys_scope') != 'global')
@@ -437,6 +517,17 @@ runInGlobal(function createInstanceHealthTestData() {
     gs.print('  IH-028: UI page ih_test_ih028_page found; IH-029: UI action "' + MARKER + ' IH-029 UI action" found');
     gs.print('  IH-030: "' + MARKER + ' IH-030 virtual with asset" found, "... without asset" not found');
     gs.print('  IH-031: "' + MARKER + ' IH-031 no serial" found, retired one and the one with serial not found');
+    gs.print('  IH-032, IH-034, IH-037: no test data (would change instance-wide settings)');
+    gs.print('  IH-033: "' + MARKER + ' IH-033 invalid source" found, valid and retired ones not found');
+    gs.print('  IH-035: both "' + MARKER + ' IH-035 duplicate name" update sets found, unique one not found');
+    gs.print('  IH-036: "' + MARKER + ' IH-036 KB without retire workflow" found, the other two not found');
+    gs.print('  IH-038: "' + MARKER + ' IH-038 calls updating include" found (IHTestUpdatesParam), "... reading include" not found');
+    gs.print('  IH-039: "' + MARKER + ' IH-039 complex condition" found (several statements, function)');
+    gs.print('  IH-040: membership of ih.test.inactive in "' + MARKER + ' IH-040 inactive member" found, ih.test.active not found');
+    gs.print('  IH-041: "' + MARKER + ' IH-041 inactive manager" found');
+    gs.print('  IH-042: "' + MARKER + ' IH-042 without members" found, the other test groups not found');
+    gs.print('  IH-043: direct role personalize_choices of ih.test.active found, the inherited ones not found');
+    gs.print('  IH-044: "' + MARKER + ' IH-044 role without type" found, "... role with type" not found');
     gs.print('  IH-001 to IH-009 test script includes and client scripts must not appear in IH-010 to IH-016.');
     gs.print('');
     for (var w = 0; w < warnings.length; w++)
