@@ -7,6 +7,7 @@ export const ih003TooManyClientScripts = ScriptOnlyCheck({
     active: true,
     category: 'manageability',
     priority: '3',
+    scoreScale: 2,
     shortDescription: 'Finds tables with more than 10 active custom client scripts',
     description:
         'Many client scripts on one table slow down forms and are hard to maintain. Counts active client scripts from customer scoped apps, and global client scripts that have a customer update. Scripts from ServiceNow plugins and store apps, inactive scripts and catalog client scripts do not count. Ideal state: at most 10 custom client scripts per table.',
@@ -46,6 +47,7 @@ export const ih008ImportSetRowGrowth = ScriptOnlyCheck({
     active: true,
     category: 'performance',
     priority: '2',
+    scoreScale: 100,
     shortDescription: 'Reports the 10 largest import runs when import set rows exceed 5 million',
     description:
         'Large import set tables slow down imports and cleanup and use database space. Counts all import set rows together; if there are more than 5 million, the 10 import runs with the most rows are reported. Ideal state: fewer than 5 million import set rows.',
@@ -90,6 +92,7 @@ export const ih004DataCollectorJobIssues = TableCheck({
     active: true,
     category: 'manageability',
     priority: '3',
+    scoreScale: 2,
     shortDescription: 'Finds active PA data collector jobs whose latest run had errors or warnings',
     description:
         'Data collector jobs that end with errors or warnings leave gaps in Performance Analytics scores. Only the latest finished run of each active job is evaluated. Ideal state: no job ends with errors or warnings.',
@@ -125,6 +128,7 @@ export const ih009GsSqlUsage = ColumnTypeCheck({
     active: true,
     category: 'upgradability',
     priority: '1',
+    scoreScale: 20,
     shortDescription: 'Finds scripts that call gs.sql',
     description:
         'gs.sql is undocumented, bypasses ACLs and can lock tables. Ideal state: no script uses gs.sql.',
@@ -156,6 +160,7 @@ export const ih012HardCodedInstanceUrl = ColumnTypeCheck({
     active: true,
     category: 'manageability',
     priority: '3',
+    scoreScale: 2,
     shortDescription: 'Finds custom scripts that contain a ServiceNow instance URL',
     description:
         'Hard-coded instance URLs point to the wrong instance after a clone or when code moves between instances. Only custom scripts are checked; every matching line is listed. Ideal state: URLs are built from the property glide.servlet.uri.',
@@ -176,6 +181,7 @@ export const ih013HardCodedSysIds = ColumnTypeCheck({
     active: true,
     category: 'manageability',
     priority: '3',
+    scoreScale: 2,
     shortDescription: 'Finds custom scripts that contain literal sys_ids',
     description:
         'Literal sys_ids break when the referenced record does not exist on another instance and hide what the code depends on. Only custom scripts are checked; every matching line is listed. Ideal state: no script contains a literal sys_id.',
@@ -196,6 +202,7 @@ export const ih014BeforeRuleUpdates = TableCheck({
     active: true,
     category: 'manageability',
     priority: '2',
+    scoreScale: 5,
     shortDescription: 'Finds custom before business rules that call update() or insert()',
     description:
         'Before business rules should only change the current record, which is saved anyway. Calling update() or insert() there writes other records before the current one is saved, or saves current twice. Only custom rules are checked; every matching line is listed. Ideal state: before rules only set values on current.',
@@ -220,6 +227,7 @@ export const ih016DuplicateScriptIncludes = ScriptOnlyCheck({
     active: true,
     category: 'manageability',
     priority: '2',
+    scoreScale: 5,
     shortDescription: 'Finds script includes that share their API name with another script include',
     description:
         'When two script includes have the same API name (same name in the same scope), it is undefined which one is loaded. The same name in different scopes is allowed and not reported. A duplicate group is reported when at least one member is custom; each member is a finding. Ideal state: every API name is unique.',
@@ -266,6 +274,7 @@ export const ih035DuplicateUpdateSetNames = ScriptOnlyCheck({
     active: true,
     category: 'manageability',
     priority: '3',
+    scoreScale: 2,
     shortDescription: 'Finds update sets that share their name with another update set',
     description:
         'Update sets with the same name are easily mixed up when they are moved, previewed and committed. "Default" is ignored because every application has one. Each update set of a duplicate group is a finding. Ideal state: every update set has a unique name.',
@@ -303,6 +312,7 @@ export const ih078IndirectCurrentUpdate = ScriptOnlyCheck({
     active: true,
     category: 'manageability',
     priority: '2',
+    scoreScale: 5,
     shortDescription: 'Finds custom business rules that pass current to a script include which updates it',
     description:
         'Calling update() on current inside a business rule saves the record again and runs all business rules a second time. When the call is hidden in a script include, it is not found by the current.update() check. Reports custom business rules that pass current to a script include whose functions call update() on a parameter. Heuristic: updates through stored fields (this.record.update()) or nested calls are not found. Ideal state: business rules never update current through a script include.',
@@ -330,6 +340,7 @@ export const ih039ComplexConditions = TableCheck({
     active: true,
     category: 'manageability',
     priority: '3',
+    scoreScale: 2,
     shortDescription: 'Finds custom business rules with long or scripted conditions',
     description:
         'The condition of a business rule is evaluated on every matching transaction and is hard to read and debug. A condition is complex when it is longer than 200 characters or contains a query (GlideRecord, GlideAggregate), a statement separator (;) or a function. Only custom business rules are checked. Ideal state: conditions are short expressions; logic belongs in the script.',
@@ -358,6 +369,7 @@ export const ih046OrphanedDictionaryEntries = ScriptOnlyCheck({
     active: true,
     category: 'manageability',
     priority: '3',
+    scoreScale: 2,
     shortDescription: 'Finds dictionary entries that belong to a table that does not exist',
     description:
         'Dictionary entries left over from deleted tables clutter the dictionary and can break upgrades and table re-creation. Variables of flows, actions and tests that are stored in the dictionary are ignored, as is the internal storage of list fields. One finding per missing table. Ideal state: every dictionary entry belongs to an existing table.',
@@ -408,6 +420,7 @@ export const ih047ListLayoutDuplicatePositions = ScriptOnlyCheck({
     active: true,
     category: 'manageability',
     priority: '3',
+    scoreScale: 2,
     shortDescription: 'Finds list layouts where two columns have the same position',
     description:
         'When two elements of a list layout share a position, the column order is undefined and can change between users and releases. Elements without a position are ignored. One finding per list layout. Ideal state: every element of a list layout has its own position.',
@@ -455,6 +468,7 @@ export const ih057UpdateSetWithoutDescription = TableCheck({
     active: true,
     category: 'manageability',
     priority: '3',
+    scoreScale: 2,
     shortDescription: 'Finds update sets without a description',
     description:
         'Without a description, reviewers and release managers cannot tell what an update set contains and why. "Default" update sets are ignored. Ideal state: every update set has a description.',
@@ -471,6 +485,7 @@ export const ih061UiActionComplexConditions = TableCheck({
     active: true,
     category: 'manageability',
     priority: '3',
+    scoreScale: 2,
     shortDescription: 'Finds custom UI actions with long or scripted conditions',
     description:
         'UI action conditions are evaluated for every record shown in a form or list, so queries and long scripts there slow down every page. A condition is complex when it is longer than 200 characters or contains a query (GlideRecord, GlideAggregate), a statement separator (;) or a function. Only custom UI actions are checked. Ideal state: UI action conditions are short expressions.',
@@ -498,6 +513,7 @@ export const ih064ScheduledJobErrors = TableCheck({
     active: true,
     category: 'manageability',
     priority: '2',
+    scoreScale: 5,
     shortDescription: 'Finds scheduled jobs whose last run failed or that have an error count',
     description:
         'A failing scheduled job silently stops doing its work (cleanup, imports, calculations). Uses the error information of the scheduler trigger (sys_trigger). Ideal state: scheduled jobs run without errors.',
@@ -528,6 +544,7 @@ export const ih069ChangedDictionaryEntries = ScriptOnlyCheck({
     active: true,
     category: 'upgradability',
     priority: '2',
+    scoreScale: 5,
     shortDescription: 'Finds ServiceNow dictionary entries that were changed by the customer',
     description:
         'Changed ServiceNow dictionary entries are skipped by upgrades and can break when ServiceNow changes the field. Uses the platform list of customized records; entries on u_ tables or u_ fields are ignored. Ideal state: ServiceNow dictionary entries are not changed; dictionary overrides are used instead.',
@@ -547,6 +564,7 @@ export const ih071CiClassesWithCustomFields = ScriptOnlyCheck({
     active: true,
     category: 'upgradability',
     priority: '3',
+    scoreScale: 2,
     shortDescription: 'Finds ServiceNow CI classes with more than 10 custom fields',
     description:
         'Many custom attributes on ServiceNow CI classes make the CMDB hard to maintain, are not filled by Discovery and complicate upgrades. Counts u_ fields and fields from customer applications on CI classes that come from ServiceNow. Ideal state: at most 10 custom fields per ServiceNow CI class.',
@@ -588,6 +606,7 @@ export const ih072CurrentUpdateInBusinessRules = TableCheck({
     active: true,
     category: 'manageability',
     priority: '2',
+    scoreScale: 5,
     shortDescription: 'Finds custom after, async and display business rules that call current.update()',
     description:
         'current.update() in a business rule saves the record again and runs all business rules a second time, which can cause loops and duplicate notifications. Before rules are covered by IH-013. Only custom business rules are checked; every matching line is listed. Ideal state: no business rule calls current.update().',
@@ -613,6 +632,7 @@ export const ih022UpgradeSkippedItems = ScriptOnlyCheck({
     active: true,
     category: 'upgradability',
     priority: '1',
+    scoreScale: 100,
     shortDescription: 'Reports the last platform upgrade if skipped items still need a review',
     description:
         'An upgrade skips ServiceNow records that the customer changed. Skipped records that differ from the new version, skipped records with errors and manual merges must be reviewed, otherwise fixes of the upgrade are missing. Skipped records that already match the new version are not counted. Uses the summary of the last platform upgrade. Ideal state: no skipped item needs a review.',
@@ -652,6 +672,7 @@ export const ih025BaselineBusinessRules = ScriptOnlyCheck({
     active: true,
     category: 'upgradability',
     priority: '2',
+    scoreScale: 5,
     shortDescription: 'Finds ServiceNow business rules that were changed by the customer',
     description:
         'Changed ServiceNow business rules are skipped by upgrades, so they miss fixes and new features and must be reviewed by hand. Uses the platform list of customized records (sys_metadata_customization) and reports records originally delivered by ServiceNow. Ideal state: ServiceNow business rules are not changed; customizations are made in copies or extensions.',
@@ -668,6 +689,7 @@ export const ih026BaselineScriptIncludes = ScriptOnlyCheck({
     active: true,
     category: 'upgradability',
     priority: '2',
+    scoreScale: 5,
     shortDescription: 'Finds ServiceNow script includes that were changed by the customer',
     description:
         'Changed ServiceNow script includes are skipped by upgrades, so they miss fixes and new features and must be reviewed by hand. Uses the platform list of customized records (sys_metadata_customization) and reports records originally delivered by ServiceNow. Ideal state: ServiceNow script includes are not changed; customizations are made in copies or extensions.',
@@ -684,6 +706,7 @@ export const ih027BaselineClientScripts = ScriptOnlyCheck({
     active: true,
     category: 'upgradability',
     priority: '2',
+    scoreScale: 5,
     shortDescription: 'Finds ServiceNow client scripts and UI scripts that were changed by the customer',
     description:
         'Changed ServiceNow client scripts and UI scripts are skipped by upgrades, so they miss fixes and new features and must be reviewed by hand. Uses the platform list of customized records (sys_metadata_customization) and reports records originally delivered by ServiceNow. Ideal state: ServiceNow client scripts and UI scripts are not changed; customizations are made in copies or extensions.',
@@ -700,6 +723,7 @@ export const ih028BaselineUiMacrosPages = ScriptOnlyCheck({
     active: true,
     category: 'upgradability',
     priority: '2',
+    scoreScale: 5,
     shortDescription: 'Finds ServiceNow UI macros and UI pages that were changed by the customer',
     description:
         'Changed ServiceNow UI macros and UI pages are skipped by upgrades, so they miss fixes and new features and must be reviewed by hand. Uses the platform list of customized records (sys_metadata_customization) and reports records originally delivered by ServiceNow. Ideal state: ServiceNow UI macros and UI pages are not changed; customizations are made in copies or extensions.',
@@ -716,6 +740,7 @@ export const ih029BaselineUiActions = ScriptOnlyCheck({
     active: true,
     category: 'upgradability',
     priority: '2',
+    scoreScale: 5,
     shortDescription: 'Finds ServiceNow UI actions that were changed by the customer',
     description:
         'Changed ServiceNow UI actions are skipped by upgrades, so they miss fixes and new features and must be reviewed by hand. Uses the platform list of customized records (sys_metadata_customization) and reports records originally delivered by ServiceNow. Ideal state: ServiceNow UI actions are not changed; customizations are made in copies or extensions.',

@@ -7,6 +7,7 @@ export const ih001PublicReports = TableCheck({
     active: true,
     category: 'security',
     priority: '1',
+    scoreScale: 20,
     shortDescription: 'Finds reports that are published to public',
     description:
         'Published reports get a public URL and can be viewed without logging in. Ideal state: no report is published to public.',
@@ -24,6 +25,7 @@ export const ih018TablesWithoutAcls = ScriptOnlyCheck({
     active: true,
     category: 'security',
     priority: '1',
+    scoreScale: 20,
     shortDescription: 'Finds tables that are not secured by any ACL, neither their own nor a parent table\'s',
     description:
         'A table without record ACLs is only protected by wildcard rules and the default deny setting. Checks all tables; ACLs on a parent table count as protection. Table rotation shards (for example syslog0001) are ignored because they are covered by their base table. Ideal state: every table is secured by ACLs.',
@@ -86,6 +88,7 @@ export const ih030VirtualCisWithAssets = ScriptOnlyCheck({
     active: true,
     category: 'manageability',
     priority: '3',
+    scoreScale: 2,
     shortDescription: 'Finds CIs flagged as virtual that have an asset',
     description:
         'Virtual CIs (virtual machines, virtual network devices) are not physical hardware and should not create or keep assets; such assets distort license, cost and inventory data. Checks every CI class that has the Virtual flag. Ideal state: no virtual CI has an asset.',
@@ -137,6 +140,7 @@ export const ih031MissingSerialNumbers = TableCheck({
     active: true,
     category: 'manageability',
     priority: '3',
+    scoreScale: 2,
     shortDescription: 'Finds computers and network gear without a serial number',
     description:
         'The serial number is the main identification attribute for hardware: without it, Discovery and imports cannot match the CI reliably and duplicates are created. Checks all computer and network gear classes, discovered or not; retired CIs are ignored. Ideal state: every computer and network gear CI has a serial number.',
@@ -153,6 +157,7 @@ export const ih060SecurityUiFilter = TableCheck({
     active: true,
     category: 'security',
     priority: '2',
+    scoreScale: 100,
     shortDescription: 'Checks that glide.security.ui.filter does not exist or is false',
     description:
         'glide.security.ui.filter should not exist or be set to false. Ideal state: the property does not exist or is false.',
@@ -169,6 +174,7 @@ export const ih067UsersWithoutLogin = TableCheck({
     active: true,
     category: 'security',
     priority: '2',
+    scoreScale: 5,
     shortDescription: 'Finds active user accounts that have not logged in for 90 days',
     description:
         'Unused active accounts keep their roles and data access and are a target for misuse. Reports active users (not web service only) whose last login is older than 90 days, or who never logged in and were created more than 90 days ago. Ideal state: unused accounts are deactivated.',
@@ -203,6 +209,7 @@ export const ih070UpdateSetAudit = ScriptOnlyCheck({
     active: true,
     category: 'security',
     priority: '3',
+    scoreScale: 100,
     shortDescription: 'Checks that changes to update sets are audited',
     description:
         'Without auditing on sys_update_set, nobody can trace who changed the state, name or content of an update set. Ideal state: auditing is enabled on the sys_update_set table.',
@@ -227,6 +234,7 @@ export const ih073UniqueLocationNames = ScriptOnlyCheck({
     active: true,
     category: 'manageability',
     priority: '3',
+    scoreScale: 2,
     shortDescription: 'Reports the share of unique location names when it is below 100%',
     description:
         'Locations are matched by name in imports, integrations and forms; duplicate names lead to wrong references. The finding shows the share of unique names and the duplicate names. Ideal state: 100% of location names are unique.',
@@ -267,6 +275,7 @@ export const ih074CisWithoutName = TableCheck({
     active: true,
     category: 'manageability',
     priority: '3',
+    scoreScale: 2,
     shortDescription: 'Finds hardware, application and VM instance CIs without a name',
     description:
         'CIs without a name cannot be found or selected by users and break identification and reports. Checks hardware, application and VM instance classes including their subclasses. Ideal state: every such CI has a name.',
@@ -283,6 +292,7 @@ export const ih048OrphanedCatalogTasks = TableCheck({
     active: true,
     category: 'manageability',
     priority: '3',
+    scoreScale: 2,
     shortDescription: 'Finds catalog tasks that are not linked to a requested item and a request',
     description:
         'Catalog tasks outside the request hierarchy are missing in request reporting, approvals and fulfillment flows. Ideal state: every catalog task is linked to a requested item and a request.',
@@ -299,6 +309,7 @@ export const ih049JobsRunAsDeletedUser = TableCheck({
     active: true,
     category: 'manageability',
     priority: '2',
+    scoreScale: 5,
     shortDescription: 'Finds active scheduled jobs whose Run as user does not exist',
     description:
         'A scheduled job that runs as a user who no longer exists may fail or run with unexpected rights. The internal users "system" and "maint" are accepted. ServiceNow jobs are included. Ideal state: every active scheduled job runs as an existing user.',
@@ -323,6 +334,7 @@ export const ih050JobsRunAsInactiveUser = TableCheck({
     active: true,
     category: 'security',
     priority: '2',
+    scoreScale: 5,
     shortDescription: 'Finds active scheduled jobs whose Run as user is inactive',
     description:
         'A job that runs as an inactive user keeps using the rights of a deactivated account, which bypasses offboarding. Ideal state: no active scheduled job runs as an inactive user.',
@@ -349,6 +361,7 @@ export const ih079TasksOpenedByInactiveUser = ScriptOnlyCheck({
     active: true,
     category: 'manageability',
     priority: '3',
+    scoreScale: 2,
     shortDescription: 'Finds active tasks whose Opened by user is inactive',
     description:
         'Notifications and follow-up questions for these tasks go to a user who has left. Ideal state: no active task is opened by an inactive user.',
@@ -373,6 +386,7 @@ export const ih052SystemLocale = ScriptOnlyCheck({
     active: true,
     category: 'manageability',
     priority: '2',
+    scoreScale: 100,
     shortDescription: 'Checks that glide.system.locale is empty or a valid locale',
     description:
         'An invalid system locale breaks date, time and number formats. The value must be empty (platform default) or a language code with an optional country code, for example de.CH. Scoped scripts cannot read the Java locale list, so the check uses ISO language format and the countries in core_country. Ideal state: glide.system.locale is empty or a valid locale.',
@@ -406,6 +420,7 @@ export const ih053SingleCurrencyMode = ScriptOnlyCheck({
     active: true,
     category: 'manageability',
     priority: '2',
+    scoreScale: 100,
     shortDescription: 'Checks the single currency settings against the active currencies',
     description:
         'With single currency mode on, all currency values use glide.i18n.single_currency.code, which must be an active currency. With only one active currency, single currency mode should be on, otherwise users can enter amounts in currencies that are not maintained. Ideal state: the mode and the code match the active currencies.',
@@ -452,6 +467,7 @@ export const ih054MarkResolved = ScriptOnlyCheck({
     active: true,
     category: 'manageability',
     priority: '2',
+    scoreScale: 5,
     shortDescription: 'Checks the mark_resolved rule and resolved incidents without Resolved or Resolved by',
     description:
         'The business rule mark_resolved fills Resolved and Resolved by when an incident is resolved. If it is missing or inactive, resolution reporting and SLAs are wrong. Reports the rule when it is missing or inactive, and every resolved or closed incident without these fields. Ideal state: the rule is active and every resolved incident has both fields.',
@@ -498,6 +514,7 @@ export const ih055ProblemClosedFields = ScriptOnlyCheck({
     active: true,
     category: 'manageability',
     priority: '2',
+    scoreScale: 5,
     shortDescription: 'Checks the problem closure rule and closed problems without Closed or Closed by',
     description:
         'When a problem is closed, Closed and Closed by must be set (by the business rule "Update fields on Problem Closure"; older releases used mark_closed). Reports the rule when it is missing or inactive, and every closed problem without these fields. Ideal state: every closed problem has both fields.',
@@ -543,6 +560,7 @@ export const ih080ActiveTasksWithClosedDate = ScriptOnlyCheck({
     active: true,
     category: 'manageability',
     priority: '3',
+    scoreScale: 2,
     shortDescription: 'Finds active tasks that have a closed date',
     description:
         'A closed date on an active task means the task was reopened without clearing the date, or the state model does not set active correctly. Durations and reports become wrong. Ideal state: active tasks have no closed date.',
@@ -567,6 +585,7 @@ export const ih058StaleConfigurationItems = ScriptOnlyCheck({
     active: true,
     category: 'manageability',
     priority: '3',
+    scoreScale: 2,
     shortDescription: 'Reports when more than 5% of active CIs were neither discovered nor updated for 60 days',
     description:
         'CIs that no source has touched for a long time are likely outdated. Active CIs are those not retired (install status and operational status). A CI is stale when it was not discovered (or never) and not updated for 60 days. One finding when more than 5% of active CIs are stale. Ideal state: at most 5% of active CIs are stale.',
@@ -612,6 +631,7 @@ export const ih059UnsecuredScriptedRest = TableCheck({
     active: true,
     category: 'security',
     priority: '1',
+    scoreScale: 20,
     shortDescription: 'Finds custom scripted REST resources that do not require authentication or ACL authorization',
     description:
         'A resource without authentication is public; without ACL authorization any authenticated user can call it. Only custom resources are checked; ServiceNow endpoints are covered by the check "Review Public REST API Endpoints". Ideal state: every custom scripted REST resource requires authentication and ACL authorization.',
@@ -638,6 +658,7 @@ export const ih032CreateAssetRules = ScriptOnlyCheck({
     active: true,
     category: 'manageability',
     priority: '2',
+    scoreScale: 100,
     shortDescription: 'Checks that the Asset Management rules that create assets for CIs are active',
     description:
         'The business rules "Create Asset on insert" and "Create asset on model change" on cmdb_ci create the asset for a new CI or a CI whose model changes. If they are inactive, CMDB and asset data drift apart. No finding if Asset Management is not installed. Ideal state: both rules are active.',
@@ -665,6 +686,7 @@ export const ih033InvalidDiscoverySource = ScriptOnlyCheck({
     active: true,
     category: 'manageability',
     priority: '3',
+    scoreScale: 2,
     shortDescription: 'Finds CIs whose discovery source is not a value of the choice list',
     description:
         'The discovery source tells which source owns a CI; reports and reconciliation rely on the values of the choice list. CIs without a discovery source and retired CIs are not reported. Ideal state: every discovery source set on a CI is a value of the cmdb_ci discovery_source choice list.',
@@ -708,6 +730,7 @@ export const ih034ImpersonationInProduction = ScriptOnlyCheck({
     active: true,
     category: 'security',
     priority: '1',
+    scoreScale: 100,
     shortDescription: 'Checks that impersonation is switched off on production instances',
     description:
         'Impersonation lets a user act with the rights and data access of another user. On a production instance (glide.installation.production = true) the impersonate button should be disabled (glide.ui.impersonate_button.enable = false). The finding lists the users with the impersonator role. Ideal state: no impersonation in production.',
@@ -748,6 +771,7 @@ export const ih036KnowledgeBaseRetireWorkflow = TableCheck({
     active: true,
     category: 'manageability',
     priority: '3',
+    scoreScale: 2,
     shortDescription: 'Finds active knowledge bases without a working retire workflow',
     description:
         'Without a retire workflow, outdated articles cannot be retired in a controlled way. Reported when the retire workflow is empty or references a workflow that no longer exists. Ideal state: every active knowledge base has an existing retire workflow.',
@@ -779,6 +803,7 @@ export const ih040InactiveGroupMembers = TableCheck({
     active: true,
     category: 'security',
     priority: '3',
+    scoreScale: 2,
     shortDescription: 'Finds inactive users that are still members of active groups',
     description:
         'Inactive members keep their group memberships, distort assignment and approval lists and get their roles back when they are reactivated. Ideal state: active groups have no inactive members.',
@@ -795,6 +820,7 @@ export const ih041InactiveGroupManager = TableCheck({
     active: true,
     category: 'manageability',
     priority: '3',
+    scoreScale: 2,
     shortDescription: 'Finds active groups whose manager is inactive',
     description:
         'Group managers approve and receive escalations; an inactive manager blocks these processes. Ideal state: every active group has an active manager.',
@@ -811,6 +837,7 @@ export const ih042GroupsWithoutMembers = TableCheck({
     active: true,
     category: 'manageability',
     priority: '3',
+    scoreScale: 2,
     shortDescription: 'Finds active groups without members',
     description:
         'Tasks assigned to a group without members are not worked on. Ideal state: every active group has at least one member.',
@@ -837,6 +864,7 @@ export const ih043DirectRoleAssignments = TableCheck({
     active: true,
     category: 'security',
     priority: '2',
+    scoreScale: 5,
     shortDescription: 'Finds roles that are assigned directly to active users instead of through a group',
     description:
         'Roles assigned directly to users are hard to review and are not removed when the user changes teams. snc_internal and snc_external are ignored because the platform assigns them to every user. Ideal state: users get roles only through groups.',
@@ -854,6 +882,7 @@ export const ih044RoleGroupsWithoutType = TableCheck({
     active: true,
     category: 'security',
     priority: '3',
+    scoreScale: 2,
     shortDescription: 'Finds active groups that grant roles but have no group type',
     description:
         'Groups that grant roles should carry a group type (for example "Authorization"), so role-granting groups can be told apart from assignment groups and reviewed. Ideal state: every active group with roles has a group type.',

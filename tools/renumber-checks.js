@@ -23,6 +23,8 @@ const files = [
     'src/fluent/scan-checks/maintenance.now.ts',
     'src/fluent/scan-checks/performance.now.ts',
     'src/fluent/script-includes/ih-scan-util.now.ts',
+    'src/fluent/health-score/health-score.now.ts',
+    // tools/set-priorities.js uses plain numbers ('007'): update it by hand after a renumbering
     'test-data/create-test-data.js',
     'test-data/remove-test-data.js',
     'docs/check-catalogue.md',

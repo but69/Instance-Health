@@ -7,6 +7,7 @@ export const ih002SlowReports = TableCheck({
     active: true,
     category: 'performance',
     priority: '2',
+    scoreScale: 5,
     shortDescription: 'Finds recently run reports with an average run time over 5 seconds',
     description:
         'Slow reports load dashboards and the database. Uses the recent average run time of reports that ran recently. Ideal state: every report loads in under 5 seconds.',
@@ -41,6 +42,7 @@ export const ih005GlobalUiScripts = TableCheck({
     active: true,
     category: 'performance',
     priority: '1',
+    scoreScale: 20,
     shortDescription: 'Finds active UI scripts that run globally',
     description:
         'Global UI scripts are loaded on every page and slow down page load for all users. Ideal state: no global UI scripts.',
@@ -57,6 +59,7 @@ export const ih007GlobalClientScripts = TableCheck({
     active: true,
     category: 'performance',
     priority: '1',
+    scoreScale: 20,
     shortDescription: 'Finds active client scripts that run on table global',
     description:
         'Client scripts on table global run on every form of every table. Ideal state: no client scripts on global.',
@@ -74,6 +77,7 @@ export const ih010DotWalkToSysId = ColumnTypeCheck({
     active: true,
     category: 'performance',
     priority: '3',
+    scoreScale: 2,
     shortDescription: 'Finds custom scripts that read a reference value with .sys_id',
     description:
         'A reference field already holds the sys_id of the referenced record. Reading it with gr.field.sys_id dot-walks to the referenced record for the same value. Only custom scripts are checked; every matching line is listed. Ideal state: reference values are read with getValue(field).',
@@ -94,6 +98,7 @@ export const ih011SynchronousAjax = ColumnTypeCheck({
     active: true,
     category: 'performance',
     priority: '2',
+    scoreScale: 5,
     shortDescription: 'Finds custom client code that makes synchronous server calls',
     description:
         'Synchronous calls block the browser until the server answers. Checks custom client scripts, catalog client scripts, UI policy scripts, client UI actions, UI scripts, UI page and widget client scripts for getXMLWait(), getReference() without callback, client GlideRecord query() without callback and async: false. Every matching line is listed. Ideal state: client code only uses asynchronous calls.',
@@ -136,6 +141,7 @@ export const ih015GlobalBusinessRules = TableCheck({
     active: true,
     category: 'performance',
     priority: '1',
+    scoreScale: 20,
     shortDescription: 'Finds active custom business rules that run on table global',
     description:
         'Business rules on table global are evaluated on every transaction. Only custom rules are reported; rules from ServiceNow plugins and the base system are ignored. Ideal state: no custom business rule runs on global.',
@@ -162,6 +168,7 @@ export const ih077CoalesceWithoutIndex = ScriptOnlyCheck({
     active: true,
     category: 'performance',
     priority: '2',
+    scoreScale: 5,
     shortDescription: 'Finds active transform maps whose coalesce fields have no database index',
     description:
         'For every import row, coalesce looks up an existing target record by the coalesce fields. Without an index this is a full table scan. A transform map is reported when none of its coalesce fields is the first column of an index on the target table. Fields of child tables that are stored in a parent table (for example CMDB classes) cannot be checked and are skipped. Ideal state: every transform map coalesces on at least one indexed field.',
@@ -245,6 +252,7 @@ export const ih019ReadAclQueries = TableCheck({
     active: true,
     category: 'performance',
     priority: '1',
+    scoreScale: 20,
     shortDescription: 'Finds custom read ACLs whose script queries the database',
     description:
         'Read ACL scripts run for every record and field that is displayed. A GlideRecord, GlideRecordSecure or GlideAggregate query in the script multiplies the database load of every list. Only custom ACLs are checked; every matching line is listed. Ideal state: read ACLs use roles and conditions, not queries.',
@@ -270,6 +278,7 @@ export const ih020SlaEngineSynchronous = ScriptOnlyCheck({
     active: true,
     category: 'performance',
     priority: '2',
+    scoreScale: 100,
     shortDescription: 'Checks that SLAs are processed synchronously (SLA engine 2011)',
     description:
         'With SLA engine 2010 (the default when com.snc.sla.engine.version is not set) task SLAs are processed by the async business rule "Process SLAs", so SLA states lag behind the task. Engine 2011 processes them synchronously with the business rule "Run SLAs". Ideal state: com.snc.sla.engine.version is 2011.',
@@ -305,6 +314,7 @@ export const ih021SyncOutboundCalls = TableCheck({
     active: true,
     category: 'performance',
     priority: '2',
+    scoreScale: 5,
     shortDescription: 'Finds custom synchronous business rules that call REST or SOAP services',
     description:
         'An outbound call in a before, after or display business rule makes the user wait for the remote system and fails the transaction when it is down. Only custom rules are checked; every matching line is listed. Ideal state: business rules with outbound calls run async.',
@@ -329,6 +339,7 @@ export const ih037BusinessRuleCallstack = TableCheck({
     active: true,
     category: 'performance',
     priority: '1',
+    scoreScale: 100,
     shortDescription: 'Checks that glide.businessrule.callstack is not set to true',
     description:
         'glide.businessrule.callstack writes the call stack of business rules to the log. It is meant for debugging and slows down every transaction. Ideal state: the property is false or not set.',
@@ -346,6 +357,7 @@ export const ih062LargeRemoteTables = TableCheck({
     active: true,
     category: 'performance',
     priority: '3',
+    scoreScale: 2,
     shortDescription: 'Finds custom remote tables that return 1000 rows or more',
     description:
         'Remote tables build their rows in a script on every query. Large result sets make lists, reports and portal widgets on these tables slow. Only custom remote tables are queried, because querying runs the remote table script. Ideal state: remote tables return fewer than 1000 rows.',
@@ -379,6 +391,7 @@ export const ih063JobsLongerThanInterval = ScriptOnlyCheck({
     active: true,
     category: 'performance',
     priority: '1',
+    scoreScale: 20,
     shortDescription: 'Finds recurring jobs that run longer than their repeat interval',
     description:
         'A job that runs longer than its interval on average is still running when the next run is due; runs pile up and block scheduler workers. Compares the repeat interval of recurring jobs with their average run time over the last 7 days; short spikes are not reported. Ideal state: every recurring job finishes before its next run.',
@@ -435,6 +448,7 @@ export const ih065CacheFlush = ColumnTypeCheck({
     active: true,
     category: 'performance',
     priority: '1',
+    scoreScale: 20,
     shortDescription: 'Finds custom scripts that flush the system cache',
     description:
         'gs.cacheFlush() and GlideCacheManager.flush() empty the system cache; every user is slower until it is rebuilt, and on multi-node instances the flush is repeated on every node. Only custom scripts are checked; every matching line is listed. Ideal state: no script flushes the cache.',
@@ -455,6 +469,7 @@ export const ih068SlowGroupedListReports = TableCheck({
     active: true,
     category: 'performance',
     priority: '2',
+    scoreScale: 5,
     shortDescription: 'Finds list reports with a group by that ran in the last 60 days and take 15 seconds or more',
     description:
         'List reports with a group by over large data sets load the database heavily. Reports list reports with a group by whose recent average run time is 15 seconds or more and that ran in the last 60 days (all slow reports over 5 seconds: IH-002). Ideal state: grouped list reports run in under 15 seconds.',
@@ -484,6 +499,7 @@ export const ih075ConcurrentScheduledImports = ScriptOnlyCheck({
     active: true,
     category: 'performance',
     priority: '3',
+    scoreScale: 2,
     shortDescription: 'Finds active scheduled imports that are scheduled at the same time',
     description:
         'Imports that start together compete for scheduler workers and database locks and can process dependent data in the wrong order. Compares the schedule (run type, time, day, period) of active scheduled imports; child imports run after their parent and are ignored, as are on-demand imports. Ideal state: scheduled imports start at different times or are chained.',
@@ -533,6 +549,7 @@ export const ih076UiActionOutboundCalls = TableCheck({
     active: true,
     category: 'performance',
     priority: '2',
+    scoreScale: 5,
     shortDescription: 'Finds custom server-side UI actions that call REST or SOAP services synchronously',
     description:
         'A UI action that calls an external system synchronously makes the user wait for that system and fails when it is down. UI actions that only use executeAsync() are not reported. Only custom UI actions are checked; every matching line is listed. Ideal state: UI actions trigger outbound calls asynchronously.',
@@ -559,6 +576,7 @@ export const ih023DefaultRowsPerPage = TableCheck({
     active: true,
     category: 'performance',
     priority: '2',
+    scoreScale: 100,
     shortDescription: 'Checks that the system default for rows per page is 50 or less',
     description:
         'The system preference rowcount sets how many rows every list shows for users who have not chosen their own value. Large pages slow down every list. Ideal state: the system default is 50 or less.',
@@ -584,6 +602,7 @@ export const ih024SlowScripts = TableCheck({
     active: true,
     category: 'performance',
     priority: '2',
+    scoreScale: 5,
     shortDescription: 'Finds scripts that ran in the last 30 days with an average run time over 5 seconds',
     description:
         'Uses the slow script statistics of the platform. A script is reported when its average run time is over 5 seconds and it ran in the last 30 days. ServiceNow scripts are included, because slow runs are often caused by data volume or configuration. Ideal state: no script runs longer than 5 seconds on average.',

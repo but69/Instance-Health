@@ -321,6 +321,30 @@ declare global {
                         table: 'scan_script_only_check'
                         id: '9439518029594f8b9ac2ddf66a3f148f'
                     }
+                    'ih-health-score': {
+                        table: 'sys_script_include'
+                        id: '69e8c8bfb88847528cfbc953d47a4c9e'
+                    }
+                    'ih-health-score-acl-create': {
+                        table: 'sys_security_acl'
+                        id: '76cd94979d784a22a84542e82fe5616a'
+                    }
+                    'ih-health-score-acl-delete': {
+                        table: 'sys_security_acl'
+                        id: '96fa41417e914456907d613bc32ede39'
+                    }
+                    'ih-health-score-acl-read': {
+                        table: 'sys_security_acl'
+                        id: '1849a511d3bd4fe996c9c871bec9fa4f'
+                    }
+                    'ih-health-score-acl-write': {
+                        table: 'sys_security_acl'
+                        id: 'c1dba7281e2d4d09a72dd30f9827f6ee'
+                    }
+                    'ih-health-score-job': {
+                        table: 'sysauto_script'
+                        id: '5a84bf997e7f427ba5d787d95595d2e6'
+                    }
                     'ih-scan-util': {
                         table: 'sys_script_include'
                         id: 'ab660315d1c14bb184dc5c20bc21f75c'
@@ -646,6 +670,380 @@ declare global {
                         id: '3375b34e79e4474bb7a9d8011059829a'
                     }
                 }
+                composite: [
+                    {
+                        table: 'sys_dictionary'
+                        id: '01dd88296d2347a2916ca99783d25e85'
+                        key: {
+                            name: 'x_bits2_inst_hlth_health_score'
+                            element: 'score_manageability'
+                        }
+                    },
+                    {
+                        table: 'sys_documentation'
+                        id: '1388052f1a3b4cbb9cab72fc8212b1cf'
+                        key: {
+                            name: 'x_bits2_inst_hlth_health_score'
+                            element: 'details'
+                            language: 'en'
+                        }
+                    },
+                    {
+                        table: 'sys_dictionary'
+                        id: '144584842d4d441fa1bbfe0ebf2bac27'
+                        key: {
+                            name: 'x_bits2_inst_hlth_health_score'
+                            element: 'score_priority_3'
+                        }
+                    },
+                    {
+                        table: 'sys_dictionary'
+                        id: '165321f5a48f4b0a9b138d8c8accca8a'
+                        key: {
+                            name: 'x_bits2_inst_hlth_health_score'
+                            element: 'findings'
+                        }
+                    },
+                    {
+                        table: 'sys_dictionary'
+                        id: '173c232a57e24ed3bfbd65386dd4f364'
+                        key: {
+                            name: 'x_bits2_inst_hlth_health_score'
+                            element: 'score_priority_2'
+                        }
+                    },
+                    {
+                        table: 'sys_documentation'
+                        id: '20c1128fca454d98ac4085bbc36365cc'
+                        key: {
+                            name: 'x_bits2_inst_hlth_health_score'
+                            element: 'score_uncapped'
+                            language: 'en'
+                        }
+                    },
+                    {
+                        table: 'sys_dictionary'
+                        id: '226d60a105944248a24adcddb4bb5d87'
+                        key: {
+                            name: 'x_bits2_inst_hlth_health_score'
+                            element: 'score_security'
+                        }
+                    },
+                    {
+                        table: 'sys_db_object'
+                        id: '22e638eb578d4ea99bdc7b74211e52e9'
+                        key: {
+                            name: 'x_bits2_inst_hlth_health_score'
+                        }
+                    },
+                    {
+                        table: 'sys_documentation'
+                        id: '254757cc0d1b4c79bb6bae478ed12029'
+                        key: {
+                            name: 'x_bits2_inst_hlth_health_score'
+                            element: 'score_security'
+                            language: 'en'
+                        }
+                    },
+                    {
+                        table: 'sys_dictionary'
+                        id: '270a8a0a816540d991b31e9e1c8c4e7e'
+                        key: {
+                            name: 'x_bits2_inst_hlth_health_score'
+                            element: 'checks_evaluated'
+                        }
+                    },
+                    {
+                        table: 'sys_documentation'
+                        id: '2e6e669c318843ae9f32e33d95b717a1'
+                        key: {
+                            name: 'x_bits2_inst_hlth_health_score'
+                            element: 'checks_failed'
+                            language: 'en'
+                        }
+                    },
+                    {
+                        table: 'sys_security_acl_role'
+                        id: '484a632a92fe4fbfb9f52edf40bdf06b'
+                        key: {
+                            sys_security_acl: '96fa41417e914456907d613bc32ede39'
+                            sys_user_role: {
+                                id: 'd7c37c23f2d14a3babfcfec3ba912af8'
+                                key: {
+                                    name: 'admin'
+                                }
+                            }
+                        }
+                    },
+                    {
+                        table: 'sys_security_acl_role'
+                        id: '4c90c0696edb4a449df207c2f86d5c05'
+                        key: {
+                            sys_security_acl: 'c1dba7281e2d4d09a72dd30f9827f6ee'
+                            sys_user_role: {
+                                id: 'd7c37c23f2d14a3babfcfec3ba912af8'
+                                key: {
+                                    name: 'admin'
+                                }
+                            }
+                        }
+                    },
+                    {
+                        table: 'sys_dictionary'
+                        id: '51ce925d696f4c619319f8bd781245e5'
+                        key: {
+                            name: 'x_bits2_inst_hlth_health_score'
+                            element: 'details'
+                        }
+                    },
+                    {
+                        table: 'sys_documentation'
+                        id: '5359b170d95647088dadb3d768b82e38'
+                        key: {
+                            name: 'x_bits2_inst_hlth_health_score'
+                            element: 'health_score'
+                            language: 'en'
+                        }
+                    },
+                    {
+                        table: 'sys_dictionary'
+                        id: '663725fd989542cba138c6cf4eb11dd5'
+                        key: {
+                            name: 'x_bits2_inst_hlth_health_score'
+                            element: 'scan_result'
+                        }
+                    },
+                    {
+                        table: 'sys_documentation'
+                        id: '7a29fa470e0f49f5816dc8d14c6eddf1'
+                        key: {
+                            name: 'x_bits2_inst_hlth_health_score'
+                            element: 'score_manageability'
+                            language: 'en'
+                        }
+                    },
+                    {
+                        table: 'sys_documentation'
+                        id: '8a0899695efe404f89798fd075bb1c9d'
+                        key: {
+                            name: 'x_bits2_inst_hlth_health_score'
+                            element: 'scan_result'
+                            language: 'en'
+                        }
+                    },
+                    {
+                        table: 'sys_documentation'
+                        id: '8c865c2ede9041bc8614fe1443bc80f3'
+                        key: {
+                            name: 'x_bits2_inst_hlth_health_score'
+                            element: 'score_priority_3'
+                            language: 'en'
+                        }
+                    },
+                    {
+                        table: 'sys_dictionary'
+                        id: '925399cbc78b4ef4b1b1df070d5f73c4'
+                        key: {
+                            name: 'x_bits2_inst_hlth_health_score'
+                            element: 'score_performance'
+                        }
+                    },
+                    {
+                        table: 'sys_documentation'
+                        id: '94e7601b5b7b40f5be0861104c18886c'
+                        key: {
+                            name: 'x_bits2_inst_hlth_health_score'
+                            element: 'score_performance'
+                            language: 'en'
+                        }
+                    },
+                    {
+                        table: 'sys_documentation'
+                        id: '987ceec633d14b5fa944da8f18c96254'
+                        key: {
+                            name: 'x_bits2_inst_hlth_health_score'
+                            element: 'NULL'
+                            language: 'en'
+                        }
+                    },
+                    {
+                        table: 'sys_documentation'
+                        id: '9a96856f3cf040dd977b8a4cb39a8d71'
+                        key: {
+                            name: 'x_bits2_inst_hlth_health_score'
+                            element: 'score_upgradability'
+                            language: 'en'
+                        }
+                    },
+                    {
+                        table: 'sys_documentation'
+                        id: '9ae59427908441c1904c7bcceb02dcf4'
+                        key: {
+                            name: 'x_bits2_inst_hlth_health_score'
+                            element: 'score_priority_1'
+                            language: 'en'
+                        }
+                    },
+                    {
+                        table: 'sys_security_acl_role'
+                        id: 'a40c6982c98e49f0ad2e3f04a4d3b9c1'
+                        key: {
+                            sys_security_acl: '1849a511d3bd4fe996c9c871bec9fa4f'
+                            sys_user_role: {
+                                id: 'd7c37c23f2d14a3babfcfec3ba912af8'
+                                key: {
+                                    name: 'admin'
+                                }
+                            }
+                        }
+                    },
+                    {
+                        table: 'sys_dictionary'
+                        id: 'a55dff5565eb49cdb4a379a70f3dfe6d'
+                        key: {
+                            name: 'x_bits2_inst_hlth_health_score'
+                            element: 'score_upgradability'
+                        }
+                    },
+                    {
+                        table: 'sys_documentation'
+                        id: 'b35c902a711d4e7ebf61549c9a4daeba'
+                        key: {
+                            name: 'x_bits2_inst_hlth_health_score'
+                            element: 'score_priority_2'
+                            language: 'en'
+                        }
+                    },
+                    {
+                        table: 'sys_documentation'
+                        id: 'b5af168fb7a243f4a1822c8eb2d777f4'
+                        key: {
+                            name: 'x_bits2_inst_hlth_health_score'
+                            element: 'knock_out_checks'
+                            language: 'en'
+                        }
+                    },
+                    {
+                        table: 'sys_dictionary'
+                        id: 'b90254e92d2a4182977d08fb3cd1c633'
+                        key: {
+                            name: 'x_bits2_inst_hlth_health_score'
+                            element: 'NULL'
+                        }
+                    },
+                    {
+                        table: 'sys_dictionary'
+                        id: 'ba582a247b95404d985691b657f51fe4'
+                        key: {
+                            name: 'x_bits2_inst_hlth_health_score'
+                            element: 'score_uncapped'
+                        }
+                    },
+                    {
+                        table: 'sys_documentation'
+                        id: 'bcbaef6bde124d57b55ff55d9feab7b8'
+                        key: {
+                            name: 'x_bits2_inst_hlth_health_score'
+                            element: 'checks_evaluated'
+                            language: 'en'
+                        }
+                    },
+                    {
+                        table: 'sys_dictionary'
+                        id: 'bf5afa6c5ff54d4c87e558ded7313c5d'
+                        key: {
+                            name: 'x_bits2_inst_hlth_health_score'
+                            element: 'knock_out_checks'
+                        }
+                    },
+                    {
+                        table: 'sys_dictionary'
+                        id: 'c2c2d123d9144559bfa605840978fca7'
+                        key: {
+                            name: 'x_bits2_inst_hlth_health_score'
+                            element: 'scan_date'
+                        }
+                    },
+                    {
+                        table: 'sys_documentation'
+                        id: 'c6b8a0fbe40d416b98bf17fd3fb5d027'
+                        key: {
+                            name: 'x_bits2_inst_hlth_health_score'
+                            element: 'scan_date'
+                            language: 'en'
+                        }
+                    },
+                    {
+                        table: 'sys_documentation'
+                        id: 'c8418f8eaec7404fb7f0a98fb20d2f6b'
+                        key: {
+                            name: 'x_bits2_inst_hlth_health_score'
+                            element: 'knock_out'
+                            language: 'en'
+                        }
+                    },
+                    {
+                        table: 'sys_security_acl_role'
+                        id: 'd2dd0e606baa40d99cc75de7b683710f'
+                        key: {
+                            sys_security_acl: '76cd94979d784a22a84542e82fe5616a'
+                            sys_user_role: {
+                                id: 'd7c37c23f2d14a3babfcfec3ba912af8'
+                                key: {
+                                    name: 'admin'
+                                }
+                            }
+                        }
+                    },
+                    {
+                        table: 'sys_documentation'
+                        id: 'd3f1a0f0d28d4370ba657bb6db50f7f5'
+                        key: {
+                            name: 'x_bits2_inst_hlth_health_score'
+                            element: 'findings'
+                            language: 'en'
+                        }
+                    },
+                    {
+                        table: 'sys_dictionary'
+                        id: 'd75cc304fd1e455781bd95fd587fe74e'
+                        key: {
+                            name: 'x_bits2_inst_hlth_health_score'
+                            element: 'checks_failed'
+                        }
+                    },
+                    {
+                        table: 'sys_dictionary'
+                        id: 'de1a901c5cf745cfa54daeae32a55fe4'
+                        key: {
+                            name: 'x_bits2_inst_hlth_health_score'
+                            element: 'score_priority_1'
+                        }
+                    },
+                    {
+                        table: 'sys_dictionary'
+                        id: 'ea18dce066ae47e6b37e6e552b39e28f'
+                        key: {
+                            name: 'x_bits2_inst_hlth_health_score'
+                            element: 'health_score'
+                        }
+                    },
+                    {
+                        table: 'ua_table_licensing_config'
+                        id: 'f5aebb93cc80415ba84dc07f148020bc'
+                        key: {
+                            name: 'x_bits2_inst_hlth_health_score'
+                        }
+                    },
+                    {
+                        table: 'sys_dictionary'
+                        id: 'fa10147e6b814704843e4419900db550'
+                        key: {
+                            name: 'x_bits2_inst_hlth_health_score'
+                            element: 'knock_out'
+                        }
+                    },
+                ]
             }
         }
     }

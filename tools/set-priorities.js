@@ -2,6 +2,7 @@
 // 1 = largest impact (instance-wide or all users, data exposure without login or ACL, breaks upgrades),
 // 2 = noticeable impact (single processes, users or areas), 3 = data quality, housekeeping, maintainability.
 // Usage (from the project root): node tools/set-priorities.js [--write]
+// Keys are the visible check numbers (IH-NNN without prefix); update them by hand after tools/renumber-checks.js.
 const fs = require('fs');
 const path = require('path');
 
@@ -31,18 +32,25 @@ const priorities = {
     '055': 3, '056': 3, '059': 3, '060': 3, '067': 3, '068': 3, '070': 3, '071': 3, '072': 3,
 };
 
+// Points per finding for the per-check score (score = 100 - findings x scoreScale, at least 0),
+// used by Instance Scan and by IHHealthScore. Setting checks: one finding means the setting is wrong.
+// Keep SETTING_CHECKS in sync with IHHealthScore (src/fluent/health-score/health-score.now.ts).
+const scaleByPriority = { 1: 20, 2: 5, 3: 2 };
+const settingChecks = ['007', '019', '021', '022', '031', '033', '036', '050', '051', '058', '067'];
+const scoreScale = id => (settingChecks.includes(id) ? 100 : scaleByPriority[priorities[id]]);
+
 const dir = 'src/fluent/scan-checks';
 const seen = new Set();
 const changes = [];
 for (const f of ['administration', 'maintenance', 'performance']) {
     const file = path.join(dir, f + '.now.ts');
     const before = fs.readFileSync(file, 'utf8');
-    const after = before.replace(/(name: 'IH-(\d{3}) [^']*',\s*active: \w+,\s*category: '\w+',\s*priority: ')(\d)(')/g,
-        (all, head, id, old, tail) => {
+    const after = before.replace(/(name: 'IH-(\d{3}) [^']*',\s*active: \w+,\s*category: '\w+',\s*priority: ')(\d)(',)(\r?\n\s*scoreScale: \d+,)?/g,
+        (all, head, id, old, tail, oldScale) => {
             seen.add(id);
             if (!priorities[id]) throw new Error('No priority defined for IH-' + id);
             if (String(priorities[id]) !== old) changes.push('IH-' + id + ': ' + old + ' -> ' + priorities[id]);
-            return head + priorities[id] + tail;
+            return head + priorities[id] + tail + '\n    scoreScale: ' + scoreScale(id) + ',';
         });
     if (process.argv.includes('--write')) fs.writeFileSync(file, after);
 }
