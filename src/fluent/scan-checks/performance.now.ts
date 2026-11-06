@@ -1,4 +1,4 @@
-import { ColumnTypeCheck, TableCheck } from '@servicenow/sdk/core'
+import { ColumnTypeCheck, ScriptOnlyCheck, TableCheck } from '@servicenow/sdk/core'
 
 // IH-002: reports whose recent average run time exceeds 5 s (durations are stored in ms)
 export const ih002SlowReports = TableCheck({
@@ -257,4 +257,126 @@ export const ih019ReadAclQueries = TableCheck({
 })(engine, current);`,
     resolutionDetails:
         'Replace the query with roles or a condition, check a value the user session already has, or cache the result (for example in the session) instead of querying for each record.',
+})
+
+// IH-020: com.snc.sla.engine.version selects the task rule: 2010 (default) = async "Process SLAs",
+// 2011 = synchronous "Run SLAs"
+export const ih020SlaEngineSynchronous = ScriptOnlyCheck({
+    $id: Now.ID['ih-020-sla-engine-synchronous'],
+    name: 'IH-020 SLA engine runs synchronously',
+    active: true,
+    category: 'performance',
+    priority: '3',
+    shortDescription: 'Checks that SLAs are processed synchronously (SLA engine 2011)',
+    description:
+        'With SLA engine 2010 (the default when com.snc.sla.engine.version is not set) task SLAs are processed by the async business rule "Process SLAs", so SLA states lag behind the task. Engine 2011 processes them synchronously with the business rule "Run SLAs". Ideal state: com.snc.sla.engine.version is 2011.',
+    script: `(function(engine) {
+    var PROPERTY = 'com.snc.sla.engine.version';
+    var property = new GlideRecord('sys_properties');
+    var hasProperty = property.get('name', PROPERTY);
+    var value = hasProperty ? property.getValue('value') : '';
+    if (value == '2011') return;
+
+    if (hasProperty) {
+        engine.finding.setCurrentSource(property);
+    } else {
+        // No property: link to the async rule, if Service Level Management is installed at all
+        var rule = new GlideRecord('sys_script');
+        rule.addQuery('collection', 'task');
+        rule.addQuery('name', 'Process SLAs');
+        rule.query();
+        if (!rule.next()) return;
+        engine.finding.setCurrentSource(rule);
+    }
+    engine.finding.setValue('finding_details', PROPERTY + ' is ' + (hasProperty ? value : 'not set (default 2010)') + ': SLAs are processed by the async business rule "Process SLAs"');
+    engine.finding.increment();
+})(engine);`,
+    resolutionDetails:
+        'Set com.snc.sla.engine.version to 2011 so that SLAs are processed synchronously by "Run SLAs". Test custom SLA logic first.',
+})
+
+// IH-021: outbound REST/SOAP calls in custom business rules that are not async
+export const ih021SyncOutboundCalls = TableCheck({
+    $id: Now.ID['ih-021-sync-outbound-calls'],
+    name: 'IH-021 Business rules with outbound REST or SOAP calls must be async',
+    active: true,
+    category: 'performance',
+    priority: '3',
+    shortDescription: 'Finds custom synchronous business rules that call REST or SOAP services',
+    description:
+        'An outbound call in a before, after or display business rule makes the user wait for the remote system and fails the transaction when it is down. Only custom rules are checked; every matching line is listed. Ideal state: business rules with outbound calls run async.',
+    table: 'sys_script',
+    conditions: 'active=true^when!=async^when!=async_always^scriptLIKERESTMessage^ORscriptLIKESOAPMessage^ORscriptLIKEGlideHTTPRequest',
+    advanced: true,
+    script: `(function(engine, current) {
+    var util = new x_bits2_inst_hlth.IHScanUtil();
+    if (!util.isCustom(current)) return;
+    var lines = util.matchingLines(current.getValue('script'), /\\b(RESTMessageV2|SOAPMessageV2|RESTMessage|SOAPMessage|GlideHTTPRequest)\\s*\\(/);
+    if (lines.length > 0)
+        util.reportLines(engine, current, lines, 'Business rule (' + (current.getValue('when') || 'no when') + ') on ' + current.getValue('collection'));
+})(engine, current);`,
+    resolutionDetails:
+        'Change the business rule to async, or trigger the call through an event and script action or a flow.',
+})
+
+// IH-023: system default of rows per page (preference rowcount without user)
+export const ih023DefaultRowsPerPage = TableCheck({
+    $id: Now.ID['ih-023-default-rows-per-page'],
+    name: 'IH-023 Default rows per page at most 50',
+    active: true,
+    category: 'performance',
+    priority: '3',
+    shortDescription: 'Checks that the system default for rows per page is 50 or less',
+    description:
+        'The system preference rowcount sets how many rows every list shows for users who have not chosen their own value. Large pages slow down every list. Ideal state: the system default is 50 or less.',
+    table: 'sys_user_preference',
+    conditions: 'name=rowcount^system=true^userISEMPTY',
+    advanced: true,
+    script: `(function(engine, current) {
+    var MAX_ROWS = 50;
+    var rows = parseInt(current.getValue('value'), 10);
+    if (isNaN(rows) || rows <= MAX_ROWS) return;
+    engine.finding.setCurrentSource(current);
+    engine.finding.setValue('finding_details', 'System default rows per page is ' + rows + ' (limit ' + MAX_ROWS + ')');
+    engine.finding.increment();
+})(engine, current);`,
+    resolutionDetails:
+        'Set the value of the system preference rowcount to 50 or less.',
+})
+
+// IH-024: slow script patterns (average in ms) seen in the last 30 days, all scripts
+export const ih024SlowScripts = TableCheck({
+    $id: Now.ID['ih-024-slow-scripts'],
+    name: 'IH-024 Long running scripts',
+    active: true,
+    category: 'performance',
+    priority: '3',
+    shortDescription: 'Finds scripts that ran in the last 30 days with an average run time over 5 seconds',
+    description:
+        'Uses the slow script statistics of the platform. A script is reported when its average run time is over 5 seconds and it ran in the last 30 days. ServiceNow scripts are included, because slow runs are often caused by data volume or configuration. Ideal state: no script runs longer than 5 seconds on average.',
+    table: 'sys_script_pattern',
+    conditions: 'average>5000',
+    advanced: true,
+    script: `(function(engine, current) {
+    var DAYS = 30;
+    var lastRun = new GlideDateTime(current.getValue('last'));
+    var since = new GlideDateTime();
+    since.addDaysUTC(-DAYS);
+    if (!current.getValue('last') || lastRun.before(since)) return;
+
+    var avgSeconds = parseFloat(current.getValue('average')) / 1000;
+    var details = 'Average run time ' + avgSeconds.toFixed(1) + ' s over ' + current.getValue('count') + ' run(s), last run ' + current.getValue('last') + ': ' + current.getValue('label');
+
+    // Link the finding to the script itself, falling back to the statistics record
+    var sourceTable = current.getValue('script_source_table');
+    var source = sourceTable ? new GlideRecord(sourceTable) : null;
+    if (source && source.isValid() && source.get(current.getValue('script_source')))
+        engine.finding.setCurrentSource(source);
+    else
+        engine.finding.setCurrentSource(current);
+    engine.finding.setValue('finding_details', details);
+    engine.finding.increment();
+})(engine, current);`,
+    resolutionDetails:
+        'Optimize the script (selective queries, indexes, fewer loops and nested queries) or move it to an async context; check whether data growth causes the slowness.',
 })

@@ -38,18 +38,18 @@ Field and table names marked ✔ were verified on bithawkdemo1 (2026-11-05).
 | IH-017 | Transform map coalesces on non-indexed fields | Performance | performance | TableCheck (advanced) | built |
 | IH-018 | Tables without ACLs | Administration | security | ScriptOnlyCheck | built |
 | IH-019 | Read ACLs with GlideRecord / GlideAggregate | Performance | performance | TableCheck (advanced) | built |
-| IH-020 | SLA engine runs synchronously | Performance | performance | ScriptOnlyCheck | specified |
-| IH-021 | Business rules with outbound REST/SOAP must be async | Performance | performance | TableCheck (advanced) | specified |
-| IH-022 | Skipped items in the last upgrade | Maintenance | upgradability | ScriptOnlyCheck | specified |
-| IH-023 | Default rows per page at most 50 | Performance | performance | TableCheck (advanced) | specified |
-| IH-024 | Long running (slow) scripts | Performance | performance | TableCheck (advanced) | specified |
-| IH-025 | Differs from baseline: business rules | Maintenance | upgradability | ScriptOnlyCheck | specified |
-| IH-026 | Differs from baseline: script includes | Maintenance | upgradability | ScriptOnlyCheck | specified |
-| IH-027 | Differs from baseline: client scripts and UI scripts | Maintenance | upgradability | ScriptOnlyCheck | specified |
-| IH-028 | Differs from baseline: UI macros and UI pages | Maintenance | upgradability | ScriptOnlyCheck | specified |
-| IH-029 | Differs from baseline: UI actions | Maintenance | upgradability | ScriptOnlyCheck | specified |
-| IH-030 | Virtual CIs with assets | Administration | manageability | ScriptOnlyCheck | specified |
-| IH-031 | Computers and network gear without serial number | Administration | manageability | TableCheck | specified |
+| IH-020 | SLA engine runs synchronously | Performance | performance | ScriptOnlyCheck | built |
+| IH-021 | Business rules with outbound REST/SOAP must be async | Performance | performance | TableCheck (advanced) | built |
+| IH-022 | Skipped items in the last upgrade | Maintenance | upgradability | ScriptOnlyCheck | specified (blocked) |
+| IH-023 | Default rows per page at most 50 | Performance | performance | TableCheck (advanced) | built |
+| IH-024 | Long running (slow) scripts | Performance | performance | TableCheck (advanced) | built |
+| IH-025 | Differs from baseline: business rules | Maintenance | upgradability | ScriptOnlyCheck | built |
+| IH-026 | Differs from baseline: script includes | Maintenance | upgradability | ScriptOnlyCheck | built |
+| IH-027 | Differs from baseline: client scripts and UI scripts | Maintenance | upgradability | ScriptOnlyCheck | built |
+| IH-028 | Differs from baseline: UI macros and UI pages | Maintenance | upgradability | ScriptOnlyCheck | built |
+| IH-029 | Differs from baseline: UI actions | Maintenance | upgradability | ScriptOnlyCheck | built |
+| IH-030 | Virtual CIs with assets | Administration | manageability | ScriptOnlyCheck | built |
+| IH-031 | Computers and network gear without serial number | Administration | manageability | TableCheck | built |
 
 ---
 
@@ -205,6 +205,8 @@ Measured on bithawkdemo1 (2026-11-06): no OOB Instance Scan check covers these t
 ## Batch 3: drafts received 2026-11-06
 
 Drafts from the user ("outcome: list of findings"), specified 2026-11-06. IH-021 follows the batch 2 code check rules (custom only, matching lines listed).
+
+**Built 2026-11-06** (all except IH-022), not deployed yet. Dry run in the app scope with the built scripts and a stub engine (no findings written) on bithawkdemo1: IH-020 0, IH-021 0, IH-023 0, IH-024 20, IH-025 26, IH-026 to IH-029 0, IH-030 0, IH-031 104 (95 computers + 9 network gear). All 26 IH-025 records also have a customer update in `sys_update_xml`, which confirms the `sys_metadata_customization` list. The baseline checks use the helper method `IHScanUtil.reportBaselineChanges()`. Test data: synthetic `sys_script_pattern` rows (IH-024), customization rows with `author_type=ServiceNow` for test records (IH-025 to IH-029), test computers and one asset (IH-030, IH-031).
 Measured on bithawkdemo1 (2026-11-06): no OOB Instance Scan check covers these topics.
 
 ## IH-020 SLA engine runs synchronously
@@ -227,6 +229,7 @@ Measured on bithawkdemo1 (2026-11-06): no OOB Instance Scan check covers these t
 - **Logic:** latest `sys_upgrade_history` record with `to_version` starting with `glide-` ✔ (app installs also create history records). Its `sys_upgrade_history_log` rows ✔ with `disposition` 4 (Skipped), 9 (Skipped Error) or 10 (Skipped Manual Merge) ✔ and `resolution_status` empty or `not_reviewed` ✔. Link to the log row (it shows the diff and the merge options).
 - **Measured:** last upgrade 2026-10-31 (patch 5aw44): 311 skipped, 2 skipped with error, none reviewed.
 - **Decision:** one finding per unreviewed item (agreed 2026-11-06).
+- **Blocked (2026-11-06):** `sys_upgrade_history_log` has "Can read" from other scopes switched off (`read_access=0`, as `sys_storage_alias` for IH-017); the app scope gets no rows, so per-item findings are not possible. `sys_upgrade_history` is readable and holds summary counts per upgrade ✔: `skipped`, `skipped_and_different`, `skipped_and_not_different`, `skipped_error`, `skipped_manual_merge`, `changes_skipped`. Last upgrade on bithawkdemo1: skipped 311, of which **311 not different** (the customized record already matches the new version, no review needed) and 0 different; skipped_error 2; skipped_manual_merge 0. Proposal: one finding per upgrade (latest platform upgrade) when `skipped_and_different + skipped_error + skipped_manual_merge > 0`, linked to the upgrade history record, counts in the details. Needs the user's decision.
 - **Resolution:** Review each skipped item in the upgrade history: revert to the base system, merge, or keep the customization and mark it reviewed.
 
 ## IH-023 Default rows per page at most 50

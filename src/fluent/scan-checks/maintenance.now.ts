@@ -258,3 +258,86 @@ export const ih016DuplicateScriptIncludes = ScriptOnlyCheck({
     resolutionDetails:
         'Rename or delete the duplicate script include so every API name is unique, and update the callers.',
 })
+
+// IH-025 to IH-029: ServiceNow records changed by the customer (sys_metadata_customization,
+// author_type ServiceNow), one check per record type group
+
+export const ih025BaselineBusinessRules = ScriptOnlyCheck({
+    $id: Now.ID['ih-025-baseline-business-rules'],
+    name: 'IH-025 Differs from baseline: business rules',
+    active: true,
+    category: 'upgradability',
+    priority: '2',
+    shortDescription: 'Finds ServiceNow business rules that were changed by the customer',
+    description:
+        'Changed ServiceNow business rules are skipped by upgrades, so they miss fixes and new features and must be reviewed by hand. Uses the platform list of customized records (sys_metadata_customization) and reports records originally delivered by ServiceNow. Ideal state: ServiceNow business rules are not changed; customizations are made in copies or extensions.',
+    script: `(function(engine) {
+    new x_bits2_inst_hlth.IHScanUtil().reportBaselineChanges(engine, ['sys_script']);
+})(engine);`,
+    resolutionDetails:
+        'Revert the record to the base system version where possible (Revert to Base System in the versions list), or move the change into a copy or extension and document why it is needed.',
+})
+
+export const ih026BaselineScriptIncludes = ScriptOnlyCheck({
+    $id: Now.ID['ih-026-baseline-script-includes'],
+    name: 'IH-026 Differs from baseline: script includes',
+    active: true,
+    category: 'upgradability',
+    priority: '2',
+    shortDescription: 'Finds ServiceNow script includes that were changed by the customer',
+    description:
+        'Changed ServiceNow script includes are skipped by upgrades, so they miss fixes and new features and must be reviewed by hand. Uses the platform list of customized records (sys_metadata_customization) and reports records originally delivered by ServiceNow. Ideal state: ServiceNow script includes are not changed; customizations are made in copies or extensions.',
+    script: `(function(engine) {
+    new x_bits2_inst_hlth.IHScanUtil().reportBaselineChanges(engine, ['sys_script_include']);
+})(engine);`,
+    resolutionDetails:
+        'Revert the record to the base system version where possible (Revert to Base System in the versions list), or move the change into a copy or extension and document why it is needed.',
+})
+
+export const ih027BaselineClientScripts = ScriptOnlyCheck({
+    $id: Now.ID['ih-027-baseline-client-scripts'],
+    name: 'IH-027 Differs from baseline: client scripts and UI scripts',
+    active: true,
+    category: 'upgradability',
+    priority: '2',
+    shortDescription: 'Finds ServiceNow client scripts and UI scripts that were changed by the customer',
+    description:
+        'Changed ServiceNow client scripts and UI scripts are skipped by upgrades, so they miss fixes and new features and must be reviewed by hand. Uses the platform list of customized records (sys_metadata_customization) and reports records originally delivered by ServiceNow. Ideal state: ServiceNow client scripts and UI scripts are not changed; customizations are made in copies or extensions.',
+    script: `(function(engine) {
+    new x_bits2_inst_hlth.IHScanUtil().reportBaselineChanges(engine, ['sys_script_client', 'sys_ui_script']);
+})(engine);`,
+    resolutionDetails:
+        'Revert the record to the base system version where possible (Revert to Base System in the versions list), or move the change into a copy or extension and document why it is needed.',
+})
+
+export const ih028BaselineUiMacrosPages = ScriptOnlyCheck({
+    $id: Now.ID['ih-028-baseline-ui-macros-pages'],
+    name: 'IH-028 Differs from baseline: UI macros and UI pages',
+    active: true,
+    category: 'upgradability',
+    priority: '2',
+    shortDescription: 'Finds ServiceNow UI macros and UI pages that were changed by the customer',
+    description:
+        'Changed ServiceNow UI macros and UI pages are skipped by upgrades, so they miss fixes and new features and must be reviewed by hand. Uses the platform list of customized records (sys_metadata_customization) and reports records originally delivered by ServiceNow. Ideal state: ServiceNow UI macros and UI pages are not changed; customizations are made in copies or extensions.',
+    script: `(function(engine) {
+    new x_bits2_inst_hlth.IHScanUtil().reportBaselineChanges(engine, ['sys_ui_macro', 'sys_ui_page']);
+})(engine);`,
+    resolutionDetails:
+        'Revert the record to the base system version where possible (Revert to Base System in the versions list), or move the change into a copy or extension and document why it is needed.',
+})
+
+export const ih029BaselineUiActions = ScriptOnlyCheck({
+    $id: Now.ID['ih-029-baseline-ui-actions'],
+    name: 'IH-029 Differs from baseline: UI actions',
+    active: true,
+    category: 'upgradability',
+    priority: '2',
+    shortDescription: 'Finds ServiceNow UI actions that were changed by the customer',
+    description:
+        'Changed ServiceNow UI actions are skipped by upgrades, so they miss fixes and new features and must be reviewed by hand. Uses the platform list of customized records (sys_metadata_customization) and reports records originally delivered by ServiceNow. Ideal state: ServiceNow UI actions are not changed; customizations are made in copies or extensions.',
+    script: `(function(engine) {
+    new x_bits2_inst_hlth.IHScanUtil().reportBaselineChanges(engine, ['sys_ui_action']);
+})(engine);`,
+    resolutionDetails:
+        'Revert the record to the base system version where possible (Revert to Base System in the versions list), or move the change into a copy or extension and document why it is needed.',
+})

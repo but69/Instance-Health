@@ -76,3 +76,71 @@ export const ih018TablesWithoutAcls = ScriptOnlyCheck({
     resolutionDetails:
         'Create record ACLs (at least read, write, create and delete) for the roles that need access, or confirm that the table is intentionally covered by wildcard ACLs only.',
 })
+
+// IH-030: the virtual flag is defined on many CI classes (not on cmdb_ci); check every top-most
+// class that defines it for virtual CIs that have an asset
+export const ih030VirtualCisWithAssets = ScriptOnlyCheck({
+    $id: Now.ID['ih-030-virtual-cis-with-assets'],
+    name: 'IH-030 Virtual CIs with assets',
+    active: true,
+    category: 'manageability',
+    priority: '3',
+    shortDescription: 'Finds CIs flagged as virtual that have an asset',
+    description:
+        'Virtual CIs (virtual machines, virtual network devices) are not physical hardware and should not create or keep assets; such assets distort license, cost and inventory data. Checks every CI class that has the Virtual flag. Ideal state: no virtual CI has an asset.',
+    script: `(function(engine) {
+    var parentCache = {};
+    function parentOf(table) {
+        if (parentCache.hasOwnProperty(table)) return parentCache[table];
+        var obj = new GlideRecord('sys_db_object');
+        var parent = obj.get('name', table) && obj.getValue('super_class') ? obj.super_class.name + '' : '';
+        parentCache[table] = parent;
+        return parent;
+    }
+
+    // Classes that define the field "virtual" themselves
+    var defines = {};
+    var dict = new GlideRecord('sys_dictionary');
+    dict.addQuery('element', 'virtual');
+    dict.addQuery('name', 'STARTSWITH', 'cmdb_ci');
+    dict.query();
+    while (dict.next()) defines[dict.getValue('name')] = true;
+
+    // Keep only the top-most ones; their queries include all child classes
+    for (var table in defines) {
+        var inherited = false;
+        for (var p = parentOf(table), depth = 0; p && depth < 20; p = parentOf(p), depth++)
+            if (defines[p]) { inherited = true; break; }
+        if (inherited) continue;
+
+        var ci = new GlideRecord(table);
+        if (!ci.isValid()) continue;
+        ci.addQuery('virtual', true);
+        ci.addNotNullQuery('asset');
+        ci.query();
+        while (ci.next()) {
+            engine.finding.setCurrentSource(ci);
+            engine.finding.setValue('finding_details', ci.getClassDisplayValue() + ' ' + ci.getDisplayValue() + ' is virtual but has asset ' + ci.asset.getDisplayValue());
+            engine.finding.increment();
+        }
+    }
+})(engine);`,
+    resolutionDetails:
+        'Retire or delete the asset of the virtual CI and check the model and model category, so that virtual CIs do not create assets.',
+})
+
+// IH-031: computers and network gear (all subclasses) without serial number, retired CIs excluded
+export const ih031MissingSerialNumbers = TableCheck({
+    $id: Now.ID['ih-031-missing-serial-numbers'],
+    name: 'IH-031 Computers and network gear without serial number',
+    active: true,
+    category: 'manageability',
+    priority: '3',
+    shortDescription: 'Finds computers and network gear without a serial number',
+    description:
+        'The serial number is the main identification attribute for hardware: without it, Discovery and imports cannot match the CI reliably and duplicates are created. Checks all computer and network gear classes, discovered or not; retired CIs are ignored. Ideal state: every computer and network gear CI has a serial number.',
+    table: 'cmdb_ci_hardware',
+    conditions: 'sys_class_nameINSTANCEOFcmdb_ci_computer^ORsys_class_nameINSTANCEOFcmdb_ci_netgear^serial_numberISEMPTY^install_status!=7',
+    resolutionDetails:
+        'Populate the serial number through Discovery, an import or manually, and check the identification rules of the class.',
+})

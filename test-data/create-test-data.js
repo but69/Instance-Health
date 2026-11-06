@@ -1,12 +1,14 @@
 // Instance Health: create test data for the scan checks
 // Run in System Definition > Scripts - Background, scope global, as admin.
 // Creates positive (must be found) and negative (must not be found) records for
-// IH-001 to IH-003, IH-005, IH-007, IH-009 to IH-017 and IH-019. Every record is marked
-// with IH-TEST (script includes: name starts with IHTest) and captured in the update set
-// "Instance Health - Test Data". Records are created in global with a customer update,
-// so they count as custom for the checks that only report custom code.
+// IH-001 to IH-003, IH-005, IH-007, IH-009 to IH-017, IH-019, IH-021 and IH-024 to IH-031.
+// Every record is marked with IH-TEST (script includes: name starts with IHTest, UI page:
+// ih_test_) and captured in the update set "Instance Health - Test Data". Records are created
+// in global with a customer update, so they count as custom for the checks that only report
+// custom code. IH-024 and IH-025 to IH-029 use synthetic statistics / customization rows.
 // Not covered: IH-004 and IH-008 (need a failing PA job / 5 million rows), IH-018 (would
-// need a new table; the instance has real findings).
+// need a new table; the instance has real findings), IH-020 and IH-023 (instance-wide
+// settings), IH-022 (needs a platform upgrade).
 // Test business rules have condition "false" and test ACLs sit on a non-existent field,
 // so none of them ever runs or decides access.
 // Remove everything again with remove-test-data.js.
@@ -327,6 +329,81 @@ runInGlobal(function createInstanceHealthTestData() {
         warnings.push('IH-019: operation "read" not found, ACLs not created');
     }
 
+    // IH-021: outbound REST call in an after rule (positive) and in an async rule (negative)
+    var restCall = '    var request = new sn_ws.RESTMessageV2();\n    request.setEndpoint(\'https://example.invalid\');';
+    insert('sys_script', testRule('IH-021 after rule with REST call', 'cmn_location', 'after', restCall));
+    insert('sys_script', testRule('IH-021 async rule with REST call', 'cmn_location', 'async', restCall));
+
+    // IH-024: synthetic slow script statistics: 8 s recent (positive, linked to a test script
+    // include), 8 s last seen 60 days ago and 3 s recent (negative)
+    var ih024Source = new GlideRecord('sys_script_include');
+    ih024Source.get('name', 'IHTestUnique');
+    var sixtyDaysAgo = new GlideDateTime();
+    sixtyDaysAgo.addDaysUTC(-60);
+    var slowCases = [['IH-024 slow recent', 8000, new GlideDateTime()], ['IH-024 slow old', 8000, sixtyDaysAgo], ['IH-024 fast recent', 3000, new GlideDateTime()]];
+    for (var s = 0; s < slowCases.length; s++)
+        tryInsert(slowCases[s][0], 'sys_script_pattern', {
+            label: MARKER + ' ' + slowCases[s][0],
+            average: slowCases[s][1],
+            count: 3,
+            last: slowCases[s][2].getValue(),
+            first: slowCases[s][2].getValue(),
+            script_source_table: 'sys_script_include',
+            script_source: ih024Source.getUniqueValue()
+        });
+
+    // IH-025 to IH-029: mark test records as changed ServiceNow records in the platform list of
+    // customized records (sys_metadata_customization). Positive: author_type ServiceNow.
+    var uiActionId = insert('sys_ui_action', {
+        name: MARKER + ' IH-029 UI action',
+        table: 'cmn_location',
+        active: 'false',
+        script: '// ' + MARKER + ': test data for Instance Health, safe to delete'
+    });
+    var uiPageId = insert('sys_ui_page', {
+        name: 'ih_test_ih028_page',
+        description: MARKER + ' IH-028 UI page',
+        html: '<?xml version="1.0" encoding="utf-8" ?><j:jelly trim="false" xmlns:j="jelly:core" xmlns:g="glide" xmlns:j2="null" xmlns:g2="null"><!-- ' + MARKER + ' --></j:jelly>'
+    });
+    function markCustomized(label, table, field, value, authorType) {
+        var rec = new GlideRecord(table);
+        if (!rec.get(field, value)) {
+            warnings.push(label + ': record not found');
+            return;
+        }
+        var row = new GlideRecord('sys_metadata_customization');
+        if (row.get('sys_metadata', rec.getUniqueValue())) {
+            row.setValue('author_type', authorType);
+            row.update();
+        } else {
+            tryInsert(label, 'sys_metadata_customization', { sys_metadata: rec.getUniqueValue(), author_type: authorType });
+        }
+    }
+    markCustomized('IH-025 positive', 'sys_script', 'name', MARKER + ' IH-014 before rule with update', 'ServiceNow');
+    markCustomized('IH-025 negative', 'sys_script', 'name', MARKER + ' IH-014 before rule without update', 'Custom');
+    markCustomized('IH-026 positive', 'sys_script_include', 'name', 'IHTestUnique', 'ServiceNow');
+    markCustomized('IH-027 positive', 'sys_script_client', 'name', MARKER + ' IH-011 asynchronous ajax', 'ServiceNow');
+    markCustomized('IH-028 positive', 'sys_ui_page', 'sys_id', uiPageId, 'ServiceNow');
+    markCustomized('IH-029 positive', 'sys_ui_action', 'sys_id', uiActionId, 'ServiceNow');
+
+    // IH-030 and IH-031: test computers (serial numbers set where IH-031 must not report them)
+    function computer(name, values) {
+        values.name = MARKER + ' ' + name;
+        return insert('cmdb_ci_computer', values);
+    }
+    var virtualWithAsset = computer('IH-030 virtual with asset', { virtual: 'true', serial_number: 'IHTEST-030-1' });
+    computer('IH-030 virtual without asset', { virtual: 'true', serial_number: 'IHTEST-030-2' });
+    var assetId = tryInsert('IH-030 asset', 'alm_hardware', { asset_tag: MARKER + '-030', serial_number: 'IHTEST-030-1' });
+    if (assetId) {
+        var vci = new GlideRecord('cmdb_ci_computer');
+        vci.get(virtualWithAsset);
+        vci.setValue('asset', assetId);
+        vci.update();
+    }
+    computer('IH-031 no serial', {});
+    computer('IH-031 retired no serial', { install_status: '7' });
+    computer('IH-031 with serial', { serial_number: 'IHTEST-031-1' });
+
     // Check that the records really landed in global and the public report is published
     var check = new GlideRecord('sys_report');
     if (!check.get(publicReport) || String(check.is_published) != 'true' || check.getValue('sys_scope') != 'global')
@@ -351,6 +428,14 @@ runInGlobal(function createInstanceHealthTestData() {
     gs.print('  IH-017: map "' + MARKER + ' IH-017 coalesce without index" found (fax_phone), "... with index" not found');
     gs.print('  IH-018: no test data; e.g. x_bits2_quackology_family found, incident not found');
     gs.print('  IH-019: ACL cmn_location.u_ih_test_query found (line 1), cmn_location.u_ih_test_role not found');
+    gs.print('  IH-020, IH-022, IH-023: no test data (would change instance-wide settings / needs an upgrade)');
+    gs.print('  IH-021: "' + MARKER + ' IH-021 after rule with REST call" found (line 3), async one not found');
+    gs.print('  IH-024: "' + MARKER + ' IH-024 slow recent" found, linked to script include IHTestUnique; slow old and fast recent not found');
+    gs.print('  IH-025: "' + MARKER + ' IH-014 before rule with update" found, "... without update" not found');
+    gs.print('  IH-026: IHTestUnique found; IH-027: "' + MARKER + ' IH-011 asynchronous ajax" found');
+    gs.print('  IH-028: UI page ih_test_ih028_page found; IH-029: UI action "' + MARKER + ' IH-029 UI action" found');
+    gs.print('  IH-030: "' + MARKER + ' IH-030 virtual with asset" found, "... without asset" not found');
+    gs.print('  IH-031: "' + MARKER + ' IH-031 no serial" found, retired one and the one with serial not found');
     gs.print('  IH-001 to IH-009 test script includes and client scripts must not appear in IH-010 to IH-016.');
     gs.print('');
     for (var w = 0; w < warnings.length; w++)

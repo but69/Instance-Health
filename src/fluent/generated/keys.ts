@@ -81,6 +81,50 @@ declare global {
                         table: 'scan_table_check'
                         id: '1fe0320e5d6f4643a25db36324796e37'
                     }
+                    'ih-020-sla-engine-synchronous': {
+                        table: 'scan_script_only_check'
+                        id: '32e2cea0e924405287e6b36c2a58eb77'
+                    }
+                    'ih-021-sync-outbound-calls': {
+                        table: 'scan_table_check'
+                        id: '6cf35a4d3be14a6b8fab4a60407207d3'
+                    }
+                    'ih-023-default-rows-per-page': {
+                        table: 'scan_table_check'
+                        id: 'd7766e499d2a4c2d930e2133f8cf4a86'
+                    }
+                    'ih-024-slow-scripts': {
+                        table: 'scan_table_check'
+                        id: 'bdf8a7203bad4b7192298d56989ea72b'
+                    }
+                    'ih-025-baseline-business-rules': {
+                        table: 'scan_script_only_check'
+                        id: 'e71ca4694f3542fb8e8a8a191d802ffe'
+                    }
+                    'ih-026-baseline-script-includes': {
+                        table: 'scan_script_only_check'
+                        id: 'ad663c8dcc964673bd654d3d5de80f48'
+                    }
+                    'ih-027-baseline-client-scripts': {
+                        table: 'scan_script_only_check'
+                        id: 'f556fc2d081842bbac83b2b7c2684830'
+                    }
+                    'ih-028-baseline-ui-macros-pages': {
+                        table: 'scan_script_only_check'
+                        id: '7c730cd335324536937a50ae355580a9'
+                    }
+                    'ih-029-baseline-ui-actions': {
+                        table: 'scan_script_only_check'
+                        id: '67ea8fe67c2b4507ba6cafbfbec92718'
+                    }
+                    'ih-030-virtual-cis-with-assets': {
+                        table: 'scan_script_only_check'
+                        id: '0f542a026d914d2e98503509659db4e9'
+                    }
+                    'ih-031-missing-serial-numbers': {
+                        table: 'scan_table_check'
+                        id: '9e08d231115c43dc8e924363997021ab'
+                    }
                     'ih-scan-util': {
                         table: 'sys_script_include'
                         id: 'ab660315d1c14bb184dc5c20bc21f75c'

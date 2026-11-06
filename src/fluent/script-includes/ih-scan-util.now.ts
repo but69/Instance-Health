@@ -1,7 +1,7 @@
 import { ScriptInclude } from '@servicenow/sdk/core'
 
-// Shared helper for the scan checks: the "custom" rule (IH-003, IH-010 to IH-016, IH-019)
-// and the line-by-line reporting of regex matches in scripts.
+// Shared helper for the scan checks: the "custom" rule (IH-003, IH-010 to IH-016, IH-019, IH-021),
+// the line-by-line reporting of regex matches in scripts, and the baseline checks (IH-025 to IH-029).
 export const ihScanUtil = ScriptInclude({
     $id: Now.ID['ih-scan-util'],
     name: 'IHScanUtil',
@@ -76,6 +76,24 @@ IHScanUtil.prototype = {
         engine.finding.setCurrentSource(record);
         engine.finding.setValue('finding_details', details.substring(0, this.MAX_DETAILS));
         engine.finding.increment();
+    },
+
+    // IH-025 to IH-029: ServiceNow records that were changed, from the platform's own list
+    // sys_metadata_customization (author_type ServiceNow = record shipped by ServiceNow)
+    reportBaselineChanges: function(engine, classNames) {
+        var changed = new GlideRecord('sys_metadata_customization');
+        changed.addQuery('author_type', 'ServiceNow');
+        changed.addQuery('sys_metadata.sys_class_name', 'IN', classNames.join(','));
+        changed.query();
+        while (changed.next()) {
+            var className = changed.sys_metadata.sys_class_name + '';
+            var record = new GlideRecord(className);
+            if (!record.isValid() || !record.get(changed.getValue('sys_metadata'))) continue;
+            engine.finding.setCurrentSource(record);
+            engine.finding.setValue('finding_details', 'ServiceNow ' + record.getClassDisplayValue() + ' changed by the customer (package ' +
+                record.sys_package.getDisplayValue() + ', last updated ' + record.getValue('sys_updated_on') + ' by ' + record.getValue('sys_updated_by') + ')');
+            engine.finding.increment();
+        }
     },
 
     _test: function(regex, text) {
