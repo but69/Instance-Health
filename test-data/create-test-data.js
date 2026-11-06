@@ -398,7 +398,9 @@ runInGlobal(function createInstanceHealthTestData() {
         return insert('cmdb_ci_computer', values);
     }
     var virtualWithAsset = computer('IH-029 virtual with asset', { virtual: 'true', serial_number: 'IHTEST-030-1' });
-    computer('IH-029 virtual without asset', { virtual: 'true', serial_number: 'IHTEST-030-2' });
+    // Negative case: a physical computer. A virtual computer without asset does not stay that way on
+    // bithawkdemo1: a platform job creates "Unknown" assets for computers without asset (seen 2026-11-06).
+    computer('IH-029 physical computer', { virtual: 'false', serial_number: 'IHTEST-030-2' });
     var assetId = tryInsert('IH-029 asset', 'alm_hardware', { asset_tag: MARKER + '-030', serial_number: 'IHTEST-030-1' });
     if (assetId) {
         var vci = new GlideRecord('cmdb_ci_computer');
@@ -658,7 +660,7 @@ runInGlobal(function createInstanceHealthTestData() {
     gs.print('  IH-024: "' + MARKER + ' IH-013 before rule with update" found, "' + MARKER + ' IH-013 before rule no update" not found');
     gs.print('  IH-025: IHTestUnique found; IH-026: "' + MARKER + ' IH-010 asynchronous ajax" found');
     gs.print('  IH-027: UI page ih_test_ih028_page found; IH-028: UI action "' + MARKER + ' IH-028 UI action" found');
-    gs.print('  IH-029: "' + MARKER + ' IH-029 virtual with asset" found, "... without asset" not found');
+    gs.print('  IH-029: "' + MARKER + ' IH-029 virtual with asset" found, "' + MARKER + ' IH-029 physical computer" not found');
     gs.print('  IH-030: "' + MARKER + ' IH-030 no serial" found, retired one and the one with serial not found');
     gs.print('  IH-031, IH-033, IH-036: no test data (would change instance-wide settings)');
     gs.print('  IH-032: "' + MARKER + ' IH-032 invalid source" found, valid and retired ones not found');

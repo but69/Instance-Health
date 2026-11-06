@@ -295,8 +295,10 @@ export const ih035DuplicateUpdateSetNames = ScriptOnlyCheck({
 
 // IH-037: business rules passing current to a script include that calls update() on a parameter
 // (escapes the current.update() check IH-013); heuristic in IHScanUtil.findIndirectCurrentUpdates
-export const ih038IndirectCurrentUpdate = TableCheck({
-    $id: Now.ID['ih-038-indirect-current-update'],
+// ScriptOnlyCheck since 2026-11-06 (new key 078, was the TableCheck ih-038): the suite scan did not
+// evaluate the custom rule "AMAG - Vehicle Registration - Create CI" as a TableCheck (SR00014613).
+export const ih078IndirectCurrentUpdate = ScriptOnlyCheck({
+    $id: Now.ID['ih-078-indirect-current-update'],
     name: 'IH-037 Script includes that update current',
     active: true,
     category: 'manageability',
@@ -304,16 +306,19 @@ export const ih038IndirectCurrentUpdate = TableCheck({
     shortDescription: 'Finds custom business rules that pass current to a script include which updates it',
     description:
         'Calling update() on current inside a business rule saves the record again and runs all business rules a second time. When the call is hidden in a script include, it is not found by the current.update() check. Reports custom business rules that pass current to a script include whose functions call update() on a parameter. Heuristic: updates through stored fields (this.record.update()) or nested calls are not found. Ideal state: business rules never update current through a script include.',
-    table: 'sys_script',
-    conditions: 'active=true^scriptLIKEcurrent',
-    advanced: true,
-    script: `(function(engine, current) {
+    script: `(function(engine) {
     var util = new x_bits2_inst_hlth.IHScanUtil();
-    if (!util.isCustom(current)) return;
-    var lines = util.findIndirectCurrentUpdates(current.getValue('script'));
-    if (lines.length > 0)
-        util.reportLines(engine, current, lines, 'Business rule (' + (current.getValue('when') || 'no when') + ') on ' + current.getValue('collection'));
-})(engine, current);`,
+    var rule = new GlideRecord('sys_script');
+    rule.addQuery('active', true);
+    rule.addQuery('script', 'CONTAINS', 'current');
+    rule.query();
+    while (rule.next()) {
+        if (!util.isCustom(rule)) continue;
+        var lines = util.findIndirectCurrentUpdates(rule.getValue('script'));
+        if (lines.length > 0)
+            util.reportLines(engine, rule, lines, 'Business rule (' + (rule.getValue('when') || 'no when') + ') on ' + rule.getValue('collection'));
+    }
+})(engine);`,
     resolutionDetails:
         'In a before rule, set the values on current and let the platform save it; in other rules, avoid updating current or pass the values the script include needs instead of the record.',
 })

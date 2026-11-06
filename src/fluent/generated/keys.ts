@@ -72,6 +72,7 @@ declare global {
                     'ih-017-coalesce-without-index': {
                         table: 'scan_table_check'
                         id: 'c70b096611cd4d2baef46640278e9175'
+                        deleted: true
                     }
                     'ih-018-tables-without-acls': {
                         table: 'scan_script_only_check'
@@ -156,6 +157,7 @@ declare global {
                     'ih-038-indirect-current-update': {
                         table: 'scan_table_check'
                         id: '3c19da8d722e4e249147e118d5529dd2'
+                        deleted: true
                     }
                     'ih-039-complex-conditions': {
                         table: 'scan_table_check'
@@ -204,6 +206,7 @@ declare global {
                     'ih-051-tasks-opened-by-inactive-user': {
                         table: 'scan_table_check'
                         id: '384a104d89d94bb38737e3962e849b3f'
+                        deleted: true
                     }
                     'ih-052-system-locale': {
                         table: 'scan_script_only_check'
@@ -224,6 +227,7 @@ declare global {
                     'ih-056-active-tasks-with-closed-date': {
                         table: 'scan_table_check'
                         id: '00e7564d189c4f91939994bd4baf34f6'
+                        deleted: true
                     }
                     'ih-057-update-set-without-description': {
                         table: 'scan_table_check'
@@ -301,6 +305,22 @@ declare global {
                         table: 'scan_table_check'
                         id: '67735ffe5c2a453a88b996afe10cbb03'
                     }
+                    'ih-077-coalesce-without-index': {
+                        table: 'scan_script_only_check'
+                        id: 'b91f93e329ca4e95abefb4fc6ce7e296'
+                    }
+                    'ih-078-indirect-current-update': {
+                        table: 'scan_script_only_check'
+                        id: 'c133cb1e0721498f814cea60ad295ee5'
+                    }
+                    'ih-079-tasks-opened-by-inactive-user': {
+                        table: 'scan_script_only_check'
+                        id: '56b2f0e5f263468280b8ed26a4bc421b'
+                    }
+                    'ih-080-active-tasks-with-closed-date': {
+                        table: 'scan_script_only_check'
+                        id: '9439518029594f8b9ac2ddf66a3f148f'
+                    }
                     'ih-scan-util': {
                         table: 'sys_script_include'
                         id: 'ab660315d1c14bb184dc5c20bc21f75c'
@@ -368,6 +388,7 @@ declare global {
                     'ih-suite-check-017': {
                         table: 'scan_check_suite_check'
                         id: '18285963b66e4d739ec0362c7f4ad8a0'
+                        deleted: true
                     }
                     'ih-suite-check-018': {
                         table: 'scan_check_suite_check'
@@ -452,6 +473,7 @@ declare global {
                     'ih-suite-check-038': {
                         table: 'scan_check_suite_check'
                         id: '83bee4a717314a2394dcee01bf47dbf2'
+                        deleted: true
                     }
                     'ih-suite-check-039': {
                         table: 'scan_check_suite_check'
@@ -500,6 +522,7 @@ declare global {
                     'ih-suite-check-051': {
                         table: 'scan_check_suite_check'
                         id: 'abe07c7b59a0447f8d3d62d8e191eb33'
+                        deleted: true
                     }
                     'ih-suite-check-052': {
                         table: 'scan_check_suite_check'
@@ -520,6 +543,7 @@ declare global {
                     'ih-suite-check-056': {
                         table: 'scan_check_suite_check'
                         id: '44410019ddce4ce6b5e26d80c78dadff'
+                        deleted: true
                     }
                     'ih-suite-check-057': {
                         table: 'scan_check_suite_check'
@@ -596,6 +620,22 @@ declare global {
                     'ih-suite-check-076': {
                         table: 'scan_check_suite_check'
                         id: '646a222dcc754acd91cf0f0c42a668f0'
+                    }
+                    'ih-suite-check-077': {
+                        table: 'scan_check_suite_check'
+                        id: '402b9f2b5c0943309e2d2c98e523b25a'
+                    }
+                    'ih-suite-check-078': {
+                        table: 'scan_check_suite_check'
+                        id: 'b996c4d6bb8b4aaa97407d922283f79a'
+                    }
+                    'ih-suite-check-079': {
+                        table: 'scan_check_suite_check'
+                        id: '180a40e04cda417f80d8f63c8ccb7a1a'
+                    }
+                    'ih-suite-check-080': {
+                        table: 'scan_check_suite_check'
+                        id: 'f3809cd44d3046e8b21c8d4ae796cc48'
                     }
                     'ih-suite-instance-health': {
                         table: 'scan_check_suite'

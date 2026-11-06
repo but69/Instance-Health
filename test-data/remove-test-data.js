@@ -77,6 +77,9 @@ runInGlobal(function removeInstanceHealthTestData() {
     deleteWhere('sys_ui_action', 'name', 'STARTSWITH', MARKER, true);
     deleteWhere('sys_ui_page', 'name', 'STARTSWITH', 'ih_test_', true);
     deleteWhere('sys_script_pattern', 'label', 'STARTSWITH', MARKER, false);
+    // Assets of test computers, also those a platform job creates automatically ("Unknown" model)
+    deleteWhere('alm_asset', 'ci.name', 'STARTSWITH', MARKER, false);
+    deleteWhere('alm_asset', 'ci.serial_number', 'STARTSWITH', 'IHTEST', false);
     deleteWhere('cmdb_ci_computer', 'name', 'STARTSWITH', MARKER, false);
     deleteWhere('cmdb_ci_computer', 'serial_number', 'STARTSWITH', 'IHTEST-074', false);
     deleteWhere('sys_trigger', 'name', 'STARTSWITH', MARKER, false);

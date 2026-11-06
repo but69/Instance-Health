@@ -31,7 +31,8 @@ export const ih018TablesWithoutAcls = ScriptOnlyCheck({
     var protectedTables = {};
     var acl = new GlideAggregate('sys_security_acl');
     acl.addQuery('type', 'record');
-    acl.addActiveQuery();
+    // addActiveQuery() is not allowed on GlideAggregate in a scoped app (failed in scan SR00014613)
+    acl.addQuery('active', true);
     acl.groupBy('name');
     acl.addAggregate('COUNT');
     acl.query();
@@ -339,9 +340,11 @@ export const ih050JobsRunAsInactiveUser = TableCheck({
         'Set Run as to an active service user that has only the roles the job needs.',
 })
 
-// IH-049: active tasks opened by an inactive user
-export const ih051TasksOpenedByInactiveUser = TableCheck({
-    $id: Now.ID['ih-051-tasks-opened-by-inactive-user'],
+// IH-049: active tasks opened by an inactive user. ScriptOnlyCheck since 2026-11-06 (new key 079, was the
+// TableCheck ih-051): the scan engine skips the base table task ("exclusion list or too large to scan")
+// and only scans its child tables, so records of class task itself were missed (SR00014613).
+export const ih079TasksOpenedByInactiveUser = ScriptOnlyCheck({
+    $id: Now.ID['ih-079-tasks-opened-by-inactive-user'],
     name: 'IH-049 Active tasks opened by an inactive user',
     active: true,
     category: 'manageability',
@@ -349,8 +352,16 @@ export const ih051TasksOpenedByInactiveUser = TableCheck({
     shortDescription: 'Finds active tasks whose Opened by user is inactive',
     description:
         'Notifications and follow-up questions for these tasks go to a user who has left. Ideal state: no active task is opened by an inactive user.',
-    table: 'task',
-    conditions: 'active=true^opened_by.active=false',
+    script: `(function(engine) {
+    var task = new GlideRecord('task');
+    task.addEncodedQuery('active=true^opened_by.active=false');
+    task.query();
+    while (task.next()) {
+        engine.finding.setCurrentSource(task);
+        engine.finding.setValue('finding_details', task.getClassDisplayValue() + ' ' + task.getValue('number') + ' opened by inactive user ' + task.opened_by.getDisplayValue());
+        engine.finding.increment();
+    }
+})(engine);`,
     resolutionDetails:
         'Check whether the task is still needed and hand it over to an active caller or requester.',
 })
@@ -524,9 +535,10 @@ export const ih055ProblemClosedFields = ScriptOnlyCheck({
         'Activate the closure business rule, then fill Closed and Closed by on the affected problems.',
 })
 
-// IH-054: active tasks that have a closed date
-export const ih056ActiveTasksWithClosedDate = TableCheck({
-    $id: Now.ID['ih-056-active-tasks-with-closed-date'],
+// IH-054: active tasks that have a closed date. ScriptOnlyCheck since 2026-11-06 (new key 080, was the
+// TableCheck ih-056) for the same reason as IH-049: the scan engine skips the base table task.
+export const ih080ActiveTasksWithClosedDate = ScriptOnlyCheck({
+    $id: Now.ID['ih-080-active-tasks-with-closed-date'],
     name: 'IH-054 Active tasks with a closed date',
     active: true,
     category: 'manageability',
@@ -534,8 +546,16 @@ export const ih056ActiveTasksWithClosedDate = TableCheck({
     shortDescription: 'Finds active tasks that have a closed date',
     description:
         'A closed date on an active task means the task was reopened without clearing the date, or the state model does not set active correctly. Durations and reports become wrong. Ideal state: active tasks have no closed date.',
-    table: 'task',
-    conditions: 'active=true^closed_atISNOTEMPTY',
+    script: `(function(engine) {
+    var task = new GlideRecord('task');
+    task.addEncodedQuery('active=true^closed_atISNOTEMPTY');
+    task.query();
+    while (task.next()) {
+        engine.finding.setCurrentSource(task);
+        engine.finding.setValue('finding_details', task.getClassDisplayValue() + ' ' + task.getValue('number') + ' is active (state ' + task.getDisplayValue('state') + ') but closed on ' + task.getValue('closed_at'));
+        engine.finding.increment();
+    }
+})(engine);`,
     resolutionDetails:
         'Check the task state: close the task properly, or clear the closed date when it was reopened, and fix the process that reopens tasks.',
 })

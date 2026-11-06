@@ -16,12 +16,10 @@ import {
     ih048OrphanedCatalogTasks,
     ih049JobsRunAsDeletedUser,
     ih050JobsRunAsInactiveUser,
-    ih051TasksOpenedByInactiveUser,
     ih052SystemLocale,
     ih053SingleCurrencyMode,
     ih054MarkResolved,
     ih055ProblemClosedFields,
-    ih056ActiveTasksWithClosedDate,
     ih058StaleConfigurationItems,
     ih059UnsecuredScriptedRest,
     ih060SecurityUiFilter,
@@ -29,6 +27,8 @@ import {
     ih070UpdateSetAudit,
     ih073UniqueLocationNames,
     ih074CisWithoutName,
+    ih079TasksOpenedByInactiveUser,
+    ih080ActiveTasksWithClosedDate,
 } from './administration.now'
 import {
     ih003TooManyClientScripts,
@@ -46,7 +46,6 @@ import {
     ih028BaselineUiMacrosPages,
     ih029BaselineUiActions,
     ih035DuplicateUpdateSetNames,
-    ih038IndirectCurrentUpdate,
     ih039ComplexConditions,
     ih046OrphanedDictionaryEntries,
     ih047ListLayoutDuplicatePositions,
@@ -56,6 +55,7 @@ import {
     ih069ChangedDictionaryEntries,
     ih071CiClassesWithCustomFields,
     ih072CurrentUpdateInBusinessRules,
+    ih078IndirectCurrentUpdate,
 } from './maintenance.now'
 import {
     ih002SlowReports,
@@ -64,7 +64,6 @@ import {
     ih010DotWalkToSysId,
     ih011SynchronousAjax,
     ih015GlobalBusinessRules,
-    ih017CoalesceWithoutIndex,
     ih019ReadAclQueries,
     ih020SlaEngineSynchronous,
     ih021SyncOutboundCalls,
@@ -77,6 +76,7 @@ import {
     ih068SlowGroupedListReports,
     ih075ConcurrentScheduledImports,
     ih076UiActionOutboundCalls,
+    ih077CoalesceWithoutIndex,
 } from './performance.now'
 
 // Scan suite "Instance health" with all Instance Health checks (user request 2026-11-06).
@@ -181,12 +181,6 @@ Record({
     $id: Now.ID['ih-suite-check-016'],
     table: 'scan_check_suite_check',
     data: { suite: instanceHealthSuite, check: ih016DuplicateScriptIncludes, score_weight: 1 },
-})
-
-Record({
-    $id: Now.ID['ih-suite-check-017'],
-    table: 'scan_check_suite_check',
-    data: { suite: instanceHealthSuite, check: ih017CoalesceWithoutIndex, score_weight: 1 },
 })
 
 Record({
@@ -310,12 +304,6 @@ Record({
 })
 
 Record({
-    $id: Now.ID['ih-suite-check-038'],
-    table: 'scan_check_suite_check',
-    data: { suite: instanceHealthSuite, check: ih038IndirectCurrentUpdate, score_weight: 1 },
-})
-
-Record({
     $id: Now.ID['ih-suite-check-039'],
     table: 'scan_check_suite_check',
     data: { suite: instanceHealthSuite, check: ih039ComplexConditions, score_weight: 1 },
@@ -382,12 +370,6 @@ Record({
 })
 
 Record({
-    $id: Now.ID['ih-suite-check-051'],
-    table: 'scan_check_suite_check',
-    data: { suite: instanceHealthSuite, check: ih051TasksOpenedByInactiveUser, score_weight: 1 },
-})
-
-Record({
     $id: Now.ID['ih-suite-check-052'],
     table: 'scan_check_suite_check',
     data: { suite: instanceHealthSuite, check: ih052SystemLocale, score_weight: 1 },
@@ -409,12 +391,6 @@ Record({
     $id: Now.ID['ih-suite-check-055'],
     table: 'scan_check_suite_check',
     data: { suite: instanceHealthSuite, check: ih055ProblemClosedFields, score_weight: 1 },
-})
-
-Record({
-    $id: Now.ID['ih-suite-check-056'],
-    table: 'scan_check_suite_check',
-    data: { suite: instanceHealthSuite, check: ih056ActiveTasksWithClosedDate, score_weight: 1 },
 })
 
 Record({
@@ -529,4 +505,28 @@ Record({
     $id: Now.ID['ih-suite-check-076'],
     table: 'scan_check_suite_check',
     data: { suite: instanceHealthSuite, check: ih076UiActionOutboundCalls, score_weight: 1 },
+})
+
+Record({
+    $id: Now.ID['ih-suite-check-077'],
+    table: 'scan_check_suite_check',
+    data: { suite: instanceHealthSuite, check: ih077CoalesceWithoutIndex, score_weight: 1 },
+})
+
+Record({
+    $id: Now.ID['ih-suite-check-078'],
+    table: 'scan_check_suite_check',
+    data: { suite: instanceHealthSuite, check: ih078IndirectCurrentUpdate, score_weight: 1 },
+})
+
+Record({
+    $id: Now.ID['ih-suite-check-079'],
+    table: 'scan_check_suite_check',
+    data: { suite: instanceHealthSuite, check: ih079TasksOpenedByInactiveUser, score_weight: 1 },
+})
+
+Record({
+    $id: Now.ID['ih-suite-check-080'],
+    table: 'scan_check_suite_check',
+    data: { suite: instanceHealthSuite, check: ih080ActiveTasksWithClosedDate, score_weight: 1 },
 })

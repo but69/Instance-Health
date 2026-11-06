@@ -154,8 +154,10 @@ export const ih015GlobalBusinessRules = TableCheck({
 // IH-016: per active transform map, finding if none of its coalesce fields starts a database index.
 // Indexes come from v_db_index (physical names). Fields whose physical column name is unknown
 // (child table stored in its parent, e.g. CMDB) cannot be checked and are skipped.
-export const ih017CoalesceWithoutIndex = TableCheck({
-    $id: Now.ID['ih-017-coalesce-without-index'],
+// ScriptOnlyCheck since 2026-11-06 (new key 077, was the TableCheck ih-017): the suite scan did not
+// evaluate ServiceNow transform maps as a TableCheck, although a point scan did (SR00014613).
+export const ih077CoalesceWithoutIndex = ScriptOnlyCheck({
+    $id: Now.ID['ih-077-coalesce-without-index'],
     name: 'IH-016 Transform map coalesces on non-indexed fields',
     active: true,
     category: 'performance',
@@ -163,16 +165,7 @@ export const ih017CoalesceWithoutIndex = TableCheck({
     shortDescription: 'Finds active transform maps whose coalesce fields have no database index',
     description:
         'For every import row, coalesce looks up an existing target record by the coalesce fields. Without an index this is a full table scan. A transform map is reported when none of its coalesce fields is the first column of an index on the target table. Fields of child tables that are stored in a parent table (for example CMDB classes) cannot be checked and are skipped. Ideal state: every transform map coalesces on at least one indexed field.',
-    table: 'sys_transform_map',
-    conditions: 'active=true',
-    advanced: true,
-    script: `(function(engine, current) {
-    var entries = new GlideRecord('sys_transform_entry');
-    entries.addQuery('map', current.getUniqueValue());
-    entries.addQuery('coalesce', true);
-    entries.query();
-    if (!entries.hasNext()) return;
-
+    script: `(function(engine) {
     var indexCache = {};
     function firstIndexColumns(table) {
         if (indexCache.hasOwnProperty(table)) return indexCache[table];
@@ -216,21 +209,31 @@ export const ih017CoalesceWithoutIndex = TableCheck({
         return 'unknown';
     }
 
-    var missing = [];
-    var unknown = 0;
-    while (entries.next()) {
-        var field = entries.getValue('target_field');
-        var result = evaluate(entries.getValue('target_table') || current.getValue('target_table'), field);
-        if (result == 'indexed') return;
-        if (result == 'missing') missing.push(field);
-        else unknown++;
-    }
-    if (missing.length == 0 || unknown > 0) return;
+    var map = new GlideRecord('sys_transform_map');
+    map.addQuery('active', true);
+    map.query();
+    while (map.next()) {
+        var entries = new GlideRecord('sys_transform_entry');
+        entries.addQuery('map', map.getUniqueValue());
+        entries.addQuery('coalesce', true);
+        entries.query();
+        var missing = [];
+        var unknown = 0;
+        var indexed = false;
+        while (entries.next() && !indexed) {
+            var field = entries.getValue('target_field');
+            var result = evaluate(entries.getValue('target_table') || map.getValue('target_table'), field);
+            if (result == 'indexed') indexed = true;
+            else if (result == 'missing') missing.push(field);
+            else unknown++;
+        }
+        if (indexed || missing.length == 0 || unknown > 0) continue;
 
-    engine.finding.setCurrentSource(current);
-    engine.finding.setValue('finding_details', 'Target table ' + current.getValue('target_table') + ': no index starts with the coalesce field(s) ' + missing.join(', '));
-    engine.finding.increment();
-})(engine, current);`,
+        engine.finding.setCurrentSource(map);
+        engine.finding.setValue('finding_details', 'Target table ' + map.getValue('target_table') + ': no index starts with the coalesce field(s) ' + missing.join(', '));
+        engine.finding.increment();
+    }
+})(engine);`,
     resolutionDetails:
         'Add a database index on the coalesce field (or a composite index starting with one of the coalesce fields) on the target table, or coalesce on a field that is already indexed.',
 })

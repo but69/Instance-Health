@@ -4,6 +4,15 @@ Dropped (without number since the renumbering on 2026-11-06): Java package colle
 
 ## Open items (as of 2026-11-06)
 
+- **First suite run (SR00014613, 2026-11-06):** 770 findings; 66 of 73 checks as expected (all positive test records found, no negative one, real findings as in the dry runs). Deviations and fixes, deployed the same day:
+  - IH-017 aborted: `addActiveQuery()` is not allowed on `GlideAggregate` in the app scope → `addQuery('active', true)`. Dry run afterwards: 167 findings.
+  - IH-049, IH-054: the engine skips the base table `task` ("exclusion list or too large to scan") and only scans child tables, so the test records of class `task` were missed → `ScriptOnlyCheck` (new keys 079, 080).
+  - IH-016, IH-037: the suite scan did not evaluate the 6 ServiceNow transform maps and the custom rule "AMAG - Vehicle Registration - Create CI", although point scans on these records produced the findings; no log entry explains it → `ScriptOnlyCheck` (new keys 077, 078). The old TableChecks (keys 017, 038, 051, 056) were deleted by the build.
+  - IH-029 test data: a platform job (runs as `admin`, seen at 12:30) creates "Unknown" model assets for computers without asset, including virtual ones, which is what IH-029 reports. The negative case is now a physical computer; the remove script also deletes these automatically created assets.
+  - IH-035: 11 instead of 8; 3 knowledge bases are not readable for the admin user (user criteria) but are seen by the scan engine. Real findings.
+  - Noted for review: IH-012 has 24 real findings in generated configuration records (`sys_one_extend_resource_mapping`), IH-009 2 in generated GAF jobs; they count as custom.
+- Second suite run after the fixes started 2026-11-06; checks are marked `validated` after it.
+
 - IH-001 to IH-008 are deployed to bithawkdemo1. The user ran them; results look fine, but the demo instance has few findings.
 - Batch 2 (IH-009 to IH-015, IH-017, IH-018) and the helper `IHScanUtil` are built and deployed to bithawkdemo1 (2026-11-06). IH-003 now uses the helper. IH-016 was built afterwards (option 1, reduced check) and deployed the same day.
 - Batches 3 to 6 (IH-019 to IH-073) are built and deployed to bithawkdemo1 (2026-11-06).
@@ -40,7 +49,7 @@ Field and table names marked ✔ were verified on bithawkdemo1 (2026-11-05).
 | IH-013 | Before business rules that update or insert other records | Maintenance | manageability | TableCheck (advanced) | built |
 | IH-014 | Global business rules | Performance | performance | TableCheck (advanced) | built |
 | IH-015 | Script includes with duplicate names | Maintenance | manageability | ScriptOnlyCheck | built |
-| IH-016 | Transform map coalesces on non-indexed fields | Performance | performance | TableCheck (advanced) | built |
+| IH-016 | Transform map coalesces on non-indexed fields | Performance | performance | ScriptOnlyCheck | built |
 | IH-017 | Tables without ACLs | Administration | security | ScriptOnlyCheck | built |
 | IH-018 | Read ACLs with GlideRecord / GlideAggregate | Performance | performance | TableCheck (advanced) | built |
 | IH-019 | SLA engine runs synchronously | Performance | performance | ScriptOnlyCheck | built |
@@ -61,7 +70,7 @@ Field and table names marked ✔ were verified on bithawkdemo1 (2026-11-05).
 | IH-034 | Update sets with duplicate names | Maintenance | manageability | ScriptOnlyCheck | built |
 | IH-035 | Knowledge bases without retire workflow | Administration | manageability | TableCheck (advanced) | built |
 | IH-036 | Business rule call stack logging enabled | Performance | performance | TableCheck | built |
-| IH-037 | Script includes that update current | Maintenance | manageability | TableCheck (advanced) | built |
+| IH-037 | Script includes that update current | Maintenance | manageability | ScriptOnlyCheck | built |
 | IH-038 | Business rules with complex script conditions | Maintenance | manageability | TableCheck (advanced) | built |
 | IH-039 | Inactive users in groups | Administration | security | TableCheck | built |
 | IH-040 | Groups with an inactive manager | Administration | manageability | TableCheck | built |
@@ -73,12 +82,12 @@ Field and table names marked ✔ were verified on bithawkdemo1 (2026-11-05).
 | IH-046 | Catalog tasks without requested item or request | Administration | manageability | TableCheck | built |
 | IH-047 | Active scheduled jobs run as a deleted user | Administration | manageability | TableCheck (advanced) | built |
 | IH-048 | Active scheduled jobs run as an inactive user | Administration | security | TableCheck (advanced) | built |
-| IH-049 | Active tasks opened by an inactive user | Administration | manageability | TableCheck | built |
+| IH-049 | Active tasks opened by an inactive user | Administration | manageability | ScriptOnlyCheck | built |
 | IH-050 | System locale is valid | Administration | manageability | ScriptOnlyCheck | built |
 | IH-051 | Single currency mode configured correctly | Administration | manageability | ScriptOnlyCheck | built |
 | IH-052 | Resolved fields set by mark_resolved | Administration | manageability | ScriptOnlyCheck | built |
 | IH-053 | Closed fields set on problems | Administration | manageability | ScriptOnlyCheck | built |
-| IH-054 | Active tasks with a closed date | Administration | manageability | TableCheck | built |
+| IH-054 | Active tasks with a closed date | Administration | manageability | ScriptOnlyCheck | built |
 | IH-055 | Update sets without description | Maintenance | manageability | TableCheck | built |
 | IH-056 | Share of active CIs not discovered or updated for 60 days | Administration | manageability | ScriptOnlyCheck | built |
 | IH-057 | Scripted REST resources without security | Administration | security | TableCheck (advanced) | built |
