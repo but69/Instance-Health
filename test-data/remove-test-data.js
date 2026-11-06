@@ -69,6 +69,8 @@ runInGlobal(function removeInstanceHealthTestData() {
     deleteWhere('sys_script_client', 'name', 'STARTSWITH', MARKER, true);
     // Match UI scripts by description: in a scoped app the name gets rewritten
     deleteWhere('sys_ui_script', 'description', 'STARTSWITH', MARKER, true);
+    deleteWhere('sys_transform_entry', 'map.name', 'STARTSWITH', MARKER, true);
+    deleteWhere('sys_transform_map', 'name', 'STARTSWITH', MARKER, true);
     deleteWhere('sys_script_include', 'name', 'STARTSWITH', 'IHTest', true);
     deleteWhere('sys_script', 'name', 'STARTSWITH', MARKER, true);
     deleteWhere('sys_security_acl', 'description', 'STARTSWITH', MARKER, true);

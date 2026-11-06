@@ -1,7 +1,7 @@
 // Instance Health: create test data for the scan checks
 // Run in System Definition > Scripts - Background, scope global, as admin.
 // Creates positive (must be found) and negative (must not be found) records for
-// IH-001 to IH-003, IH-005, IH-007, IH-009 to IH-016 and IH-019. Every record is marked
+// IH-001 to IH-003, IH-005, IH-007, IH-009 to IH-017 and IH-019. Every record is marked
 // with IH-TEST (script includes: name starts with IHTest) and captured in the update set
 // "Instance Health - Test Data". Records are created in global with a customer update,
 // so they count as custom for the checks that only report custom code.
@@ -281,6 +281,27 @@ runInGlobal(function createInstanceHealthTestData() {
     tryInsert('IH-016 duplicate 2', 'sys_script_include', scriptInclude('IHTestDuplicate', 'IH-016 duplicate name (2)', '        return 2;'));
     insert('sys_script_include', scriptInclude('IHTestUnique', 'IH-016 unique name', '        return 0;'));
 
+    // IH-017: transform maps coalescing on fax_phone (no index, positive) and name (indexed, negative).
+    // The maps are never run; their source is the import set row base table.
+    var coalesceCases = [['IH-017 coalesce without index', 'fax_phone'], ['IH-017 coalesce with index', 'name']];
+    for (var c = 0; c < coalesceCases.length; c++) {
+        var mapId = insert('sys_transform_map', {
+            name: MARKER + ' ' + coalesceCases[c][0],
+            source_table: 'sys_import_set_row',
+            target_table: 'cmn_location',
+            active: 'true',
+            run_business_rules: 'false'
+        });
+        insert('sys_transform_entry', {
+            map: mapId,
+            source_table: 'sys_import_set_row',
+            source_field: 'sys_id',
+            target_table: 'cmn_location',
+            target_field: coalesceCases[c][1],
+            coalesce: 'true'
+        });
+    }
+
     // IH-019: read ACLs on a non-existent field, with a query (positive) and without (negative)
     var readOperation = new GlideRecord('sys_security_operation');
     if (readOperation.get('name', 'read')) {
@@ -327,6 +348,7 @@ runInGlobal(function createInstanceHealthTestData() {
     gs.print('  IH-014: "' + MARKER + ' IH-014 before rule with update" found (line 4), the other two not found');
     gs.print('  IH-015: "' + MARKER + ' IH-015 global rule active" found, inactive one not found');
     gs.print('  IH-016: both IHTestDuplicate script includes found, IHTestUnique not found');
+    gs.print('  IH-017: map "' + MARKER + ' IH-017 coalesce without index" found (fax_phone), "... with index" not found');
     gs.print('  IH-018: no test data; e.g. x_bits2_quackology_family found, incident not found');
     gs.print('  IH-019: ACL cmn_location.u_ih_test_query found (line 1), cmn_location.u_ih_test_role not found');
     gs.print('  IH-001 to IH-009 test script includes and client scripts must not appear in IH-010 to IH-016.');

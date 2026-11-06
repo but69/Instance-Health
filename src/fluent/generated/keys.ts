@@ -69,6 +69,10 @@ declare global {
                         table: 'scan_script_only_check'
                         id: 'dd3ba9ade9c647dab478a72dfee30da8'
                     }
+                    'ih-017-coalesce-without-index': {
+                        table: 'scan_table_check'
+                        id: 'c70b096611cd4d2baef46640278e9175'
+                    }
                     'ih-018-tables-without-acls': {
                         table: 'scan_script_only_check'
                         id: 'dcf915e944484e419a958babd6601b8b'

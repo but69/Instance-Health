@@ -5,7 +5,7 @@ Dropped: IH-006 Java package collection mode (2026-11-05).
 ## Open items (as of 2026-11-06)
 
 - IH-001 to IH-009 are deployed to bithawkdemo1. The user ran them; results look fine, but the demo instance has few findings.
-- Batch 2 (IH-010 to IH-016, IH-018, IH-019) and the helper `IHScanUtil` are built and deployed to bithawkdemo1 (2026-11-06). IH-003 now uses the helper. IH-017 is on hold (see there).
+- Batch 2 (IH-010 to IH-016, IH-018, IH-019) and the helper `IHScanUtil` are built and deployed to bithawkdemo1 (2026-11-06). IH-003 now uses the helper. IH-017 was built afterwards (option 1, reduced check), not deployed yet; its test maps are in `create-test-data.js` but not yet on the instance.
 - Test data refreshed on 2026-11-06 for batch 1 and 2: 51 records, all in global, including the 2 IH-019 ACLs and both IH-016 duplicates (no warnings). Next: the user runs all checks and sends the findings for comparison.
 - `remove-test-data.js` ends with the error `"g_tableName" is not defined` when it restores the user's app after deleting the test update set (2026-11-06). The deletion itself is complete and the app is restored; cause not yet investigated.
 - Test data is on bithawkdemo1 (created 2026-11-06 with `now-sdk exec --file test-data/create-test-data.js --scope global --auth but-o`, update set "Instance Health - Test Data", global, 31 updates). Next: run the checks, compare with the expected findings, then run `remove-test-data.js`. Mark checks `validated` afterwards.
@@ -35,7 +35,7 @@ Field and table names marked ✔ were verified on bithawkdemo1 (2026-11-05).
 | IH-014 | Before business rules that update or insert other records | Maintenance | manageability | TableCheck (advanced) | built |
 | IH-015 | Global business rules | Performance | performance | TableCheck (advanced) | built |
 | IH-016 | Script includes with duplicate names | Maintenance | manageability | ScriptOnlyCheck | built |
-| IH-017 | Transform map coalesces on non-indexed fields | Performance | performance | TableCheck (advanced) | specified (on hold) |
+| IH-017 | Transform map coalesces on non-indexed fields | Performance | performance | TableCheck (advanced) | built |
 | IH-018 | Tables without ACLs | Administration | security | ScriptOnlyCheck | built |
 | IH-019 | Read ACLs with GlideRecord / GlideAggregate | Performance | performance | TableCheck (advanced) | built |
 
@@ -163,10 +163,13 @@ Measured on bithawkdemo1 (2026-11-06): no OOB Instance Scan check covers these t
 
 ## IH-017 Transform map coalesces on non-indexed fields
 
-- **Ideal:** Every coalesce field is indexed on the target table.
-- **Logic:** `sys_transform_entry` where `coalesce=true` ✔ (`map`, `target_table`, `target_field` ✔). Finding if no `sys_index` ✔ on the table that defines the field (walk up the hierarchy) has `target_field` as first column (`logical_table_name`, `col_name_string` ✔). `sys_id` counts as indexed. Link to the transform map.
+- **Ideal:** Every active transform map coalesces on at least one indexed field.
+- **Logic (built 2026-11-06, option 1 "reduced check"):** TableCheck on `sys_transform_map` where `active=true` ✔. For each coalesce entry (`sys_transform_entry`, `coalesce=true` ✔): find the table that defines the field (`sys_dictionary`, up the `super_class` chain), then the first table from there upwards with physical indexes in `v_db_index` ✔ (`table_name`, `column_names` like `[name;sys_id]`). Field is indexed if it is the first column of an index; `sys_id` always is. If that table is not the defining table, the field is stored under an unknown physical column name and counts as unknown (e.g. `cmdb_ci_computer.serial_number` stored in `cmdb`). The map is a finding only if no coalesce field is indexed and none is unknown (no finding when unsure). One finding per map, linked to the transform map, listing the unindexed fields.
+- **Changed from per field to per map (2026-11-06):** the coalesce lookup uses all coalesce fields together, so one indexed field is enough. Per field, maps like the `sys_choice` translation map were reported for `element`, `value`, `dependent_value` although `name` is indexed.
+- **Option 2 rejected (2026-11-06):** a cross-scope privilege for `sys_storage_alias` cannot work: the table has "Can read" from other scopes switched off (`read_access=0`), which a privilege cannot override; access tracking created no privilege record for it, unlike for all other tables the app reads. Agreed fallback: option 1.
+- **Prototype on bithawkdemo1 (2026-11-06):** 37 maps with coalesce: 30 covered, 6 findings (HR Profile, HR Job Profile, Notification → `incident.correlation_id`, Rate Model Line, HR Location, HR Department), 1 unknown (Computer → CMDB).
 - **Measured:** 70 coalesce entries.
-- **On hold (2026-11-06): no reliable index source from the app scope.** `sys_index` holds only the 37 custom-created indexes (0 for `task`, `incident`, `sys_user`), so every OOB field would be reported. `v_db_index` (query by `table_name`) lists all physical indexes, but with physical column names: fields of extended tables are stored as `a_ref_N` / `a_str_N` in the base table (`task`), and the mapping `sys_storage_alias` (222,212 rows in global) returns no rows from the app scope. CMDB tables return no indexes at all (partitioned storage). Options to discuss: a global helper outside the app, a cross-scope privilege for `sys_storage_alias`, or a reduced check (only fields stored under their own name, CMDB excluded).
+- **Was on hold (2026-11-06): no reliable index source from the app scope.** `sys_index` holds only the 37 custom-created indexes (0 for `task`, `incident`, `sys_user`), so every OOB field would be reported. `v_db_index` (query by `table_name`) lists all physical indexes, but with physical column names: fields of extended tables are stored as `a_ref_N` / `a_str_N` in the base table (`task`), and the mapping `sys_storage_alias` (222,212 rows in global) returns no rows from the app scope. CMDB tables return no indexes at all (partitioned storage). Options to discuss: a global helper outside the app, a cross-scope privilege for `sys_storage_alias`, or a reduced check (only fields stored under their own name, CMDB excluded).
 - **Resolution:** Add an index on the coalesce field(s), or a composite index for multiple coalesce fields.
 
 ## IH-018 Tables without ACLs

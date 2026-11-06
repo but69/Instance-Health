@@ -151,6 +151,90 @@ export const ih015GlobalBusinessRules = TableCheck({
         'Move shared functions into a script include, and move table logic into a business rule on the specific table.',
 })
 
+// IH-017: per active transform map, finding if none of its coalesce fields starts a database index.
+// Indexes come from v_db_index (physical names). Fields whose physical column name is unknown
+// (child table stored in its parent, e.g. CMDB) cannot be checked and are skipped.
+export const ih017CoalesceWithoutIndex = TableCheck({
+    $id: Now.ID['ih-017-coalesce-without-index'],
+    name: 'IH-017 Transform map coalesces on non-indexed fields',
+    active: true,
+    category: 'performance',
+    priority: '3',
+    shortDescription: 'Finds active transform maps whose coalesce fields have no database index',
+    description:
+        'For every import row, coalesce looks up an existing target record by the coalesce fields. Without an index this is a full table scan. A transform map is reported when none of its coalesce fields is the first column of an index on the target table. Fields of child tables that are stored in a parent table (for example CMDB classes) cannot be checked and are skipped. Ideal state: every transform map coalesces on at least one indexed field.',
+    table: 'sys_transform_map',
+    conditions: 'active=true',
+    advanced: true,
+    script: `(function(engine, current) {
+    var entries = new GlideRecord('sys_transform_entry');
+    entries.addQuery('map', current.getUniqueValue());
+    entries.addQuery('coalesce', true);
+    entries.query();
+    if (!entries.hasNext()) return;
+
+    var indexCache = {};
+    function firstIndexColumns(table) {
+        if (indexCache.hasOwnProperty(table)) return indexCache[table];
+        var columns = [];
+        var idx = new GlideRecord('v_db_index');
+        idx.addQuery('table_name', table);
+        idx.query();
+        while (idx.next()) {
+            var names = (idx.getValue('column_names') || '').replace(/^\\[|\\]$/g, '');
+            if (names) columns.push(names.split(';')[0]);
+        }
+        indexCache[table] = columns;
+        return columns;
+    }
+    function parentOf(table) {
+        var obj = new GlideRecord('sys_db_object');
+        return obj.get('name', table) && obj.getValue('super_class') ? obj.super_class.name + '' : '';
+    }
+    function definingTable(table, field) {
+        for (var t = table, depth = 0; t && depth < 20; t = parentOf(t), depth++) {
+            var dict = new GlideRecord('sys_dictionary');
+            dict.addQuery('name', t);
+            dict.addQuery('element', field);
+            dict.setLimit(1);
+            dict.query();
+            if (dict.hasNext()) return t;
+        }
+        return '';
+    }
+    // 'indexed', 'missing' or 'unknown'
+    function evaluate(table, field) {
+        if (field == 'sys_id') return 'indexed';
+        var defining = definingTable(table, field);
+        if (!defining) return 'unknown';
+        for (var t = defining, depth = 0; t && depth < 20; t = parentOf(t), depth++) {
+            var columns = firstIndexColumns(t);
+            if (columns.length == 0) continue;
+            if (t != defining) return 'unknown';
+            return columns.indexOf(field) > -1 ? 'indexed' : 'missing';
+        }
+        return 'unknown';
+    }
+
+    var missing = [];
+    var unknown = 0;
+    while (entries.next()) {
+        var field = entries.getValue('target_field');
+        var result = evaluate(entries.getValue('target_table') || current.getValue('target_table'), field);
+        if (result == 'indexed') return;
+        if (result == 'missing') missing.push(field);
+        else unknown++;
+    }
+    if (missing.length == 0 || unknown > 0) return;
+
+    engine.finding.setCurrentSource(current);
+    engine.finding.setValue('finding_details', 'Target table ' + current.getValue('target_table') + ': no index starts with the coalesce field(s) ' + missing.join(', '));
+    engine.finding.increment();
+})(engine, current);`,
+    resolutionDetails:
+        'Add a database index on the coalesce field (or a composite index starting with one of the coalesce fields) on the target table, or coalesce on a field that is already indexed.',
+})
+
 // IH-019: database queries in read ACL scripts run for every record and field that is read
 export const ih019ReadAclQueries = TableCheck({
     $id: Now.ID['ih-019-read-acl-queries'],
