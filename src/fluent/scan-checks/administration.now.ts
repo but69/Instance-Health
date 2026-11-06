@@ -6,7 +6,7 @@ export const ih001PublicReports = TableCheck({
     name: 'IH-001 Reports published to public',
     active: true,
     category: 'security',
-    priority: '2',
+    priority: '1',
     shortDescription: 'Finds reports that are published to public',
     description:
         'Published reports get a public URL and can be viewed without logging in. Ideal state: no report is published to public.',
@@ -23,7 +23,7 @@ export const ih018TablesWithoutAcls = ScriptOnlyCheck({
     name: 'IH-017 Tables without ACLs',
     active: true,
     category: 'security',
-    priority: '2',
+    priority: '1',
     shortDescription: 'Finds tables that are not secured by any ACL, neither their own nor a parent table\'s',
     description:
         'A table without record ACLs is only protected by wildcard rules and the default deny setting. Checks all tables; ACLs on a parent table count as protection. Table rotation shards (for example syslog0001) are ignored because they are covered by their base table. Ideal state: every table is secured by ACLs.',
@@ -202,7 +202,7 @@ export const ih070UpdateSetAudit = ScriptOnlyCheck({
     name: 'IH-067 Update set table not audited',
     active: true,
     category: 'security',
-    priority: '2',
+    priority: '3',
     shortDescription: 'Checks that changes to update sets are audited',
     description:
         'Without auditing on sys_update_set, nobody can trace who changed the state, name or content of an update set. Ideal state: auditing is enabled on the sys_update_set table.',
@@ -298,7 +298,7 @@ export const ih049JobsRunAsDeletedUser = TableCheck({
     name: 'IH-047 Active scheduled jobs run as a deleted user',
     active: true,
     category: 'manageability',
-    priority: '3',
+    priority: '2',
     shortDescription: 'Finds active scheduled jobs whose Run as user does not exist',
     description:
         'A scheduled job that runs as a user who no longer exists may fail or run with unexpected rights. The internal users "system" and "maint" are accepted. ServiceNow jobs are included. Ideal state: every active scheduled job runs as an existing user.',
@@ -372,7 +372,7 @@ export const ih052SystemLocale = ScriptOnlyCheck({
     name: 'IH-050 System locale is valid',
     active: true,
     category: 'manageability',
-    priority: '3',
+    priority: '2',
     shortDescription: 'Checks that glide.system.locale is empty or a valid locale',
     description:
         'An invalid system locale breaks date, time and number formats. The value must be empty (platform default) or a language code with an optional country code, for example de.CH. Scoped scripts cannot read the Java locale list, so the check uses ISO language format and the countries in core_country. Ideal state: glide.system.locale is empty or a valid locale.',
@@ -405,7 +405,7 @@ export const ih053SingleCurrencyMode = ScriptOnlyCheck({
     name: 'IH-051 Single currency mode configured correctly',
     active: true,
     category: 'manageability',
-    priority: '3',
+    priority: '2',
     shortDescription: 'Checks the single currency settings against the active currencies',
     description:
         'With single currency mode on, all currency values use glide.i18n.single_currency.code, which must be an active currency. With only one active currency, single currency mode should be on, otherwise users can enter amounts in currencies that are not maintained. Ideal state: the mode and the code match the active currencies.',
@@ -451,7 +451,7 @@ export const ih054MarkResolved = ScriptOnlyCheck({
     name: 'IH-052 Resolved fields set by mark_resolved',
     active: true,
     category: 'manageability',
-    priority: '3',
+    priority: '2',
     shortDescription: 'Checks the mark_resolved rule and resolved incidents without Resolved or Resolved by',
     description:
         'The business rule mark_resolved fills Resolved and Resolved by when an incident is resolved. If it is missing or inactive, resolution reporting and SLAs are wrong. Reports the rule when it is missing or inactive, and every resolved or closed incident without these fields. Ideal state: the rule is active and every resolved incident has both fields.',
@@ -497,7 +497,7 @@ export const ih055ProblemClosedFields = ScriptOnlyCheck({
     name: 'IH-053 Closed fields set on problems',
     active: true,
     category: 'manageability',
-    priority: '3',
+    priority: '2',
     shortDescription: 'Checks the problem closure rule and closed problems without Closed or Closed by',
     description:
         'When a problem is closed, Closed and Closed by must be set (by the business rule "Update fields on Problem Closure"; older releases used mark_closed). Reports the rule when it is missing or inactive, and every closed problem without these fields. Ideal state: every closed problem has both fields.',
@@ -611,7 +611,7 @@ export const ih059UnsecuredScriptedRest = TableCheck({
     name: 'IH-057 Scripted REST resources without security',
     active: true,
     category: 'security',
-    priority: '2',
+    priority: '1',
     shortDescription: 'Finds custom scripted REST resources that do not require authentication or ACL authorization',
     description:
         'A resource without authentication is public; without ACL authorization any authenticated user can call it. Only custom resources are checked; ServiceNow endpoints are covered by the check "Review Public REST API Endpoints". Ideal state: every custom scripted REST resource requires authentication and ACL authorization.',
@@ -637,7 +637,7 @@ export const ih032CreateAssetRules = ScriptOnlyCheck({
     name: 'IH-031 Create Asset business rules active',
     active: true,
     category: 'manageability',
-    priority: '3',
+    priority: '2',
     shortDescription: 'Checks that the Asset Management rules that create assets for CIs are active',
     description:
         'The business rules "Create Asset on insert" and "Create asset on model change" on cmdb_ci create the asset for a new CI or a CI whose model changes. If they are inactive, CMDB and asset data drift apart. No finding if Asset Management is not installed. Ideal state: both rules are active.',
@@ -707,7 +707,7 @@ export const ih034ImpersonationInProduction = ScriptOnlyCheck({
     name: 'IH-033 Impersonation in production',
     active: true,
     category: 'security',
-    priority: '2',
+    priority: '1',
     shortDescription: 'Checks that impersonation is switched off on production instances',
     description:
         'Impersonation lets a user act with the rights and data access of another user. On a production instance (glide.installation.production = true) the impersonate button should be disabled (glide.ui.impersonate_button.enable = false). The finding lists the users with the impersonator role. Ideal state: no impersonation in production.',
@@ -778,7 +778,7 @@ export const ih040InactiveGroupMembers = TableCheck({
     name: 'IH-039 Inactive users in groups',
     active: true,
     category: 'security',
-    priority: '2',
+    priority: '3',
     shortDescription: 'Finds inactive users that are still members of active groups',
     description:
         'Inactive members keep their group memberships, distort assignment and approval lists and get their roles back when they are reactivated. Ideal state: active groups have no inactive members.',
@@ -853,7 +853,7 @@ export const ih044RoleGroupsWithoutType = TableCheck({
     name: 'IH-043 Groups with roles without a group type',
     active: true,
     category: 'security',
-    priority: '2',
+    priority: '3',
     shortDescription: 'Finds active groups that grant roles but have no group type',
     description:
         'Groups that grant roles should carry a group type (for example "Authorization"), so role-granting groups can be told apart from assignment groups and reviewed. Ideal state: every active group with roles has a group type.',

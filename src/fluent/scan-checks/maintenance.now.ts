@@ -45,7 +45,7 @@ export const ih008ImportSetRowGrowth = ScriptOnlyCheck({
     name: 'IH-007 Import set rows over 5 million',
     active: true,
     category: 'performance',
-    priority: '3',
+    priority: '2',
     shortDescription: 'Reports the 10 largest import runs when import set rows exceed 5 million',
     description:
         'Large import set tables slow down imports and cleanup and use database space. Counts all import set rows together; if there are more than 5 million, the 10 import runs with the most rows are reported. Ideal state: fewer than 5 million import set rows.',
@@ -124,7 +124,7 @@ export const ih009GsSqlUsage = ColumnTypeCheck({
     name: 'IH-008 Scripts using gs.sql',
     active: true,
     category: 'upgradability',
-    priority: '2',
+    priority: '1',
     shortDescription: 'Finds scripts that call gs.sql',
     description:
         'gs.sql is undocumented, bypasses ACLs and can lock tables. Ideal state: no script uses gs.sql.',
@@ -195,7 +195,7 @@ export const ih014BeforeRuleUpdates = TableCheck({
     name: 'IH-013 Before business rules that update or insert records',
     active: true,
     category: 'manageability',
-    priority: '3',
+    priority: '2',
     shortDescription: 'Finds custom before business rules that call update() or insert()',
     description:
         'Before business rules should only change the current record, which is saved anyway. Calling update() or insert() there writes other records before the current one is saved, or saves current twice. Only custom rules are checked; every matching line is listed. Ideal state: before rules only set values on current.',
@@ -219,7 +219,7 @@ export const ih016DuplicateScriptIncludes = ScriptOnlyCheck({
     name: 'IH-015 Script includes with duplicate names',
     active: true,
     category: 'manageability',
-    priority: '3',
+    priority: '2',
     shortDescription: 'Finds script includes that share their API name with another script include',
     description:
         'When two script includes have the same API name (same name in the same scope), it is undefined which one is loaded. The same name in different scopes is allowed and not reported. A duplicate group is reported when at least one member is custom; each member is a finding. Ideal state: every API name is unique.',
@@ -302,7 +302,7 @@ export const ih078IndirectCurrentUpdate = ScriptOnlyCheck({
     name: 'IH-037 Script includes that update current',
     active: true,
     category: 'manageability',
-    priority: '3',
+    priority: '2',
     shortDescription: 'Finds custom business rules that pass current to a script include which updates it',
     description:
         'Calling update() on current inside a business rule saves the record again and runs all business rules a second time. When the call is hidden in a script include, it is not found by the current.update() check. Reports custom business rules that pass current to a script include whose functions call update() on a parameter. Heuristic: updates through stored fields (this.record.update()) or nested calls are not found. Ideal state: business rules never update current through a script include.',
@@ -497,7 +497,7 @@ export const ih064ScheduledJobErrors = TableCheck({
     name: 'IH-062 Scheduled jobs with errors',
     active: true,
     category: 'manageability',
-    priority: '3',
+    priority: '2',
     shortDescription: 'Finds scheduled jobs whose last run failed or that have an error count',
     description:
         'A failing scheduled job silently stops doing its work (cleanup, imports, calculations). Uses the error information of the scheduler trigger (sys_trigger). Ideal state: scheduled jobs run without errors.',
@@ -587,7 +587,7 @@ export const ih072CurrentUpdateInBusinessRules = TableCheck({
     name: 'IH-069 current.update() in business rules',
     active: true,
     category: 'manageability',
-    priority: '3',
+    priority: '2',
     shortDescription: 'Finds custom after, async and display business rules that call current.update()',
     description:
         'current.update() in a business rule saves the record again and runs all business rules a second time, which can cause loops and duplicate notifications. Before rules are covered by IH-013. Only custom business rules are checked; every matching line is listed. Ideal state: no business rule calls current.update().',
@@ -612,7 +612,7 @@ export const ih022UpgradeSkippedItems = ScriptOnlyCheck({
     name: 'IH-021 Skipped items in the last upgrade',
     active: true,
     category: 'upgradability',
-    priority: '2',
+    priority: '1',
     shortDescription: 'Reports the last platform upgrade if skipped items still need a review',
     description:
         'An upgrade skips ServiceNow records that the customer changed. Skipped records that differ from the new version, skipped records with errors and manual merges must be reviewed, otherwise fixes of the upgrade are missing. Skipped records that already match the new version are not counted. Uses the summary of the last platform upgrade. Ideal state: no skipped item needs a review.',
