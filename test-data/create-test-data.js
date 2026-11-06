@@ -6,7 +6,23 @@
 // IH-004 and IH-008 are not covered (need a failing PA job / 5 million rows).
 // Remove everything again with remove-test-data.js.
 
-(function createInstanceHealthTestData() {
+// Records and update sets follow the user's current application, not the script scope.
+// Run in global so nothing lands in a scoped app (e.g. Instance Health itself), and
+// always restore the user's application afterwards (this also restores its update set).
+function runInGlobal(fn) {
+    var previousApp = gs.getCurrentApplicationId();
+    gs.setCurrentApplicationId('global');
+    try {
+        if (gs.getCurrentApplicationId() != 'global')
+            throw new Error('Could not switch the current application to global.');
+        fn();
+    } finally {
+        if (previousApp && previousApp != 'global')
+            gs.setCurrentApplicationId(previousApp);
+    }
+}
+
+runInGlobal(function createInstanceHealthTestData() {
     var MARKER = 'IH-TEST';
     var UPDATE_SET_NAME = 'Instance Health - Test Data';
     var IH003_POSITIVE_TABLE = 'cmn_building';
@@ -38,25 +54,34 @@
         return;
     }
 
-    // Capture everything in a dedicated update set
-    var updateSetApi = new GlideUpdateSet();
-    var updateSetId = updateSetApi.create(UPDATE_SET_NAME);
-    updateSetApi.set(updateSetId);
+    // Capture everything in a dedicated global update set
+    // (GlideUpdateSet.create() returns nothing on bithawkdemo1, so insert it directly)
+    var updateSet = new GlideRecord('sys_update_set');
+    updateSet.initialize();
+    updateSet.setValue('name', UPDATE_SET_NAME);
+    updateSet.setValue('application', 'global');
+    updateSet.setValue('state', 'in progress');
+    updateSet.setValue('description', MARKER + ': test data for Instance Health, safe to delete');
+    var updateSetId = updateSet.insert();
+    if (!updateSetId)
+        throw new Error('Could not create update set "' + UPDATE_SET_NAME + '".');
+    new GlideUpdateSet().set(updateSetId);
 
-    // IH-001: published report (positive) and unpublished report (negative)
+    // IH-001: published report (positive) and unpublished report (negative).
+    // is_published is set by the OOB rule "Report roles updated - is_publish field" from roles.
     var publicReport = insert('sys_report', {
         title: MARKER + ' IH-001 public report',
         table: 'incident',
         type: 'list',
         field_list: 'number,short_description',
-        is_published: 'true'
+        roles: 'public'
     });
     var privateReport = insert('sys_report', {
         title: MARKER + ' IH-001 private report',
         table: 'incident',
         type: 'list',
         field_list: 'number,short_description',
-        is_published: 'false'
+        roles: ''
     });
 
     // IH-002: synthetic report stats, 8 s (positive), 3 s (negative), 8 s without recent runs (negative)
@@ -151,8 +176,12 @@
         script: 'var IHTestGsSqlCommented = Class.create();\nIHTestGsSqlCommented.prototype = {\n    initialize: function() {},\n    neverCalled: function() {\n        // return gs.sql(\'SELECT 1\');\n        /* var rows = gs.sql(\'SELECT 2\'); */\n        return null;\n    },\n    type: \'IHTestGsSqlCommented\'\n};'
     });
 
-    gs.print('Created ' + created.length + ' test records in update set "' + UPDATE_SET_NAME + '".');
-    gs.print('Your current update set is now "' + UPDATE_SET_NAME + '". Switch back before doing other work.');
+    // Check that the records really landed in global and the public report is published
+    var check = new GlideRecord('sys_report');
+    if (!check.get(publicReport) || String(check.is_published) != 'true' || check.getValue('sys_scope') != 'global')
+        gs.print('WARNING: public report is not published or not in global, IH-001 test is invalid.');
+
+    gs.print('Created ' + created.length + ' test records in global, update set "' + UPDATE_SET_NAME + '".');
     gs.print('');
     gs.print('Expected findings after running the checks:');
     gs.print('  IH-001: "' + MARKER + ' IH-001 public report" found, private report not found');
@@ -163,4 +192,4 @@
     gs.print('  IH-009: script include IHTestGsSqlUsed found, IHTestGsSqlCommented not found');
     gs.print('');
     gs.print('Existing custom client scripts may change the IH-003 counts; check ' + IH003_NEGATIVE_TABLE + ' if it is reported.');
-})();
+});

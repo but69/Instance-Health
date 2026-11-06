@@ -2,10 +2,11 @@
 
 Dropped: IH-006 Java package collection mode (2026-11-05).
 
-## Open items (as of 2026-11-05)
+## Open items (as of 2026-11-06)
 
 - All 8 checks are deployed to bithawkdemo1. The user ran them; results look fine, but the demo instance has few findings.
-- Next: user runs `test-data/create-test-data.js` on bithawkdemo1, runs the checks, compares with the expected findings, then runs `remove-test-data.js`. Mark checks `validated` afterwards. The test scripts have not been run yet.
+- Test data is on bithawkdemo1 (created 2026-11-06 with `now-sdk exec --file test-data/create-test-data.js --scope global --auth but-o`, update set "Instance Health - Test Data", global, 31 updates). Next: run the checks, compare with the expected findings, then run `remove-test-data.js`. Mark checks `validated` afterwards.
+- Lessons from the first test data run (2026-11-06): records and update sets follow the user's current application, not the script scope, so the first run landed in the Instance Health app scope (cleaned up). Both scripts now switch to global and restore the app. `GlideUpdateSet.create()` returns nothing, so the update set is inserted directly. A report counts as published only if `roles` contains `public` (OOB rule "Report roles updated - is_publish field" overwrites `is_published`). `now-sdk exec` sometimes reports "not authorized" or a connection reset although the script ran: check the instance before running it again.
 - Proposed, not yet agreed: make thresholds (IH-002 5 s, IH-003 10 scripts, IH-008 5 million rows) configurable as system properties. This would also allow testing IH-008 with a low threshold.
 - Proposed, not yet agreed: IH-004 should also flag active jobs whose latest run is older than 7 days (seen on bithawkdemo1: latest run 2026-06-12).
 - Proposed, not yet agreed: group all checks in an "Instance Health" suite (needs a `Record()` on the suite table, verify first).
