@@ -21,6 +21,7 @@ ServiceNow Fluent app (scope `x_bits2_inst_hlth`, SDK 4.14.0) that delivers Inst
 - Priority: 2 for security and upgrade risks, 3 for performance and hygiene, unless the catalogue says otherwise.
 - Scripts are inline template strings, ES5 only (`var`, no arrow functions, no template literals inside the script). Escape backslashes in regexes (`\\s`) and check the built XML in `dist/app/update/` after a build.
 - Prefer condition-only `TableCheck` when every matching record is a finding. Use scripts only when needed.
+- Every check belongs to the scan suite "Instance health" (`src/fluent/scan-checks/suite.now.ts`). After adding a check, regenerate the suite file with `node tools/generate-suite.js src/fluent/scan-checks`.
 
 ## Test data
 

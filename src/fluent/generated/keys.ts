@@ -305,6 +305,302 @@ declare global {
                         table: 'sys_script_include'
                         id: 'ab660315d1c14bb184dc5c20bc21f75c'
                     }
+                    'ih-suite-check-001': {
+                        table: 'scan_check_suite_check'
+                        id: '258a69455edc4d888e9a6e2829142418'
+                    }
+                    'ih-suite-check-002': {
+                        table: 'scan_check_suite_check'
+                        id: '627644e2e3e14c768b8b8f202196a007'
+                    }
+                    'ih-suite-check-003': {
+                        table: 'scan_check_suite_check'
+                        id: '469301738e1e48f1aae7c9a984ab7813'
+                    }
+                    'ih-suite-check-004': {
+                        table: 'scan_check_suite_check'
+                        id: 'a1c37b97b69c42b2b94fc38c0585ea42'
+                    }
+                    'ih-suite-check-005': {
+                        table: 'scan_check_suite_check'
+                        id: '264e5964d8d140f6a0b7db70cd84f713'
+                    }
+                    'ih-suite-check-007': {
+                        table: 'scan_check_suite_check'
+                        id: '30ce1696435845bcb509be8d972a7128'
+                    }
+                    'ih-suite-check-008': {
+                        table: 'scan_check_suite_check'
+                        id: '0499d175c20b4bd5a6151bea854314d2'
+                    }
+                    'ih-suite-check-009': {
+                        table: 'scan_check_suite_check'
+                        id: '952dc9c334124312834d72f599066b57'
+                    }
+                    'ih-suite-check-010': {
+                        table: 'scan_check_suite_check'
+                        id: 'f18f82f9d93344588e48a82cadbc7aad'
+                    }
+                    'ih-suite-check-011': {
+                        table: 'scan_check_suite_check'
+                        id: '91fb3e35925b4ab6a59611e31661573a'
+                    }
+                    'ih-suite-check-012': {
+                        table: 'scan_check_suite_check'
+                        id: '2145858a2b7c4e3bb052b376f6154a6c'
+                    }
+                    'ih-suite-check-013': {
+                        table: 'scan_check_suite_check'
+                        id: '6970035219de46c7b136f013dcb36d6f'
+                    }
+                    'ih-suite-check-014': {
+                        table: 'scan_check_suite_check'
+                        id: '5747d8cbe8194594a5698c4815094c31'
+                    }
+                    'ih-suite-check-015': {
+                        table: 'scan_check_suite_check'
+                        id: '07a1aa3792f04f17b9cbd85df8bb451e'
+                    }
+                    'ih-suite-check-016': {
+                        table: 'scan_check_suite_check'
+                        id: '9201f16cbf5f40278b2254853b95fa0f'
+                    }
+                    'ih-suite-check-017': {
+                        table: 'scan_check_suite_check'
+                        id: '18285963b66e4d739ec0362c7f4ad8a0'
+                    }
+                    'ih-suite-check-018': {
+                        table: 'scan_check_suite_check'
+                        id: 'b687338157714732a6392b42653d6c4b'
+                    }
+                    'ih-suite-check-019': {
+                        table: 'scan_check_suite_check'
+                        id: 'f167c428f9394407a8b228ac7de3f748'
+                    }
+                    'ih-suite-check-020': {
+                        table: 'scan_check_suite_check'
+                        id: '21cbcd88194c4595a0b633f656aca8d3'
+                    }
+                    'ih-suite-check-021': {
+                        table: 'scan_check_suite_check'
+                        id: '7d0989ab47d34b6c82d0e1e92f0d1887'
+                    }
+                    'ih-suite-check-022': {
+                        table: 'scan_check_suite_check'
+                        id: '1946f4f5dcc5426f8a7677da0dbe6fe7'
+                    }
+                    'ih-suite-check-023': {
+                        table: 'scan_check_suite_check'
+                        id: 'eecf919ef4064c54b25d35a47baeb4f2'
+                    }
+                    'ih-suite-check-024': {
+                        table: 'scan_check_suite_check'
+                        id: 'b7b956658b584277a91007dbd507d05a'
+                    }
+                    'ih-suite-check-025': {
+                        table: 'scan_check_suite_check'
+                        id: 'bf39c8ebab1b472a8751f1b756d7d563'
+                    }
+                    'ih-suite-check-026': {
+                        table: 'scan_check_suite_check'
+                        id: 'f1d6f25e84f642338607d402702ccfd0'
+                    }
+                    'ih-suite-check-027': {
+                        table: 'scan_check_suite_check'
+                        id: '5483ce132f4849d5995102eefbfc45ec'
+                    }
+                    'ih-suite-check-028': {
+                        table: 'scan_check_suite_check'
+                        id: '8027e63c3ba5493d91a6be7646677a97'
+                    }
+                    'ih-suite-check-029': {
+                        table: 'scan_check_suite_check'
+                        id: '0092b784243643cf806b9e0732894752'
+                    }
+                    'ih-suite-check-030': {
+                        table: 'scan_check_suite_check'
+                        id: '586e36b83b504c0faa632ed0bbd87bab'
+                    }
+                    'ih-suite-check-031': {
+                        table: 'scan_check_suite_check'
+                        id: 'f90d4eedb93b4828b3b91ae121a6390c'
+                    }
+                    'ih-suite-check-032': {
+                        table: 'scan_check_suite_check'
+                        id: '4bb818d8dba449ff9edc11a0a3e2996e'
+                    }
+                    'ih-suite-check-033': {
+                        table: 'scan_check_suite_check'
+                        id: '1f1a14b283894fd0b6d35bb0c62ca771'
+                    }
+                    'ih-suite-check-034': {
+                        table: 'scan_check_suite_check'
+                        id: '6a22fe18e6bb4e3f9f44bba76d8a8b52'
+                    }
+                    'ih-suite-check-035': {
+                        table: 'scan_check_suite_check'
+                        id: 'b06f3ae0dccb41e8bcd510e1c0c274ee'
+                    }
+                    'ih-suite-check-036': {
+                        table: 'scan_check_suite_check'
+                        id: '4f81905982f34081bcd36626064bfc36'
+                    }
+                    'ih-suite-check-037': {
+                        table: 'scan_check_suite_check'
+                        id: 'b51fb1816b944b7cb9c15de65a42d3ab'
+                    }
+                    'ih-suite-check-038': {
+                        table: 'scan_check_suite_check'
+                        id: '83bee4a717314a2394dcee01bf47dbf2'
+                    }
+                    'ih-suite-check-039': {
+                        table: 'scan_check_suite_check'
+                        id: 'faf9e7871a064bd49ac03c5ebd6781f0'
+                    }
+                    'ih-suite-check-040': {
+                        table: 'scan_check_suite_check'
+                        id: '661bbfcd1183451fbcd3be83b99346c6'
+                    }
+                    'ih-suite-check-041': {
+                        table: 'scan_check_suite_check'
+                        id: 'f6457a3bc73d479e8e99940a94ce4c62'
+                    }
+                    'ih-suite-check-042': {
+                        table: 'scan_check_suite_check'
+                        id: '1ba56fdfcb9241cc9e67967539752933'
+                    }
+                    'ih-suite-check-043': {
+                        table: 'scan_check_suite_check'
+                        id: 'd62071be3f044177a6393789099b82b7'
+                    }
+                    'ih-suite-check-044': {
+                        table: 'scan_check_suite_check'
+                        id: 'c00520773bbd4131aa79fa1241952e12'
+                    }
+                    'ih-suite-check-046': {
+                        table: 'scan_check_suite_check'
+                        id: '1a1400a718eb46dd99a73edec7a54bf7'
+                    }
+                    'ih-suite-check-047': {
+                        table: 'scan_check_suite_check'
+                        id: '649caabe18a44a86a3b201d29e3c2ac9'
+                    }
+                    'ih-suite-check-048': {
+                        table: 'scan_check_suite_check'
+                        id: '3be5de1725cb44c594563ca11c02f5c6'
+                    }
+                    'ih-suite-check-049': {
+                        table: 'scan_check_suite_check'
+                        id: 'f3339fd51a4c48c082fa277fe2a623de'
+                    }
+                    'ih-suite-check-050': {
+                        table: 'scan_check_suite_check'
+                        id: 'cee2623636904baab20fbb1e678cc41c'
+                    }
+                    'ih-suite-check-051': {
+                        table: 'scan_check_suite_check'
+                        id: 'abe07c7b59a0447f8d3d62d8e191eb33'
+                    }
+                    'ih-suite-check-052': {
+                        table: 'scan_check_suite_check'
+                        id: 'ba44ebbbdb514c64b46004f62bc0836e'
+                    }
+                    'ih-suite-check-053': {
+                        table: 'scan_check_suite_check'
+                        id: '933331abdc984fd7bb305c7b76da4cbb'
+                    }
+                    'ih-suite-check-054': {
+                        table: 'scan_check_suite_check'
+                        id: '3e2aaeedd3ba4e10b1bbbf89200cd0f4'
+                    }
+                    'ih-suite-check-055': {
+                        table: 'scan_check_suite_check'
+                        id: '5ec0f273f605498c9765518b91842b82'
+                    }
+                    'ih-suite-check-056': {
+                        table: 'scan_check_suite_check'
+                        id: '44410019ddce4ce6b5e26d80c78dadff'
+                    }
+                    'ih-suite-check-057': {
+                        table: 'scan_check_suite_check'
+                        id: '9947995500f44252bcdab65382fa8a5a'
+                    }
+                    'ih-suite-check-058': {
+                        table: 'scan_check_suite_check'
+                        id: 'fca19e7bccab4918a0a48e5d551e3f64'
+                    }
+                    'ih-suite-check-059': {
+                        table: 'scan_check_suite_check'
+                        id: 'f38329f4f7de42aa85891dac21cf9e85'
+                    }
+                    'ih-suite-check-060': {
+                        table: 'scan_check_suite_check'
+                        id: '25095d2928c84245b8dd613564aed89c'
+                    }
+                    'ih-suite-check-061': {
+                        table: 'scan_check_suite_check'
+                        id: 'eb834d54d8c24c6cac3dddcac63fe484'
+                    }
+                    'ih-suite-check-062': {
+                        table: 'scan_check_suite_check'
+                        id: 'ae5d1ef8384c4d368528b772b31f2cc7'
+                    }
+                    'ih-suite-check-063': {
+                        table: 'scan_check_suite_check'
+                        id: '4ce324560a454d4ea133541eec90b155'
+                    }
+                    'ih-suite-check-064': {
+                        table: 'scan_check_suite_check'
+                        id: '405a3caea2b54752a877ef300f6e9fa9'
+                    }
+                    'ih-suite-check-065': {
+                        table: 'scan_check_suite_check'
+                        id: 'd23df7d1ecfe4d47a05b5ed934f1274a'
+                    }
+                    'ih-suite-check-067': {
+                        table: 'scan_check_suite_check'
+                        id: '07d4be15efcf4a4ab8d12efc094452c0'
+                    }
+                    'ih-suite-check-068': {
+                        table: 'scan_check_suite_check'
+                        id: 'df365acba9af46679991ae9afb747635'
+                    }
+                    'ih-suite-check-069': {
+                        table: 'scan_check_suite_check'
+                        id: '6f1a07d39fc24fa2959574e2af443a76'
+                    }
+                    'ih-suite-check-070': {
+                        table: 'scan_check_suite_check'
+                        id: '67e87380e8b4412aba26cfe21f449c3d'
+                    }
+                    'ih-suite-check-071': {
+                        table: 'scan_check_suite_check'
+                        id: '60b93dfa1d34419f9b574761ac593623'
+                    }
+                    'ih-suite-check-072': {
+                        table: 'scan_check_suite_check'
+                        id: '235c4c8cf7fa42fd83c20fc5d5a5f45c'
+                    }
+                    'ih-suite-check-073': {
+                        table: 'scan_check_suite_check'
+                        id: '73f0df8e79db4e0194cd624ab7228f71'
+                    }
+                    'ih-suite-check-074': {
+                        table: 'scan_check_suite_check'
+                        id: '1572cf4aefde41b4a9f4106b6c8cf098'
+                    }
+                    'ih-suite-check-075': {
+                        table: 'scan_check_suite_check'
+                        id: 'fd67ec946045416a8f6463ccd6216dfe'
+                    }
+                    'ih-suite-check-076': {
+                        table: 'scan_check_suite_check'
+                        id: '646a222dcc754acd91cf0f0c42a668f0'
+                    }
+                    'ih-suite-instance-health': {
+                        table: 'scan_check_suite'
+                        id: 'b152ddddafa943f0accb08142b5b42d6'
+                    }
                     package_json: {
                         table: 'sys_module'
                         id: '3375b34e79e4474bb7a9d8011059829a'
