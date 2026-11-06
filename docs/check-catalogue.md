@@ -6,7 +6,8 @@ Dropped: IH-006 Java package collection mode (2026-11-05).
 
 - IH-001 to IH-009 are deployed to bithawkdemo1. The user ran them; results look fine, but the demo instance has few findings.
 - Batch 2 (IH-010 to IH-016, IH-018, IH-019) and the helper `IHScanUtil` are built and deployed to bithawkdemo1 (2026-11-06). IH-003 now uses the helper. IH-017 was built afterwards (option 1, reduced check) and deployed the same day.
-- Batch 3 (IH-020 to IH-031) is built and deployed to bithawkdemo1 (2026-11-06).
+- Batch 3 (IH-020 to IH-031) and batch 4 (IH-032 to IH-044) are built and deployed to bithawkdemo1 (2026-11-06).
+- Test data refreshed on 2026-11-06 for batches 1 to 4: 97 records (test users `ih.test.active` / `ih.test.inactive` included), no warnings. Next: the user runs all checks (IH-001 to IH-044) and sends the findings for comparison.
 - Test data refreshed on 2026-11-06 for batches 1 to 3: 68 records, all in global, no warnings. A dry run of the batch 3 checks against it (built scripts, stub engine, no findings written) finds every positive case once and no negative one. Next: the user runs all checks (IH-001 to IH-031) and sends the findings for comparison.
 - Test record names must fit the field length: `sys_script.name` holds 40 characters including the `IH-TEST ` prefix (a longer name was truncated on 2026-11-06 and its lookup failed). Next: the user runs all checks and sends the findings for comparison.
 - `remove-test-data.js` ends with the error `"g_tableName" is not defined` when it restores the user's app after deleting the test update set (2026-11-06). The deletion itself is complete and the app is restored; cause not yet investigated.
@@ -294,7 +295,7 @@ Measured on bithawkdemo1 (2026-11-06): no OOB Instance Scan check covers these t
 
 Drafts from the user ("same setup as the previous checks": catalogue first, custom-only for code checks with matching lines, link to the record to act on, test data, dry run before deploy), specified 2026-11-06. IH-032, IH-034 to IH-038 and IH-040 to IH-042 follow the proposals below without an explicit decision; the user can still change them.
 
-**Built 2026-11-06**, not deployed yet. Dry run in the app scope (built scripts, stub engine, no findings written) on bithawkdemo1: IH-032 0, IH-033 0, IH-034 1, IH-035 9, IH-036 7, IH-037 0, IH-038 1, IH-039 0, IH-040 2, IH-041 0, IH-042 30, IH-043 0, IH-044 18. Test data: test users `ih.test.active` (locked out) and `ih.test.inactive`, test groups, memberships, a direct role (`personalize_choices`), knowledge bases, update sets, computers with discovery sources, and business rules / script includes for IH-038 and IH-039. No test data for IH-032, IH-034, IH-037 (instance-wide settings).
+**Built and deployed 2026-11-06.** Dry run in the app scope (built scripts, stub engine, no findings written) on bithawkdemo1, without test data: IH-032 0, IH-033 0, IH-034 1, IH-035 9, IH-036 7, IH-037 0, IH-038 1, IH-039 0, IH-040 2, IH-041 0, IH-042 30, IH-043 256 (after the fix, see there), IH-044 18. With test data every positive case is found once and no negative one. Test data: test users `ih.test.active` (locked out) and `ih.test.inactive`, test groups, memberships, a direct role (`personalize_choices`), knowledge bases, update sets, computers with discovery sources, and business rules / script includes for IH-038 and IH-039. No test data for IH-032, IH-034, IH-037 (instance-wide settings).
 Overlap with OOB checks (bithawkdemo1, 2026-11-06): `sn_access_analyzer` "Users with Direct Role Assignments (Bypassing Groups)" (active) covers IH-043; `sn_vsc` "Restrict Impersonation to Admin" and "Log User Impersonation" cover other impersonation aspects than IH-034.
 
 ## IH-032 Create Asset business rules active
@@ -384,8 +385,8 @@ Overlap with OOB checks (bithawkdemo1, 2026-11-06): `sn_access_analyzer` "Users 
 ## IH-043 Roles assigned directly to users
 
 - **Ideal:** Users get roles only through groups.
-- **Logic:** `sys_user_has_role` where `inherited=false^granted_byISEMPTY^user.active=true`, excluding `snc_internal` / `snc_external` (assigned by the platform to every user). Link to the role assignment.
-- **Measured:** 646 direct assignments, all `snc_internal`; 0 after the exclusion.
+- **Logic:** `sys_user_has_role` where `inherited=false^user.active=true`, excluding `snc_internal` / `snc_external` (assigned by the platform to every user). Link to the role assignment.
+- **Measured (corrected 2026-11-06):** 257 direct assignments on active users (e.g. `itil` 37, `sn_hr_core.hrsm_employee` 27, `admin` 22, `security_admin` 2). The first measurement ("646, all `snc_internal`, 0 after the exclusion") was wrong: `granted_by` defaults to `not-applicable`, so `granted_byISEMPTY` only matched the platform's own `snc_internal` assignments. Found by the test data dry run (the test user's direct role was missing), fixed and redeployed the same day.
 - **Decision:** build it although the OOB Access Analyzer check covers the topic, so all health checks are in one place (agreed 2026-11-06).
 - **Resolution:** Remove the direct role and add the user to a group that has the role.
 

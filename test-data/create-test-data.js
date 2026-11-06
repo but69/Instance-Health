@@ -418,10 +418,16 @@ runInGlobal(function createInstanceHealthTestData() {
     insert('sys_update_set', { name: MARKER + ' IH-035 unique name', application: 'global', state: 'complete' });
 
     // IH-036: active knowledge base without retire workflow (positive), with one and inactive (negative)
+    // Any existing workflow is enough for the check; prefer one for kb_knowledge (bithawkdemo1 has none)
     var kbWorkflow = new GlideRecord('wf_workflow');
     kbWorkflow.addQuery('table', 'kb_knowledge');
     kbWorkflow.setLimit(1);
     kbWorkflow.query();
+    if (!kbWorkflow.hasNext()) {
+        kbWorkflow = new GlideRecord('wf_workflow');
+        kbWorkflow.setLimit(1);
+        kbWorkflow.query();
+    }
     var kbBase = { owner: gs.getUserID(), active: 'true' };
     function knowledgeBase(title, values) {
         var v = { title: MARKER + ' ' + title, owner: kbBase.owner, active: kbBase.active };

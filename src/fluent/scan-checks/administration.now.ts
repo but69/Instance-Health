@@ -355,7 +355,8 @@ export const ih043DirectRoleAssignments = TableCheck({
     description:
         'Roles assigned directly to users are hard to review and are not removed when the user changes teams. snc_internal and snc_external are ignored because the platform assigns them to every user. Ideal state: users get roles only through groups.',
     table: 'sys_user_has_role',
-    conditions: 'inherited=false^granted_byISEMPTY^user.active=true^role.nameNOT INsnc_internal,snc_external',
+    // granted_by defaults to "not-applicable", so it cannot be used to detect direct assignments
+    conditions: 'inherited=false^user.active=true^role.nameNOT INsnc_internal,snc_external',
     resolutionDetails:
         'Remove the direct role and add the user to a group that grants the role.',
 })
