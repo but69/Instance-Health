@@ -25,6 +25,16 @@ Field and table names marked ✔ were verified on bithawkdemo1 (2026-11-05).
 | IH-007 | Global client scripts | Performance | performance | TableCheck | built |
 | IH-008 | Import set rows > 5 million | Maintenance | performance | ScriptOnlyCheck | built |
 | IH-009 | Scripts using gs.sql | Maintenance | upgradability | ColumnTypeCheck | built |
+| IH-010 | Unnecessary dot-walk to sys_id | Performance | performance | ColumnTypeCheck | specified |
+| IH-011 | Synchronous AJAX in client code | Performance | performance | ColumnTypeCheck | specified |
+| IH-012 | Hard-coded instance URL | Maintenance | manageability | ColumnTypeCheck | specified |
+| IH-013 | Hard-coded sys_ids in scripts | Maintenance | manageability | ColumnTypeCheck | specified |
+| IH-014 | Before business rules that update or insert other records | Maintenance | manageability | TableCheck (advanced) | specified |
+| IH-015 | Global business rules | Performance | performance | TableCheck (advanced) | specified |
+| IH-016 | Script includes with duplicate names | Maintenance | manageability | ScriptOnlyCheck | specified |
+| IH-017 | Transform map coalesces on non-indexed fields | Performance | performance | TableCheck (advanced) | specified |
+| IH-018 | Tables without ACLs | Administration | security | ScriptOnlyCheck | specified |
+| IH-019 | Read ACLs with GlideRecord / GlideAggregate | Performance | performance | TableCheck (advanced) | specified |
 
 ---
 
@@ -84,3 +94,85 @@ Field and table names marked ✔ were verified on bithawkdemo1 (2026-11-05).
 - **Ideal:** No script uses `gs.sql`.
 - **Logic:** ColumnTypeCheck on all `script` columns: regex `\bgs\s*\.\s*sql\s*\(` after stripping comments, so commented-out calls are ignored. Changed from LinterCheck (2026-11-05): the documented AST API cannot reliably tell `gs.sql` apart from other `.sql()` calls.
 - **Resolution:** Replace with GlideRecord / GlideAggregate. `gs.sql` is undocumented, bypasses ACLs and can lock tables.
+
+---
+
+## Batch 2: drafts received 2026-11-06
+
+Drafts from the user, specified 2026-11-06.
+Measured on bithawkdemo1 (2026-11-06): no OOB Instance Scan check covers these topics (402 checks reviewed; `sn_vsc` covers empty ACLs and client-callable script includes only).
+
+**Common rules for the code checks (IH-010 to IH-016, IH-019):**
+- **Decision:** custom records only, using the same rule as IH-003 (customer scoped app, or global with a customer update in `sys_update_xml`). ServiceNow code is not reported (agreed 2026-11-06).
+- **Decision:** every regex-based check (IH-010 to IH-014, IH-019) lists each matching line as `line N: <code>` in `finding_details` (agreed 2026-11-06).
+- Comments are stripped before matching (as IH-009). Each finding links to the script record.
+- The custom rule should live in one shared helper (script include in the app) instead of being copied into every check; IH-003 moves to it as well.
+
+## IH-010 Unnecessary dot-walk to sys_id
+
+- **Ideal:** Reference values are read with `getValue('field')` or `field.toString()`, not `field.sys_id`.
+- **Logic:** ColumnTypeCheck on `script` columns, regex for `<identifier>.<field>.sys_id` (e.g. `current.caller_id.sys_id`, `gr.assigned_to.sys_id`). Not a finding: `current.sys_id`, `gr.sys_id` (no dot-walk). Each matching line goes into `finding_details`.
+- **Resolution:** Use `gr.getValue('field')` (or `gr.field + ''`); the reference field already holds the sys_id.
+
+## IH-011 Synchronous AJAX in client code
+
+- **Ideal:** Client code uses asynchronous calls only.
+- **Logic:** Client script columns (`sys_script_client`, `catalog_script_client`, client UI actions, UI policy scripts). Patterns: `getXMLWait(`, `g_form.getReference(<field>)` without callback, client `GlideRecord.query()` without callback, `async: false` / `async:false`.
+- **Measured:** 294 active client scripts match a raw LIKE on these patterns, mostly OOB; plain matching is not enough for `getReference` (async with callback).
+- **Resolution:** Use `getXMLAnswer` / `getXML` with a callback, `getReference(field, callback)`, or a GlideAjax call.
+
+## IH-012 Hard-coded instance URL
+
+- **Ideal:** No script contains an instance URL; use `gs.getProperty('glide.servlet.uri')`.
+- **Logic:** ColumnTypeCheck on `script` columns, regex `https?://[a-z0-9-]+\.service-now\.com` (any instance, also other ones, e.g. a dev URL in production code).
+- **Resolution:** Build URLs from `glide.servlet.uri` or `instance_name`; hard-coded URLs break after clones.
+
+## IH-013 Hard-coded sys_ids in scripts
+
+- **Ideal:** No script contains a literal sys_id.
+- **Logic:** ColumnTypeCheck on `script` columns, regex for a quoted 32-character hex string `['"][0-9a-f]{32}['"]`.
+- **Resolution:** Use a system property, a lookup by a stable key (name, number) or a reference in configuration.
+
+## IH-014 Before business rules that update or insert other records
+
+- **Ideal:** Before business rules only change `current`; changes to other records happen in after or async rules.
+- **Logic:** `sys_script` where `when=before^active=true`, script contains `.update(` or `.insert(` on a variable other than `current` (after stripping comments). `current.update()` is reported too (it is worse in a before rule).
+- **Measured:** 269 active before rules contain `.update(` or `.insert(`, mostly OOB.
+- **Resolution:** Move the logic to an after or async business rule.
+
+## IH-015 Global business rules
+
+- **Ideal:** No business rule runs on table `global`.
+- **Logic:** `sys_script` where `collection=global^active=true`.
+- **Measured:** 94 active rules on global, all from plugins or the base system, none custom.
+- **Resolution:** Move functions to script includes; global rules are loaded on every transaction.
+
+## IH-016 Script includes with duplicate names
+
+- **Ideal:** Each script include name is unique within its scope.
+- **Logic:** GlideAggregate on `sys_script_include` grouped by `api_name`, count > 1. One finding per script include in a duplicate group, with the other record(s) in `finding_details`.
+- **Measured:** 113 names occur more than once, but almost all in different scopes (legal: `x_a.Util` and `x_b.Util` are distinct). Same scope: 6 names; duplicate `api_name`: 8. All OOB.
+- **Decision:** only duplicates within the same scope (same `api_name`) count; a group is reported if at least one member is custom (agreed 2026-11-06).
+- **Resolution:** Rename or remove one; with duplicate names it is undefined which class is loaded.
+
+## IH-017 Transform map coalesces on non-indexed fields
+
+- **Ideal:** Every coalesce field is indexed on the target table.
+- **Logic:** `sys_transform_entry` where `coalesce=true` ✔ (`map`, `target_table`, `target_field` ✔). Finding if no `sys_index` ✔ on the table that defines the field (walk up the hierarchy) has `target_field` as first column (`logical_table_name`, `col_name_string` ✔). `sys_id` counts as indexed. Link to the transform map.
+- **Measured:** 70 coalesce entries.
+- **Resolution:** Add an index on the coalesce field(s), or a composite index for multiple coalesce fields.
+
+## IH-018 Tables without ACLs
+
+- **Ideal:** Every table is secured by ACLs, its own or inherited from a parent table.
+- **Logic:** All tables in `sys_db_object`. Finding if no active record ACL (`sys_security_acl`, `type=record`) has `name` = the table or `<table>.<field>`, on the table itself or on any parent table (`super_class` chain). Table rotation shards (name ends in 4 digits, e.g. `syslog0001`) are excluded. Wildcard `*` ACLs do not count. Link to the `sys_db_object` record.
+- **Decision:** all tables, not only custom ones; inherited ACLs count as protection (agreed 2026-11-06).
+- **Measured:** 10,010 tables; 2,358 without own ACL; 167 without own or inherited ACL after excluding 520 rotation shards (3 custom), e.g. `cmn_building`, `sys_phone_territory`, `x_bits2_quackology_family`.
+- **Resolution:** Create table ACLs (at least read, write, create, delete) for the required roles.
+
+## IH-019 Read ACLs with GlideRecord / GlideAggregate
+
+- **Ideal:** Read ACL scripts do not query the database; they run for every record and field.
+- **Logic:** `sys_security_acl` where `operation=read^active=true^advanced=true` ✔, script contains `GlideRecord` or `GlideAggregate` (after stripping comments).
+- **Measured:** 174 active read ACLs match, mostly OOB.
+- **Resolution:** Use conditions or roles, cache results, or move the logic into a role or a scratchpad value.
