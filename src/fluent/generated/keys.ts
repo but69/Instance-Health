@@ -381,6 +381,23 @@ declare global {
                         table: 'sys_security_acl'
                         id: 'd01b19eb323d4ea98c0a61e35145610a'
                     }
+                    'ih-kb': {
+                        table: 'kb_knowledge_base'
+                        id: 'deca461ffbb641169b7edbe74c02179f'
+                        deleted: true
+                    }
+                    'ih-kb-all-checks': {
+                        table: 'kb_knowledge'
+                        id: 'f671986e714d4ae4b7967224b27b830c'
+                    }
+                    'ih-kb-category-servicenow': {
+                        table: 'kb_category'
+                        id: '402f215c82994ed2971e860eb2cf6a80'
+                    }
+                    'ih-kb-how-to-use': {
+                        table: 'kb_knowledge'
+                        id: '19a821481a30422a88186fb1a5da4ef6'
+                    }
                     'ih-list-control-health-score': {
                         table: 'sys_ui_list_control'
                         id: '3fd79b40b5ef4ed7a0096e395ab36d3a'

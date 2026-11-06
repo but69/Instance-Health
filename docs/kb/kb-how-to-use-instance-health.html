@@ -1,0 +1,374 @@
+<style>
+.bh-kb {
+  --kb-navy:       #24303e;
+  --kb-navy-700:   #1b242f;
+  --kb-teal:       #38b5aa;
+  --kb-teal-700:   #2ea095;
+  --kb-teal-900:   #006c76;
+  --kb-amber:      #f7aa08;
+  --kb-danger:     #c8413a;
+  --kb-bg:         #ffffff;
+  --kb-bg-soft:    #f7f9fa;
+  --kb-bg-tint:    #f0faf9;
+  --kb-bg-amber:   #fffbf0;
+  --kb-bg-warn:    #fff5ec;
+  --kb-bg-danger:  #fdecec;
+  --kb-bg-success: #e9f6ef;
+  --kb-ink:        #24303e;
+  --kb-ink-body:   #3d4f5e;
+  --kb-ink-muted:  #5a6e7e;
+  --kb-ink-faint:  #8fa8b8;
+  --kb-line:       #e0e4e8;
+  --kb-line-soft:  #eaecee;
+  --kb-r-sm:       4px;
+  --kb-r-md:       6px;
+  --kb-r-lg:       10px;
+  --kb-shadow-sm:  0 1px 4px rgba(36,48,62,.07);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 14px; line-height: 1.6; color: var(--kb-ink);
+}
+.bh-kb *, .bh-kb *::before, .bh-kb *::after { box-sizing: border-box; }
+.bh-kb .bh-header { background: var(--kb-navy); border-radius: var(--kb-r-lg); padding: 28px 32px; margin: 0 0 20px; display: flex; align-items: flex-start; gap: 20px; }
+.bh-kb .bh-header-accent { width: 4px; min-height: 56px; background: var(--kb-teal); border-radius: var(--kb-r-sm); flex-shrink: 0; }
+.bh-kb .bh-header-meta { color: var(--kb-teal); font-size: 11px; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase; margin: 0 0 6px; }
+.bh-kb .bh-header h1 { color: #fff; font-size: 22px; font-weight: 700; line-height: 1.25; margin: 0 0 6px; }
+.bh-kb .bh-header-sub { color: var(--kb-ink-faint); font-size: 13px; line-height: 1.5; }
+.bh-kb .bh-card { background: var(--kb-bg); border-radius: var(--kb-r-lg); padding: 22px 24px; margin: 0 0 20px; box-shadow: var(--kb-shadow-sm); }
+.bh-kb h2 { font-size: 16px; font-weight: 700; color: var(--kb-ink); margin: 0 0 14px; display: flex; align-items: center; gap: 8px; line-height: 1.3; }
+.bh-kb h2::before { content: ''; display: inline-block; width: 3px; height: 18px; background: var(--kb-teal); border-radius: 2px; flex-shrink: 0; }
+.bh-kb h3 { font-size: 14px; font-weight: 700; color: var(--kb-ink); margin: 14px 0 8px; line-height: 1.35; }
+.bh-kb p { margin: 0 0 10px; color: var(--kb-ink-body); }
+.bh-kb p:last-child { margin-bottom: 0; }
+.bh-kb strong { color: var(--kb-ink); font-weight: 700; }
+.bh-kb em { font-style: italic; }
+.bh-kb hr { border: none; border-top: 1px solid var(--kb-line); margin: 18px 0; }
+.bh-kb a { color: var(--kb-teal); text-decoration: none; }
+.bh-kb a:hover { color: var(--kb-teal-900); text-decoration: underline; }
+.bh-kb ul, .bh-kb ol { padding-left: 20px; margin: 8px 0 12px; color: var(--kb-ink-body); font-size: 13px; }
+.bh-kb li { margin-bottom: 4px; }
+.bh-kb code { background: #eef1f3; color: var(--kb-ink); padding: 1px 6px; border-radius: var(--kb-r-sm); font-size: 12px; font-family: 'SF Mono','Cascadia Mono',Consolas,monospace; }
+.bh-kb pre { background: #1e2a36; color: #b0c8d8; padding: 14px 18px; border-radius: var(--kb-r-md); font-family: 'SF Mono','Cascadia Mono',Consolas,monospace; font-size: 12px; line-height: 1.55; overflow-x: auto; margin: 10px 0; }
+.bh-kb pre code { background: transparent; color: inherit; padding: 0; border-radius: 0; }
+.bh-kb kbd { display: inline-block; min-width: 22px; padding: 1px 7px; font-family: 'SF Mono',Consolas,monospace; font-size: 11px; font-weight: 600; color: var(--kb-ink); background: linear-gradient(180deg,#fff 0%,#eef1f3 100%); border: 1px solid #c8d0d8; border-bottom-color: #a8b3bf; border-radius: var(--kb-r-sm); box-shadow: 0 1px 0 #a8b3bf; line-height: 1.55; text-align: center; vertical-align: baseline; }
+.bh-kb .bh-hint { background: var(--kb-bg-tint); border-left: 3px solid var(--kb-teal); border-radius: 0 var(--kb-r-md) var(--kb-r-md) 0; padding: 10px 14px; font-size: 13px; color: var(--kb-ink); margin: 12px 0; line-height: 1.55; }
+.bh-kb .bh-hint strong { color: var(--kb-ink); }
+.bh-kb .bh-hint.bh-tip     { background: var(--kb-bg-amber);   border-left-color: var(--kb-amber); }
+.bh-kb .bh-hint.bh-warn    { background: var(--kb-bg-warn);    border-left-color: #e65c00; }
+.bh-kb .bh-hint.bh-danger  { background: var(--kb-bg-danger);  border-left-color: var(--kb-danger); }
+.bh-kb .bh-hint.bh-success { background: var(--kb-bg-success); border-left-color: #1f9d72; }
+.bh-kb .bh-benefit-grid { display: flex; gap: 12px; flex-wrap: wrap; margin: 14px 0; }
+.bh-kb .bh-benefit-card { flex: 1; min-width: 200px; background: var(--kb-bg-tint); border-top: 3px solid var(--kb-teal); border-radius: 0 0 var(--kb-r-md) var(--kb-r-md); padding: 14px 16px; }
+.bh-kb .bh-benefit-card.bh-accent { border-top-color: var(--kb-amber); background: var(--kb-bg-amber); }
+.bh-kb .bh-benefit-title { font-weight: 700; font-size: 13px; color: var(--kb-ink); margin-bottom: 5px; }
+.bh-kb .bh-benefit-text { font-size: 12px; color: var(--kb-ink-muted); line-height: 1.5; }
+.bh-kb table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 10px 0; border-radius: var(--kb-r-md); overflow: hidden; }
+.bh-kb thead tr { background: var(--kb-navy); }
+.bh-kb thead th { color: #fff; text-align: left; padding: 10px 14px; font-weight: 600; font-size: 12px; letter-spacing: .3px; }
+.bh-kb tbody tr:nth-child(odd)  { background: var(--kb-bg-soft); }
+.bh-kb tbody tr:nth-child(even) { background: var(--kb-bg); }
+.bh-kb tbody td { padding: 10px 14px; border-bottom: 1px solid var(--kb-line-soft); color: var(--kb-ink-body); vertical-align: top; }
+.bh-kb tbody tr:last-child td { border-bottom: none; }
+.bh-kb .bh-update-table thead tr { background: var(--kb-teal-900); }
+.bh-kb .bh-steps { display: flex; flex-direction: column; gap: 16px; }
+.bh-kb .bh-step { display: flex; gap: 14px; align-items: flex-start; }
+.bh-kb .bh-step-num { background: var(--kb-teal); color: #fff; font-weight: 700; font-size: 12px; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+.bh-kb .bh-step-body { flex: 1; min-width: 0; }
+.bh-kb .bh-step-title { font-weight: 700; font-size: 13px; margin-bottom: 6px; color: var(--kb-ink); }
+.bh-kb .bh-option-header { background: var(--kb-navy); color: #fff; padding: 10px 16px; font-weight: 700; font-size: 14px; border-radius: var(--kb-r-md) var(--kb-r-md) 0 0; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.bh-kb .bh-option-header-sub { font-size: 12px; font-weight: 400; opacity: .7; }
+.bh-kb .bh-option-body { border: 1px solid var(--kb-line); border-top: none; border-radius: 0 0 var(--kb-r-md) var(--kb-r-md); padding: 18px 20px; background: var(--kb-bg); margin-bottom: 16px; }
+.bh-kb .bh-tag { background: var(--kb-teal); color: #fff; font-size: 10px; font-weight: 600; letter-spacing: .5px; padding: 2px 8px; border-radius: 20px; text-transform: uppercase; display: inline-block; line-height: 1.6; }
+.bh-kb .bh-tag.bh-orange { background: var(--kb-amber); color: var(--kb-navy); }
+.bh-kb .bh-tag.bh-navy   { background: var(--kb-navy); color: #fff; }
+.bh-kb .bh-tag.bh-ghost  { background: transparent; color: var(--kb-teal); border: 1px solid var(--kb-teal); }
+.bh-kb .bh-faq-wrap { border: 1px solid var(--kb-line); border-radius: var(--kb-r-md); overflow: hidden; }
+.bh-kb .bh-faq-item { border-bottom: 1px solid var(--kb-line-soft); }
+.bh-kb .bh-faq-item:last-child { border-bottom: none; }
+.bh-kb .bh-faq-q { padding: 11px 14px; font-weight: 600; font-size: 13px; color: var(--kb-ink); background: var(--kb-bg-soft); }
+.bh-kb .bh-faq-a { padding: 10px 14px 12px; font-size: 13px; color: var(--kb-ink-body); }
+.bh-kb .bh-try { background: var(--kb-navy); border-radius: var(--kb-r-lg); padding: 22px 26px; margin: 0 0 20px; }
+.bh-kb .bh-try-label { color: var(--kb-teal); font-size: 11px; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 8px; }
+.bh-kb .bh-try-title { color: #fff; font-size: 14px; font-weight: 600; margin-bottom: 12px; line-height: 1.5; }
+.bh-kb .bh-try-prompt { background: rgba(56,181,170,.12); border-left: 3px solid var(--kb-teal); border-radius: 0 var(--kb-r-md) var(--kb-r-md) 0; padding: 11px 15px; color: #b8e8e5; font-style: italic; font-size: 13px; margin-bottom: 10px; line-height: 1.55; }
+.bh-kb .bh-try-sub { color: #6e8a99; font-size: 12px; line-height: 1.55; }
+.bh-kb .bh-contact { background: var(--kb-bg); border-radius: var(--kb-r-md); padding: 14px 18px; font-size: 13px; color: var(--kb-ink-body); text-align: center; box-shadow: var(--kb-shadow-sm); }
+.bh-kb .bh-contact strong { color: var(--kb-ink); }
+.bh-kb .bh-figure { margin: 12px 0; border-radius: var(--kb-r-md); overflow: hidden; border: 1px solid var(--kb-line); background: var(--kb-bg-soft); }
+.bh-kb .bh-figure img { display: block; width: 100%; height: auto; }
+.bh-kb .bh-figure-caption { font-size: 12px; color: var(--kb-ink-muted); padding: 8px 14px; background: var(--kb-bg); border-top: 1px solid var(--kb-line-soft); }
+.bh-kb .bh-kv { display: grid; grid-template-columns: minmax(140px,max-content) 1fr; gap: 6px 18px; font-size: 13px; margin: 10px 0; }
+.bh-kb .bh-kv dt { color: var(--kb-ink-muted); font-weight: 600; }
+.bh-kb .bh-kv dd { color: var(--kb-ink-body); margin: 0; }
+.bh-kb .bh-banner { display: flex; gap: 12px; align-items: flex-start; border-radius: var(--kb-r-md); padding: 12px 16px; margin: 0 0 16px; font-size: 13px; line-height: 1.55; background: #e6efff; border: 1px solid #b8d0f0; color: var(--kb-ink); }
+.bh-kb .bh-banner-icon { width: 22px; height: 22px; border-radius: 50%; background: #2c70d4; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; flex-shrink: 0; font-family: serif; }
+.bh-kb .bh-banner-body { flex: 1; color: var(--kb-ink-body); }
+.bh-kb .bh-banner-body strong { color: var(--kb-ink); }
+.bh-kb .bh-banner.bh-wip { background: var(--kb-bg-amber); border-color: #f0d27a; }
+.bh-kb .bh-banner.bh-wip .bh-banner-icon { background: var(--kb-amber); color: var(--kb-navy); }
+.bh-kb .bh-banner.bh-deprecated { background: var(--kb-bg-danger); border-color: #f0b8b5; }
+.bh-kb .bh-banner.bh-deprecated .bh-banner-icon { background: var(--kb-danger); color: #fff; }
+.bh-kb .bh-banner.bh-new { background: var(--kb-bg-success); border-color: #b8e0c9; }
+.bh-kb .bh-banner.bh-new .bh-banner-icon { background: #1f9d72; color: #fff; }
+.bh-kb .bh-applies { background: var(--kb-bg-tint); border-left: 3px solid var(--kb-teal); border-radius: 0 var(--kb-r-md) var(--kb-r-md) 0; padding: 14px 18px; margin: 0 0 20px; }
+.bh-kb .bh-applies-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; color: var(--kb-teal-900); margin-bottom: 10px; }
+.bh-kb .bh-applies-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap: 10px 24px; font-size: 13px; }
+.bh-kb .bh-applies-key { font-size: 10.5px; text-transform: uppercase; letter-spacing: .5px; color: var(--kb-ink-muted); font-weight: 600; margin-bottom: 2px; }
+.bh-kb .bh-applies-val { color: var(--kb-ink); font-weight: 600; line-height: 1.4; }
+.bh-kb .bh-toc { background: var(--kb-bg-soft); border: 1px solid var(--kb-line); border-radius: var(--kb-r-md); padding: 14px 18px; margin: 0 0 20px; }
+.bh-kb .bh-toc-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; color: var(--kb-ink-muted); margin-bottom: 8px; }
+.bh-kb .bh-toc-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; counter-reset: toc-counter; }
+.bh-kb .bh-toc-list li { counter-increment: toc-counter; font-size: 13px; display: flex; align-items: baseline; gap: 10px; }
+.bh-kb .bh-toc-list li::before { content: counter(toc-counter,decimal-leading-zero); color: var(--kb-teal-900); font-weight: 700; font-family: 'SF Mono',Consolas,monospace; font-size: 11px; letter-spacing: .3px; }
+.bh-kb .bh-toc-list a { color: var(--kb-ink); font-weight: 500; }
+.bh-kb .bh-toc-list a:hover { color: var(--kb-teal-900); text-decoration: underline; }
+.bh-kb .bh-changelog { border-left: 2px solid var(--kb-line); padding: 4px 0 4px 22px; margin: 12px 0 4px; }
+.bh-kb .bh-changelog-item { position: relative; padding: 0 0 14px; }
+.bh-kb .bh-changelog-item:last-child { padding-bottom: 0; }
+.bh-kb .bh-changelog-item::before { content: ''; position: absolute; left: -27px; top: 6px; width: 8px; height: 8px; border-radius: 50%; background: var(--kb-teal); border: 2px solid var(--kb-bg); box-shadow: 0 0 0 1px var(--kb-line); }
+.bh-kb .bh-changelog-head { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; flex-wrap: wrap; }
+.bh-kb .bh-changelog-version { font-family: 'SF Mono',Consolas,monospace; font-size: 12px; font-weight: 700; color: var(--kb-ink); background: #eef1f3; padding: 1px 8px; border-radius: var(--kb-r-sm); }
+.bh-kb .bh-changelog-date { font-size: 11px; color: var(--kb-ink-muted); text-transform: uppercase; letter-spacing: .5px; font-weight: 600; }
+.bh-kb .bh-changelog-author { font-size: 12px; color: var(--kb-ink-muted); }
+.bh-kb .bh-changelog-body { font-size: 13px; color: var(--kb-ink-body); }
+.bh-kb .bh-changelog-body ul { margin: 4px 0 0; padding-left: 18px; }
+.bh-kb .bh-changelog-body li { margin-bottom: 2px; }
+.bh-kb .bh-annot { position: relative; }
+.bh-kb .bh-annot-pin { position: absolute; width: 26px; height: 26px; border-radius: 50%; background: var(--kb-teal); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; border: 3px solid #fff; box-shadow: 0 2px 6px rgba(0,0,0,.3); transform: translate(-50%,-50%); z-index: 2; pointer-events: none; }
+.bh-kb .bh-annot-legend { list-style: none; padding: 12px 16px; margin: 0; background: var(--kb-bg); border-top: 1px solid var(--kb-line-soft); display: grid; gap: 8px; counter-reset: pin-counter; }
+.bh-kb .bh-annot-legend li { counter-increment: pin-counter; display: grid; grid-template-columns: 22px 1fr; gap: 12px; font-size: 12px; color: var(--kb-ink-body); align-items: baseline; line-height: 1.5; }
+.bh-kb .bh-annot-legend li::before { content: counter(pin-counter); background: var(--kb-teal); color: #fff; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 11px; }
+.bh-kb .bh-related { list-style: none; padding: 0; margin: 8px 0 0; display: grid; gap: 8px; }
+.bh-kb .bh-related li { padding: 10px 14px; background: var(--kb-bg-soft); border-left: 3px solid var(--kb-teal); border-radius: 0 var(--kb-r-md) var(--kb-r-md) 0; font-size: 13px; }
+.bh-kb .bh-related a { font-weight: 600; }
+.bh-kb .bh-related-meta { color: var(--kb-ink-muted); font-size: 11px; text-transform: uppercase; letter-spacing: .6px; margin-left: 8px; }
+@media print {
+  .bh-kb { color: #000; font-size: 11pt; line-height: 1.4; }
+  .bh-kb a { color: #000; text-decoration: underline; }
+  .bh-kb a[href^="http"]::after { content: ' (' attr(href) ')'; font-size: 9pt; color: #555; word-break: break-all; }
+  .bh-kb .bh-header, .bh-kb .bh-try { background: #fff !important; color: #000 !important; border: 2px solid #000; box-shadow: none; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .bh-kb .bh-header h1, .bh-kb .bh-try-title { color: #000 !important; }
+  .bh-kb .bh-header-meta, .bh-kb .bh-try-label { color: #555 !important; }
+  .bh-kb .bh-header-sub, .bh-kb .bh-try-sub { color: #444 !important; }
+  .bh-kb .bh-header-accent { background: #000 !important; }
+  .bh-kb .bh-card, .bh-kb .bh-contact, .bh-kb .bh-toc, .bh-kb .bh-applies, .bh-kb .bh-banner, .bh-kb .bh-faq-wrap, .bh-kb .bh-option-body { box-shadow: none; border: 1px solid #999; page-break-inside: avoid; }
+  .bh-kb thead tr, .bh-kb .bh-option-header { background: #444 !important; color: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .bh-kb pre { background: #f4f4f4 !important; color: #000 !important; border: 1px solid #ccc; page-break-inside: avoid; }
+  .bh-kb .bh-step-num, .bh-kb .bh-tag { background: #444 !important; color: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .bh-kb h2, .bh-kb h3 { page-break-after: avoid; }
+  .bh-kb .bh-step, .bh-kb .bh-faq-item, .bh-kb .bh-changelog-item { page-break-inside: avoid; }
+  .bh-kb .bh-try-prompt { background: transparent !important; border-left: 2px solid #000 !important; color: #000 !important; }
+}
+</style>
+<div class="bh-kb">
+
+  <div class="bh-header">
+    <div class="bh-header-accent"></div>
+    <div>
+      <div class="bh-header-meta">ServiceNow &nbsp;&middot;&nbsp; Instance Health &nbsp;&middot;&nbsp; Stand: 2026-11</div>
+      <h1>How to use Instance Health</h1>
+      <div class="bh-header-sub">Run the scan, read the dashboard, work through the findings and understand how the health score is calculated.</div>
+    </div>
+  </div>
+
+  <div class="bh-applies">
+    <div class="bh-applies-label">Applies to</div>
+    <div class="bh-applies-grid">
+      <div><div class="bh-applies-key">Application</div><div class="bh-applies-val">Instance Health (x_bits2_inst_hlth)</div></div>
+      <div><div class="bh-applies-key">Requires</div><div class="bh-applies-val">Instance Scan, role admin</div></div>
+      <div><div class="bh-applies-key">Audience</div><div class="bh-applies-val">ServiceNow administrators</div></div>
+    </div>
+  </div>
+
+  <div class="bh-toc">
+    <div class="bh-toc-label">Contents</div>
+    <ul class="bh-toc-list">
+      <li><a href="#what">What Instance Health does</a></li>
+      <li><a href="#where">Where to find it</a></li>
+      <li><a href="#scan">Run a scan</a></li>
+      <li><a href="#dashboard">Read the dashboard</a></li>
+      <li><a href="#findings">Work through the findings</a></li>
+      <li><a href="#faq">Questions and answers</a></li>
+      <li><a href="#scoring">How the health score is calculated</a></li>
+    </ul>
+  </div>
+
+  <div class="bh-card" id="what">
+    <h2>What Instance Health does</h2>
+    <p>Instance Health adds <strong>73 checks</strong> to Instance Scan. They look for configuration and code that slows the instance down, exposes data, makes upgrades harder or leaves records in a poor state. All checks are grouped in the scan suite <strong>Instance health</strong>.</p>
+    <p>After every scan of the suite, the app turns the findings into one <strong>health score from 0 to 100</strong> (100 = completely healthy) and stores it, so you can follow the trend over time.</p>
+    <div class="bh-benefit-grid">
+      <div class="bh-benefit-card">
+        <div class="bh-benefit-title">One number per scan</div>
+        <div class="bh-benefit-text">The health score, plus sub-scores for security, performance, manageability and upgradability.</div>
+      </div>
+      <div class="bh-benefit-card">
+        <div class="bh-benefit-title">Findings you can act on</div>
+        <div class="bh-benefit-text">Each finding links to the record you have to change, for example the report, script or ACL.</div>
+      </div>
+      <div class="bh-benefit-card bh-accent">
+        <div class="bh-benefit-title">Trend instead of snapshot</div>
+        <div class="bh-benefit-text">Every scan adds a point to the trend chart, so you see whether cleanup work pays off.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bh-card" id="where">
+    <h2>Where to find it</h2>
+    <p>Open the application menu <strong>Instance Health</strong> in the navigator. It is visible for users with the role <code>admin</code>.</p>
+    <table>
+      <thead><tr><th>Module</th><th>What it shows</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Dashboard</strong></td><td>Trend chart of the health score and all scores per scan result in a list. Start here.</td></tr>
+        <tr><td><strong>Health Scores</strong></td><td>One record per scan: health score, sub-scores, number of findings, knock-out checks and checks that failed.</td></tr>
+      </tbody>
+    </table>
+    <p>The findings themselves are in Instance Scan (<strong>Instance Scan &gt; Findings</strong>).</p>
+  </div>
+
+  <div class="bh-card" id="scan">
+    <h2>Run a scan</h2>
+    <div class="bh-steps">
+      <div class="bh-step">
+        <div class="bh-step-num">1</div>
+        <div class="bh-step-body">
+          <div class="bh-step-title">Start the suite</div>
+          <p>Open <strong>Instance Health &gt; Health Scores</strong> and click the banner button <strong>Run Instance Health Scan</strong>. The button starts the suite &ldquo;Instance health&rdquo; with all checks. If a run of the suite is still in progress, you get a message instead and no second run is started.</p>
+        </div>
+      </div>
+      <div class="bh-step">
+        <div class="bh-step-num">2</div>
+        <div class="bh-step-body">
+          <div class="bh-step-title">Wait for the scan to finish</div>
+          <p>The scan runs in the background; follow it in <strong>Instance Scan &gt; Scan Results</strong>. A run takes about 15 minutes, depending on the size of the instance.</p>
+        </div>
+      </div>
+      <div class="bh-step">
+        <div class="bh-step-num">3</div>
+        <div class="bh-step-body">
+          <div class="bh-step-title">Wait for the health score</div>
+          <p>A scheduled job &ldquo;Instance Health - calculate health score&rdquo; runs <strong>every 15 minutes</strong> and calculates the score of every finished run that has none yet. The new record then appears in the list and on the dashboard.</p>
+        </div>
+      </div>
+    </div>
+    <div class="bh-hint"><strong>Note:</strong> The app does not start scans by itself. Run the scan regularly (for example after each release or upgrade), otherwise the trend has no new points.</div>
+  </div>
+
+  <div class="bh-card" id="dashboard">
+    <h2>Read the dashboard</h2>
+    <p>The dashboard <strong>Instance Health</strong> has three parts:</p>
+    <ul>
+      <li><strong>Filter &ldquo;Trend lines&rdquo; (top):</strong> choose which lines the chart shows: the overall health score, security, performance, manageability, upgradability. Without a selection all five are shown.</li>
+      <li><strong>Trend chart:</strong> the average score per scan date, one line per selected trend line. The chart is for reading only; clicking a point does nothing.</li>
+      <li><strong>Score list (below the chart):</strong> one row per scan result, newest first, with scan date, health score, findings, checks evaluated, checks failed, knock-out and the manageability score. It follows the filter.</li>
+    </ul>
+    <div class="bh-hint bh-tip"><strong>Tip:</strong> A drop between two scans means new findings. Compare the findings of the two scan results in Instance Scan to see what changed.</div>
+  </div>
+
+  <div class="bh-card" id="findings">
+    <h2>Work through the findings</h2>
+    <div class="bh-steps">
+      <div class="bh-step">
+        <div class="bh-step-num">1</div>
+        <div class="bh-step-body">
+          <div class="bh-step-title">Start with the priority 1 checks</div>
+          <p>Priority 1 checks have the largest impact on the instance and on the score (see below). Fix these first, especially a check with a <strong>knock-out</strong>: it caps the whole health score at 60.</p>
+        </div>
+      </div>
+      <div class="bh-step">
+        <div class="bh-step-num">2</div>
+        <div class="bh-step-body">
+          <div class="bh-step-title">Open the finding</div>
+          <p>The finding shows what is wrong in the details (for code checks the matching lines) and links to the record that has to be changed. The check itself holds the <strong>resolution details</strong>: what to do about it.</p>
+        </div>
+      </div>
+      <div class="bh-step">
+        <div class="bh-step-num">3</div>
+        <div class="bh-step-body">
+          <div class="bh-step-title">Fix, or accept the finding</div>
+          <p>Fix the record, or decide that the finding is acceptable and note the reason. The next scan reports whatever is still open.</p>
+        </div>
+      </div>
+      <div class="bh-step">
+        <div class="bh-step-num">4</div>
+        <div class="bh-step-body">
+          <div class="bh-step-title">Scan again</div>
+          <p>Run the scan again and check that the finding is gone and the health score went up.</p>
+        </div>
+      </div>
+    </div>
+    <p>Which checks exist, what they find and why they matter is described in the article <strong>Instance Health: all scan checks</strong>.</p>
+    <div class="bh-hint"><strong>Note:</strong> Code checks only report <strong>custom</strong> records (your own scoped apps and customized global records). Code delivered by ServiceNow is not reported.</div>
+  </div>
+
+  <div class="bh-card" id="faq">
+    <h2>Questions and answers</h2>
+    <div class="bh-faq-wrap">
+      <div class="bh-faq-item">
+        <div class="bh-faq-q">I ran the scan but there is no new health score. Why?</div>
+        <div class="bh-faq-a">The score is calculated by a job that runs every 15 minutes, and only for finished runs of the suite. Wait for the scan to finish and for the next job run. Check that the job &ldquo;Instance Health - calculate health score&rdquo; is active.</div>
+      </div>
+      <div class="bh-faq-item">
+        <div class="bh-faq-q">The score is 60 although there are only a few findings. Why?</div>
+        <div class="bh-faq-a">A priority 1 check scored 0 and triggered the knock-out cap. The list shows the knock-out checks of the scan. Fix them first; the uncapped score is kept on the record.</div>
+      </div>
+      <div class="bh-faq-item">
+        <div class="bh-faq-q">A check is missing from the score of a scan.</div>
+        <div class="bh-faq-a">Checks that did not run or failed in the scan are not counted. They are listed in the field &ldquo;checks failed&rdquo; of the health score record.</div>
+      </div>
+      <div class="bh-faq-item">
+        <div class="bh-faq-q">Why does a check report so many findings that I cannot fix them?</div>
+        <div class="bh-faq-a">The score of a check drops by a fixed number of points per finding, down to 0. More findings than that do not make the score worse, so you can work through them step by step and see the score rise once the count falls.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bh-card" id="scoring">
+    <h2>How the health score is calculated</h2>
+    <p>The health score is built in three steps: a score for every check, a weighted average of all checks, and a cap when a critical check fails. 100 means completely healthy.</p>
+
+    <h3>1. Score per check (0 to 100)</h3>
+    <p>Every check starts at 100. Each finding deducts points, depending on the priority of the check. The score never goes below 0.</p>
+    <table>
+      <thead><tr><th>Priority</th><th>Meaning</th><th>Points per finding</th><th>Score is 0 after</th><th>Weight</th></tr></thead>
+      <tbody>
+        <tr><td><strong>1</strong></td><td>Largest impact: instance-wide or all users, data exposure, breaks upgrades</td><td>20</td><td>5 findings</td><td>5</td></tr>
+        <tr><td><strong>2</strong></td><td>Noticeable impact on single processes, users or areas</td><td>5</td><td>20 findings</td><td>3</td></tr>
+        <tr><td><strong>3</strong></td><td>Data quality, housekeeping, maintainability</td><td>2</td><td>50 findings</td><td>1</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Setting checks:</strong> some checks look at one setting or limit (for example impersonation in production, call stack logging, rows per page). One finding means the setting is wrong, so the check scores <strong>0 with the first finding</strong>.</p>
+    <p><strong>Share checks:</strong> two checks measure a share instead of counting findings. &ldquo;Unique location names&rdquo; scores the share of unique names; &ldquo;CIs not discovered or updated for 60 days&rdquo; scores 100 minus the share of stale CIs.</p>
+
+    <h3>2. Health score: weighted average</h3>
+    <p>The health score is the average of all check scores, weighted by priority (5 for priority 1, 3 for priority 2, 1 for priority 3). A priority 1 check therefore counts five times as much as a priority 3 check.</p>
+
+    <h3>3. Knock-out cap at 60</h3>
+    <p>If a priority 1 check scores 0, the health score is <strong>at most 60</strong>, however good the rest is. A single critical problem, such as a public report or a table without ACLs, must not disappear in the average. The value without the cap is kept in the field <em>score uncapped</em>.</p>
+
+    <h3>Sub-scores</h3>
+    <p>The same calculation is made per priority and per category: security, performance, manageability and upgradability. They show where the weak spots are.</p>
+
+    <h3>Example</h3>
+    <table>
+      <thead><tr><th>Check</th><th>Priority</th><th>Findings</th><th>Check score</th><th>Weight</th></tr></thead>
+      <tbody>
+        <tr><td>Global UI scripts</td><td>1</td><td>2</td><td>100 &minus; 2 &times; 20 = <strong>60</strong></td><td>5</td></tr>
+        <tr><td>Roles assigned directly to users</td><td>2</td><td>8</td><td>100 &minus; 8 &times; 5 = <strong>60</strong></td><td>3</td></tr>
+        <tr><td>Update sets without description</td><td>3</td><td>10</td><td>100 &minus; 10 &times; 2 = <strong>80</strong></td><td>1</td></tr>
+      </tbody>
+    </table>
+    <p>Weighted average: (60 &times; 5 + 60 &times; 3 + 80 &times; 1) / (5 + 3 + 1) = 560 / 9 = <strong>62.2</strong>. No priority 1 check is at 0, so there is no cap. If the global UI scripts had 5 findings, that check would be at 0, and the score would be at most 60.</p>
+
+    <h3>What is not counted</h3>
+    <ul>
+      <li>Checks that did not run or failed in the scan (the platform would give them 100). They are listed in &ldquo;checks failed&rdquo;.</li>
+      <li>Records in tables that ServiceNow generates itself (for example Generative AI Framework scheduled scripts), which are never treated as custom.</li>
+    </ul>
+    <div class="bh-hint"><strong>Note:</strong> Instance Scan shows its own score per check, using the same points per finding. The overall health score and the knock-out cap exist only in this app.</div>
+  </div>
+
+  <div class="bh-contact">
+    Questions or problems? Contact <strong>Thomas Buecker</strong>.
+  </div>
+
+</div>

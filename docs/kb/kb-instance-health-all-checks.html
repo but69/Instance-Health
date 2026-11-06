@@ -1,0 +1,330 @@
+<style>
+.bh-kb {
+  --kb-navy:       #24303e;
+  --kb-navy-700:   #1b242f;
+  --kb-teal:       #38b5aa;
+  --kb-teal-700:   #2ea095;
+  --kb-teal-900:   #006c76;
+  --kb-amber:      #f7aa08;
+  --kb-danger:     #c8413a;
+  --kb-bg:         #ffffff;
+  --kb-bg-soft:    #f7f9fa;
+  --kb-bg-tint:    #f0faf9;
+  --kb-bg-amber:   #fffbf0;
+  --kb-bg-warn:    #fff5ec;
+  --kb-bg-danger:  #fdecec;
+  --kb-bg-success: #e9f6ef;
+  --kb-ink:        #24303e;
+  --kb-ink-body:   #3d4f5e;
+  --kb-ink-muted:  #5a6e7e;
+  --kb-ink-faint:  #8fa8b8;
+  --kb-line:       #e0e4e8;
+  --kb-line-soft:  #eaecee;
+  --kb-r-sm:       4px;
+  --kb-r-md:       6px;
+  --kb-r-lg:       10px;
+  --kb-shadow-sm:  0 1px 4px rgba(36,48,62,.07);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 14px; line-height: 1.6; color: var(--kb-ink);
+}
+.bh-kb *, .bh-kb *::before, .bh-kb *::after { box-sizing: border-box; }
+.bh-kb .bh-header { background: var(--kb-navy); border-radius: var(--kb-r-lg); padding: 28px 32px; margin: 0 0 20px; display: flex; align-items: flex-start; gap: 20px; }
+.bh-kb .bh-header-accent { width: 4px; min-height: 56px; background: var(--kb-teal); border-radius: var(--kb-r-sm); flex-shrink: 0; }
+.bh-kb .bh-header-meta { color: var(--kb-teal); font-size: 11px; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase; margin: 0 0 6px; }
+.bh-kb .bh-header h1 { color: #fff; font-size: 22px; font-weight: 700; line-height: 1.25; margin: 0 0 6px; }
+.bh-kb .bh-header-sub { color: var(--kb-ink-faint); font-size: 13px; line-height: 1.5; }
+.bh-kb .bh-card { background: var(--kb-bg); border-radius: var(--kb-r-lg); padding: 22px 24px; margin: 0 0 20px; box-shadow: var(--kb-shadow-sm); }
+.bh-kb h2 { font-size: 16px; font-weight: 700; color: var(--kb-ink); margin: 0 0 14px; display: flex; align-items: center; gap: 8px; line-height: 1.3; }
+.bh-kb h2::before { content: ''; display: inline-block; width: 3px; height: 18px; background: var(--kb-teal); border-radius: 2px; flex-shrink: 0; }
+.bh-kb h3 { font-size: 14px; font-weight: 700; color: var(--kb-ink); margin: 14px 0 8px; line-height: 1.35; }
+.bh-kb p { margin: 0 0 10px; color: var(--kb-ink-body); }
+.bh-kb p:last-child { margin-bottom: 0; }
+.bh-kb strong { color: var(--kb-ink); font-weight: 700; }
+.bh-kb em { font-style: italic; }
+.bh-kb hr { border: none; border-top: 1px solid var(--kb-line); margin: 18px 0; }
+.bh-kb a { color: var(--kb-teal); text-decoration: none; }
+.bh-kb a:hover { color: var(--kb-teal-900); text-decoration: underline; }
+.bh-kb ul, .bh-kb ol { padding-left: 20px; margin: 8px 0 12px; color: var(--kb-ink-body); font-size: 13px; }
+.bh-kb li { margin-bottom: 4px; }
+.bh-kb code { background: #eef1f3; color: var(--kb-ink); padding: 1px 6px; border-radius: var(--kb-r-sm); font-size: 12px; font-family: 'SF Mono','Cascadia Mono',Consolas,monospace; }
+.bh-kb pre { background: #1e2a36; color: #b0c8d8; padding: 14px 18px; border-radius: var(--kb-r-md); font-family: 'SF Mono','Cascadia Mono',Consolas,monospace; font-size: 12px; line-height: 1.55; overflow-x: auto; margin: 10px 0; }
+.bh-kb pre code { background: transparent; color: inherit; padding: 0; border-radius: 0; }
+.bh-kb kbd { display: inline-block; min-width: 22px; padding: 1px 7px; font-family: 'SF Mono',Consolas,monospace; font-size: 11px; font-weight: 600; color: var(--kb-ink); background: linear-gradient(180deg,#fff 0%,#eef1f3 100%); border: 1px solid #c8d0d8; border-bottom-color: #a8b3bf; border-radius: var(--kb-r-sm); box-shadow: 0 1px 0 #a8b3bf; line-height: 1.55; text-align: center; vertical-align: baseline; }
+.bh-kb .bh-hint { background: var(--kb-bg-tint); border-left: 3px solid var(--kb-teal); border-radius: 0 var(--kb-r-md) var(--kb-r-md) 0; padding: 10px 14px; font-size: 13px; color: var(--kb-ink); margin: 12px 0; line-height: 1.55; }
+.bh-kb .bh-hint strong { color: var(--kb-ink); }
+.bh-kb .bh-hint.bh-tip     { background: var(--kb-bg-amber);   border-left-color: var(--kb-amber); }
+.bh-kb .bh-hint.bh-warn    { background: var(--kb-bg-warn);    border-left-color: #e65c00; }
+.bh-kb .bh-hint.bh-danger  { background: var(--kb-bg-danger);  border-left-color: var(--kb-danger); }
+.bh-kb .bh-hint.bh-success { background: var(--kb-bg-success); border-left-color: #1f9d72; }
+.bh-kb .bh-benefit-grid { display: flex; gap: 12px; flex-wrap: wrap; margin: 14px 0; }
+.bh-kb .bh-benefit-card { flex: 1; min-width: 200px; background: var(--kb-bg-tint); border-top: 3px solid var(--kb-teal); border-radius: 0 0 var(--kb-r-md) var(--kb-r-md); padding: 14px 16px; }
+.bh-kb .bh-benefit-card.bh-accent { border-top-color: var(--kb-amber); background: var(--kb-bg-amber); }
+.bh-kb .bh-benefit-title { font-weight: 700; font-size: 13px; color: var(--kb-ink); margin-bottom: 5px; }
+.bh-kb .bh-benefit-text { font-size: 12px; color: var(--kb-ink-muted); line-height: 1.5; }
+.bh-kb table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 10px 0; border-radius: var(--kb-r-md); overflow: hidden; }
+.bh-kb thead tr { background: var(--kb-navy); }
+.bh-kb thead th { color: #fff; text-align: left; padding: 10px 14px; font-weight: 600; font-size: 12px; letter-spacing: .3px; }
+.bh-kb tbody tr:nth-child(odd)  { background: var(--kb-bg-soft); }
+.bh-kb tbody tr:nth-child(even) { background: var(--kb-bg); }
+.bh-kb tbody td { padding: 10px 14px; border-bottom: 1px solid var(--kb-line-soft); color: var(--kb-ink-body); vertical-align: top; }
+.bh-kb tbody tr:last-child td { border-bottom: none; }
+.bh-kb .bh-update-table thead tr { background: var(--kb-teal-900); }
+.bh-kb .bh-steps { display: flex; flex-direction: column; gap: 16px; }
+.bh-kb .bh-step { display: flex; gap: 14px; align-items: flex-start; }
+.bh-kb .bh-step-num { background: var(--kb-teal); color: #fff; font-weight: 700; font-size: 12px; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+.bh-kb .bh-step-body { flex: 1; min-width: 0; }
+.bh-kb .bh-step-title { font-weight: 700; font-size: 13px; margin-bottom: 6px; color: var(--kb-ink); }
+.bh-kb .bh-option-header { background: var(--kb-navy); color: #fff; padding: 10px 16px; font-weight: 700; font-size: 14px; border-radius: var(--kb-r-md) var(--kb-r-md) 0 0; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.bh-kb .bh-option-header-sub { font-size: 12px; font-weight: 400; opacity: .7; }
+.bh-kb .bh-option-body { border: 1px solid var(--kb-line); border-top: none; border-radius: 0 0 var(--kb-r-md) var(--kb-r-md); padding: 18px 20px; background: var(--kb-bg); margin-bottom: 16px; }
+.bh-kb .bh-tag { background: var(--kb-teal); color: #fff; font-size: 10px; font-weight: 600; letter-spacing: .5px; padding: 2px 8px; border-radius: 20px; text-transform: uppercase; display: inline-block; line-height: 1.6; }
+.bh-kb .bh-tag.bh-orange { background: var(--kb-amber); color: var(--kb-navy); }
+.bh-kb .bh-tag.bh-navy   { background: var(--kb-navy); color: #fff; }
+.bh-kb .bh-tag.bh-ghost  { background: transparent; color: var(--kb-teal); border: 1px solid var(--kb-teal); }
+.bh-kb .bh-faq-wrap { border: 1px solid var(--kb-line); border-radius: var(--kb-r-md); overflow: hidden; }
+.bh-kb .bh-faq-item { border-bottom: 1px solid var(--kb-line-soft); }
+.bh-kb .bh-faq-item:last-child { border-bottom: none; }
+.bh-kb .bh-faq-q { padding: 11px 14px; font-weight: 600; font-size: 13px; color: var(--kb-ink); background: var(--kb-bg-soft); }
+.bh-kb .bh-faq-a { padding: 10px 14px 12px; font-size: 13px; color: var(--kb-ink-body); }
+.bh-kb .bh-try { background: var(--kb-navy); border-radius: var(--kb-r-lg); padding: 22px 26px; margin: 0 0 20px; }
+.bh-kb .bh-try-label { color: var(--kb-teal); font-size: 11px; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 8px; }
+.bh-kb .bh-try-title { color: #fff; font-size: 14px; font-weight: 600; margin-bottom: 12px; line-height: 1.5; }
+.bh-kb .bh-try-prompt { background: rgba(56,181,170,.12); border-left: 3px solid var(--kb-teal); border-radius: 0 var(--kb-r-md) var(--kb-r-md) 0; padding: 11px 15px; color: #b8e8e5; font-style: italic; font-size: 13px; margin-bottom: 10px; line-height: 1.55; }
+.bh-kb .bh-try-sub { color: #6e8a99; font-size: 12px; line-height: 1.55; }
+.bh-kb .bh-contact { background: var(--kb-bg); border-radius: var(--kb-r-md); padding: 14px 18px; font-size: 13px; color: var(--kb-ink-body); text-align: center; box-shadow: var(--kb-shadow-sm); }
+.bh-kb .bh-contact strong { color: var(--kb-ink); }
+.bh-kb .bh-figure { margin: 12px 0; border-radius: var(--kb-r-md); overflow: hidden; border: 1px solid var(--kb-line); background: var(--kb-bg-soft); }
+.bh-kb .bh-figure img { display: block; width: 100%; height: auto; }
+.bh-kb .bh-figure-caption { font-size: 12px; color: var(--kb-ink-muted); padding: 8px 14px; background: var(--kb-bg); border-top: 1px solid var(--kb-line-soft); }
+.bh-kb .bh-kv { display: grid; grid-template-columns: minmax(140px,max-content) 1fr; gap: 6px 18px; font-size: 13px; margin: 10px 0; }
+.bh-kb .bh-kv dt { color: var(--kb-ink-muted); font-weight: 600; }
+.bh-kb .bh-kv dd { color: var(--kb-ink-body); margin: 0; }
+.bh-kb .bh-banner { display: flex; gap: 12px; align-items: flex-start; border-radius: var(--kb-r-md); padding: 12px 16px; margin: 0 0 16px; font-size: 13px; line-height: 1.55; background: #e6efff; border: 1px solid #b8d0f0; color: var(--kb-ink); }
+.bh-kb .bh-banner-icon { width: 22px; height: 22px; border-radius: 50%; background: #2c70d4; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; flex-shrink: 0; font-family: serif; }
+.bh-kb .bh-banner-body { flex: 1; color: var(--kb-ink-body); }
+.bh-kb .bh-banner-body strong { color: var(--kb-ink); }
+.bh-kb .bh-banner.bh-wip { background: var(--kb-bg-amber); border-color: #f0d27a; }
+.bh-kb .bh-banner.bh-wip .bh-banner-icon { background: var(--kb-amber); color: var(--kb-navy); }
+.bh-kb .bh-banner.bh-deprecated { background: var(--kb-bg-danger); border-color: #f0b8b5; }
+.bh-kb .bh-banner.bh-deprecated .bh-banner-icon { background: var(--kb-danger); color: #fff; }
+.bh-kb .bh-banner.bh-new { background: var(--kb-bg-success); border-color: #b8e0c9; }
+.bh-kb .bh-banner.bh-new .bh-banner-icon { background: #1f9d72; color: #fff; }
+.bh-kb .bh-applies { background: var(--kb-bg-tint); border-left: 3px solid var(--kb-teal); border-radius: 0 var(--kb-r-md) var(--kb-r-md) 0; padding: 14px 18px; margin: 0 0 20px; }
+.bh-kb .bh-applies-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; color: var(--kb-teal-900); margin-bottom: 10px; }
+.bh-kb .bh-applies-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap: 10px 24px; font-size: 13px; }
+.bh-kb .bh-applies-key { font-size: 10.5px; text-transform: uppercase; letter-spacing: .5px; color: var(--kb-ink-muted); font-weight: 600; margin-bottom: 2px; }
+.bh-kb .bh-applies-val { color: var(--kb-ink); font-weight: 600; line-height: 1.4; }
+.bh-kb .bh-toc { background: var(--kb-bg-soft); border: 1px solid var(--kb-line); border-radius: var(--kb-r-md); padding: 14px 18px; margin: 0 0 20px; }
+.bh-kb .bh-toc-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; color: var(--kb-ink-muted); margin-bottom: 8px; }
+.bh-kb .bh-toc-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; counter-reset: toc-counter; }
+.bh-kb .bh-toc-list li { counter-increment: toc-counter; font-size: 13px; display: flex; align-items: baseline; gap: 10px; }
+.bh-kb .bh-toc-list li::before { content: counter(toc-counter,decimal-leading-zero); color: var(--kb-teal-900); font-weight: 700; font-family: 'SF Mono',Consolas,monospace; font-size: 11px; letter-spacing: .3px; }
+.bh-kb .bh-toc-list a { color: var(--kb-ink); font-weight: 500; }
+.bh-kb .bh-toc-list a:hover { color: var(--kb-teal-900); text-decoration: underline; }
+.bh-kb .bh-changelog { border-left: 2px solid var(--kb-line); padding: 4px 0 4px 22px; margin: 12px 0 4px; }
+.bh-kb .bh-changelog-item { position: relative; padding: 0 0 14px; }
+.bh-kb .bh-changelog-item:last-child { padding-bottom: 0; }
+.bh-kb .bh-changelog-item::before { content: ''; position: absolute; left: -27px; top: 6px; width: 8px; height: 8px; border-radius: 50%; background: var(--kb-teal); border: 2px solid var(--kb-bg); box-shadow: 0 0 0 1px var(--kb-line); }
+.bh-kb .bh-changelog-head { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; flex-wrap: wrap; }
+.bh-kb .bh-changelog-version { font-family: 'SF Mono',Consolas,monospace; font-size: 12px; font-weight: 700; color: var(--kb-ink); background: #eef1f3; padding: 1px 8px; border-radius: var(--kb-r-sm); }
+.bh-kb .bh-changelog-date { font-size: 11px; color: var(--kb-ink-muted); text-transform: uppercase; letter-spacing: .5px; font-weight: 600; }
+.bh-kb .bh-changelog-author { font-size: 12px; color: var(--kb-ink-muted); }
+.bh-kb .bh-changelog-body { font-size: 13px; color: var(--kb-ink-body); }
+.bh-kb .bh-changelog-body ul { margin: 4px 0 0; padding-left: 18px; }
+.bh-kb .bh-changelog-body li { margin-bottom: 2px; }
+.bh-kb .bh-annot { position: relative; }
+.bh-kb .bh-annot-pin { position: absolute; width: 26px; height: 26px; border-radius: 50%; background: var(--kb-teal); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; border: 3px solid #fff; box-shadow: 0 2px 6px rgba(0,0,0,.3); transform: translate(-50%,-50%); z-index: 2; pointer-events: none; }
+.bh-kb .bh-annot-legend { list-style: none; padding: 12px 16px; margin: 0; background: var(--kb-bg); border-top: 1px solid var(--kb-line-soft); display: grid; gap: 8px; counter-reset: pin-counter; }
+.bh-kb .bh-annot-legend li { counter-increment: pin-counter; display: grid; grid-template-columns: 22px 1fr; gap: 12px; font-size: 12px; color: var(--kb-ink-body); align-items: baseline; line-height: 1.5; }
+.bh-kb .bh-annot-legend li::before { content: counter(pin-counter); background: var(--kb-teal); color: #fff; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 11px; }
+.bh-kb .bh-related { list-style: none; padding: 0; margin: 8px 0 0; display: grid; gap: 8px; }
+.bh-kb .bh-related li { padding: 10px 14px; background: var(--kb-bg-soft); border-left: 3px solid var(--kb-teal); border-radius: 0 var(--kb-r-md) var(--kb-r-md) 0; font-size: 13px; }
+.bh-kb .bh-related a { font-weight: 600; }
+.bh-kb .bh-related-meta { color: var(--kb-ink-muted); font-size: 11px; text-transform: uppercase; letter-spacing: .6px; margin-left: 8px; }
+@media print {
+  .bh-kb { color: #000; font-size: 11pt; line-height: 1.4; }
+  .bh-kb a { color: #000; text-decoration: underline; }
+  .bh-kb a[href^="http"]::after { content: ' (' attr(href) ')'; font-size: 9pt; color: #555; word-break: break-all; }
+  .bh-kb .bh-header, .bh-kb .bh-try { background: #fff !important; color: #000 !important; border: 2px solid #000; box-shadow: none; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .bh-kb .bh-header h1, .bh-kb .bh-try-title { color: #000 !important; }
+  .bh-kb .bh-header-meta, .bh-kb .bh-try-label { color: #555 !important; }
+  .bh-kb .bh-header-sub, .bh-kb .bh-try-sub { color: #444 !important; }
+  .bh-kb .bh-header-accent { background: #000 !important; }
+  .bh-kb .bh-card, .bh-kb .bh-contact, .bh-kb .bh-toc, .bh-kb .bh-applies, .bh-kb .bh-banner, .bh-kb .bh-faq-wrap, .bh-kb .bh-option-body { box-shadow: none; border: 1px solid #999; page-break-inside: avoid; }
+  .bh-kb thead tr, .bh-kb .bh-option-header { background: #444 !important; color: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .bh-kb pre { background: #f4f4f4 !important; color: #000 !important; border: 1px solid #ccc; page-break-inside: avoid; }
+  .bh-kb .bh-step-num, .bh-kb .bh-tag { background: #444 !important; color: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .bh-kb h2, .bh-kb h3 { page-break-after: avoid; }
+  .bh-kb .bh-step, .bh-kb .bh-faq-item, .bh-kb .bh-changelog-item { page-break-inside: avoid; }
+  .bh-kb .bh-try-prompt { background: transparent !important; border-left: 2px solid #000 !important; color: #000 !important; }
+}
+</style>
+<div class="bh-kb">
+
+  <div class="bh-header">
+    <div class="bh-header-accent"></div>
+    <div>
+      <div class="bh-header-meta">ServiceNow &nbsp;&middot;&nbsp; Instance Health &nbsp;&middot;&nbsp; Stand: 2026-11</div>
+      <h1>Instance Health: all scan checks</h1>
+      <div class="bh-header-sub">What each of the 73 checks looks for and why it matters for the health of the instance.</div>
+    </div>
+  </div>
+
+  <div class="bh-applies">
+    <div class="bh-applies-label">Applies to</div>
+    <div class="bh-applies-grid">
+      <div><div class="bh-applies-key">Application</div><div class="bh-applies-val">Instance Health (x_bits2_inst_hlth)</div></div>
+      <div><div class="bh-applies-key">Scan suite</div><div class="bh-applies-val">Instance health (73 checks)</div></div>
+      <div><div class="bh-applies-key">Audience</div><div class="bh-applies-val">ServiceNow administrators</div></div>
+    </div>
+  </div>
+
+  <div class="bh-card" id="overview">
+    <h2>How to read this list</h2>
+    <p>The checks are grouped by topic. The column <strong>P</strong> is the priority, which sets how much a finding costs in the health score (see the article <strong>How to use Instance Health</strong>):</p>
+    <ul>
+      <li><span class="bh-tag">P1</span> largest impact: instance-wide or all users, data exposure without login or ACL, breaks upgrades. 13 checks.</li>
+      <li><span class="bh-tag bh-orange">P2</span> noticeable impact on single processes, users or areas. 31 checks.</li>
+      <li><span class="bh-tag bh-ghost">P3</span> data quality, housekeeping, maintainability. 29 checks.</li>
+    </ul>
+    <div class="bh-hint"><strong>Note:</strong> Checks on code (scripts, business rules, client scripts, UI actions and similar) report <strong>custom</strong> records only. Code delivered by ServiceNow is not reported. Retired CIs are left out of the CI checks.</div>
+  </div>
+
+  <div class="bh-toc">
+    <div class="bh-toc-label">Contents</div>
+    <ul class="bh-toc-list">
+      <li><a href="#security">Security and access (11 checks)</a></li>
+      <li><a href="#performance">Performance (20 checks)</a></li>
+      <li><a href="#code">Code quality and upgradability (18 checks)</a></li>
+      <li><a href="#data">Data quality and housekeeping (24 checks)</a></li>
+    </ul>
+  </div>
+
+  <div class="bh-card" id="security">
+    <h2>Security and access</h2>
+    <p>Who can see or do what: public content, missing ACLs, roles, users and open endpoints.</p>
+    <table>
+      <thead><tr><th>ID</th><th>P</th><th>Check</th><th>What it finds</th><th>Why it matters</th></tr></thead>
+      <tbody>
+        <tr><td>IH-001</td><td>1</td><td>Reports published to public</td><td>Reports that are published to public.</td><td>Public reports can be opened without logging in, so their data is exposed.</td></tr>
+        <tr><td>IH-017</td><td>1</td><td>Tables without ACLs</td><td>Tables that have no record ACL, neither their own nor one inherited from a parent table.</td><td>Without ACLs, access to the table is not controlled by the platform&rsquo;s rules.</td></tr>
+        <tr><td>IH-033</td><td>1</td><td>Impersonation in production</td><td>A production instance with the impersonation button enabled; the details list the users with the impersonator role.</td><td>Impersonation lets users act as someone else and blurs the audit trail.</td></tr>
+        <tr><td>IH-057</td><td>1</td><td>Scripted REST resources without security</td><td>Custom scripted REST resources that do not require authentication or ACL authorization.</td><td>An open endpoint can be called by anyone and may return or change data.</td></tr>
+        <tr><td>IH-042</td><td>2</td><td>Roles assigned directly to users</td><td>Roles given to a user directly instead of through a group.</td><td>Direct roles are hard to review and are forgotten when people change jobs.</td></tr>
+        <tr><td>IH-048</td><td>2</td><td>Scheduled jobs run as an inactive user</td><td>Active scheduled jobs whose run-as user is inactive.</td><td>The job fails or runs with the rights of an account nobody looks after.</td></tr>
+        <tr><td>IH-058</td><td>2</td><td>Property glide.security.ui.filter set to true</td><td>The system property set to true.</td><td>The setting differs from the secure default; it should not exist or be false.</td></tr>
+        <tr><td>IH-064</td><td>2</td><td>Active user accounts without login</td><td>Active users whose last login is older than 90 days, or who never logged in and were created more than 90 days ago.</td><td>Unused accounts with roles are an attack surface and cost licenses.</td></tr>
+        <tr><td>IH-039</td><td>3</td><td>Inactive users in groups</td><td>Inactive users that are still members of active groups.</td><td>They distort assignment and approval lists.</td></tr>
+        <tr><td>IH-043</td><td>3</td><td>Groups with roles without a group type</td><td>Active groups that grant roles but have no group type.</td><td>Role-granting groups must be recognizable for access reviews.</td></tr>
+        <tr><td>IH-067</td><td>3</td><td>Update set table not audited</td><td>Auditing switched off on the update set table.</td><td>Changes to update sets cannot be traced.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="bh-card" id="performance">
+    <h2>Performance</h2>
+    <p>Settings, scripts and jobs that slow down all users or single processes.</p>
+    <table>
+      <thead><tr><th>ID</th><th>P</th><th>Check</th><th>What it finds</th><th>Why it matters</th></tr></thead>
+      <tbody>
+        <tr><td>IH-005</td><td>1</td><td>Global UI scripts</td><td>Active UI scripts marked global.</td><td>They are loaded on every page for every user.</td></tr>
+        <tr><td>IH-006</td><td>1</td><td>Global client scripts</td><td>Active client scripts on the table &ldquo;global&rdquo;.</td><td>They run on every form for every user.</td></tr>
+        <tr><td>IH-014</td><td>1</td><td>Global business rules</td><td>Custom active business rules on the table &ldquo;global&rdquo;.</td><td>They are loaded on every transaction of the instance.</td></tr>
+        <tr><td>IH-018</td><td>1</td><td>Read ACLs with GlideRecord / GlideAggregate</td><td>Custom read ACL scripts that query the database.</td><td>A read ACL runs for every record and field of a list, so a query multiplies into thousands.</td></tr>
+        <tr><td>IH-036</td><td>1</td><td>Business rule call stack logging enabled</td><td>The property glide.businessrule.callstack set to true.</td><td>It is for debugging only and slows down every transaction.</td></tr>
+        <tr><td>IH-061</td><td>1</td><td>Scheduled jobs running longer than their interval</td><td>Recurring jobs whose average run time over 7 days is longer than their interval.</td><td>Runs pile up and take up the scheduler workers of the instance.</td></tr>
+        <tr><td>IH-063</td><td>1</td><td>Scripts that flush the cache</td><td>Custom scripts that call <code>gs.cacheFlush</code> or <code>GlideCacheManager.flush</code>.</td><td>All users are slow until the cache is built up again.</td></tr>
+        <tr><td>IH-002</td><td>2</td><td>Slow reports (&gt; 5 s)</td><td>Recently run reports with an average run time over 5 seconds.</td><td>Slow reports load the database and make dashboards unusable.</td></tr>
+        <tr><td>IH-007</td><td>2</td><td>Import set rows &gt; 5 million</td><td>More than 5 million rows in the import set tables; lists the 10 biggest import runs.</td><td>Huge staging tables slow imports and backups; the cleanup job is missing or too slow.</td></tr>
+        <tr><td>IH-010</td><td>2</td><td>Synchronous AJAX in client code</td><td>Client code that waits for the server: <code>getXMLWait</code>, <code>getReference</code> or <code>GlideRecord.query()</code> without callback, <code>async: false</code>.</td><td>The browser freezes while it waits for the server.</td></tr>
+        <tr><td>IH-016</td><td>2</td><td>Transform map coalesces on non-indexed fields</td><td>Active transform maps where no coalesce field is indexed.</td><td>Every imported row triggers a full table scan; imports become slower the more data exists.</td></tr>
+        <tr><td>IH-019</td><td>2</td><td>SLA engine runs synchronously</td><td>The SLA engine version is not 2011 (synchronous).</td><td>The old asynchronous engine delays SLA updates.</td></tr>
+        <tr><td>IH-020</td><td>2</td><td>Business rules with outbound REST/SOAP must be async</td><td>Custom business rules that are not async and call REST or SOAP.</td><td>The user waits for the remote system on every save.</td></tr>
+        <tr><td>IH-022</td><td>2</td><td>Default rows per page at most 50</td><td>A system default of more than 50 rows per page.</td><td>Large pages slow down every list.</td></tr>
+        <tr><td>IH-023</td><td>2</td><td>Long running (slow) scripts</td><td>Scripts with an average run time over 5 seconds that ran in the last 30 days.</td><td>Slow scripts block users and workers.</td></tr>
+        <tr><td>IH-065</td><td>2</td><td>Slow list reports with group by</td><td>List reports with a group by and an average run time of 15 seconds or more.</td><td>Grouped list reports are expensive; removing the group by is often enough.</td></tr>
+        <tr><td>IH-073</td><td>2</td><td>UI actions with synchronous outbound calls</td><td>Custom server-side UI actions that call REST or SOAP and wait for the answer.</td><td>The user waits on the button until the remote system answers.</td></tr>
+        <tr><td>IH-009</td><td>3</td><td>Unnecessary dot-walk to sys_id</td><td>Scripts that read <code>current.caller_id.sys_id</code> instead of the reference value.</td><td>The dot-walk loads the referenced record for nothing.</td></tr>
+        <tr><td>IH-060</td><td>3</td><td>Remote tables with 1000 rows or more</td><td>Custom remote tables that return 1000 rows or more.</td><td>Every access runs the remote script and fetches all rows.</td></tr>
+        <tr><td>IH-072</td><td>3</td><td>Scheduled imports at the same time</td><td>Active scheduled imports that start at the same time.</td><td>They compete for resources and slow each other down.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="bh-card" id="code">
+    <h2>Code quality and upgradability</h2>
+    <p>Customizations that are hard to maintain or that break or block upgrades.</p>
+    <table>
+      <thead><tr><th>ID</th><th>P</th><th>Check</th><th>What it finds</th><th>Why it matters</th></tr></thead>
+      <tbody>
+        <tr><td>IH-008</td><td>1</td><td>Scripts using gs.sql</td><td>Custom scripts that call the undocumented <code>gs.sql</code>.</td><td>It bypasses ACLs, can lock tables and may stop working in an upgrade.</td></tr>
+        <tr><td>IH-021</td><td>1</td><td>Skipped items in the last upgrade</td><td>Items skipped in the last platform upgrade that differ from the new version or failed, and were not reviewed.</td><td>Skipped changes mean you run old code or miss fixes and features.</td></tr>
+        <tr><td>IH-013</td><td>2</td><td>Before business rules that update or insert other records</td><td>Before rules with <code>update()</code> or <code>insert()</code> on other records.</td><td>The save may fail after the other record is already changed; changes belong in after or async rules.</td></tr>
+        <tr><td>IH-015</td><td>2</td><td>Script includes with duplicate names</td><td>Script includes with the same API name in the same scope.</td><td>It is undefined which class is loaded.</td></tr>
+        <tr><td>IH-024</td><td>2</td><td>Differs from baseline: business rules</td><td>ServiceNow business rules that were changed.</td><td>Changed records are skipped in upgrades and miss fixes.</td></tr>
+        <tr><td>IH-025</td><td>2</td><td>Differs from baseline: script includes</td><td>ServiceNow script includes that were changed.</td><td>As IH-024.</td></tr>
+        <tr><td>IH-026</td><td>2</td><td>Differs from baseline: client scripts and UI scripts</td><td>ServiceNow client scripts and UI scripts that were changed.</td><td>As IH-024.</td></tr>
+        <tr><td>IH-027</td><td>2</td><td>Differs from baseline: UI macros and UI pages</td><td>ServiceNow UI macros and UI pages that were changed.</td><td>As IH-024.</td></tr>
+        <tr><td>IH-028</td><td>2</td><td>Differs from baseline: UI actions</td><td>ServiceNow UI actions that were changed.</td><td>As IH-024.</td></tr>
+        <tr><td>IH-037</td><td>2</td><td>Script includes that update current</td><td>Business rules that pass <code>current</code> to a script include which then calls <code>update()</code> on it.</td><td>It hides updates from IH-013 and IH-069 and causes loops and double saves.</td></tr>
+        <tr><td>IH-066</td><td>2</td><td>Changed ServiceNow dictionary entries</td><td>ServiceNow dictionary entries that were changed.</td><td>Use a dictionary override on a child table; changed entries are skipped in upgrades.</td></tr>
+        <tr><td>IH-069</td><td>2</td><td>current.update() in business rules</td><td>Custom business rules that are not before rules and call <code>current.update()</code>.</td><td>It triggers the rules a second time and risks endless loops.</td></tr>
+        <tr><td>IH-003</td><td>3</td><td>Tables with &gt; 10 custom client scripts</td><td>Tables with more than 10 active custom client scripts.</td><td>Many client scripts on one form are hard to maintain and slow the form down.</td></tr>
+        <tr><td>IH-011</td><td>3</td><td>Hard-coded instance URL</td><td>Scripts that contain a URL of a ServiceNow instance.</td><td>The URL breaks after a clone and points to the wrong instance.</td></tr>
+        <tr><td>IH-012</td><td>3</td><td>Hard-coded sys_ids in scripts</td><td>Scripts that contain a literal 32-character sys_id.</td><td>The sys_id differs per instance and breaks when moved between instances.</td></tr>
+        <tr><td>IH-038</td><td>3</td><td>Business rules with complex script conditions</td><td>Business rule conditions longer than 200 characters or with queries, <code>;</code> or <code>function</code>.</td><td>Logic hidden in conditions is hard to find and to test.</td></tr>
+        <tr><td>IH-059</td><td>3</td><td>UI actions with complex conditions</td><td>UI action conditions with the same complexity as IH-038.</td><td>As IH-038; conditions run every time a form or list is shown.</td></tr>
+        <tr><td>IH-068</td><td>3</td><td>ServiceNow CI classes with more than 10 custom fields</td><td>ServiceNow CI classes with more than 10 custom fields.</td><td>Many custom fields on base classes complicate upgrades; use a child class or related tables.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="bh-card" id="data">
+    <h2>Data quality and housekeeping</h2>
+    <p>Records and settings that are wrong, orphaned or missing. They rarely stop the instance, but they cause errors, wrong reports and manual cleanup.</p>
+    <table>
+      <thead><tr><th>ID</th><th>P</th><th>Check</th><th>What it finds</th><th>Why it matters</th></tr></thead>
+      <tbody>
+        <tr><td>IH-031</td><td>2</td><td>Create Asset business rules active</td><td>The two Asset Management rules that create assets for CIs are inactive.</td><td>New CIs get no asset; asset and CMDB data drift apart.</td></tr>
+        <tr><td>IH-047</td><td>2</td><td>Active scheduled jobs run as a deleted user</td><td>Active jobs whose run-as user does not exist.</td><td>The job cannot run correctly or at all.</td></tr>
+        <tr><td>IH-050</td><td>2</td><td>System locale is valid</td><td>An invalid value in <code>glide.system.locale</code>.</td><td>Dates, numbers and sorting behave unexpectedly.</td></tr>
+        <tr><td>IH-051</td><td>2</td><td>Single currency mode configured correctly</td><td>Single currency mode on without an active currency code, or off although only one currency is used.</td><td>Currency amounts are shown or converted wrongly.</td></tr>
+        <tr><td>IH-052</td><td>2</td><td>Resolved fields set by mark_resolved</td><td>The business rule <code>mark_resolved</code> is inactive, or resolved incidents without &ldquo;Resolved&rdquo; and &ldquo;Resolved by&rdquo;.</td><td>Resolution times and reports are wrong.</td></tr>
+        <tr><td>IH-053</td><td>2</td><td>Closed fields set on problems</td><td>The rule &ldquo;Update fields on Problem Closure&rdquo; is inactive, or closed problems without &ldquo;Closed&rdquo; and &ldquo;Closed by&rdquo;.</td><td>Closure reports are wrong.</td></tr>
+        <tr><td>IH-062</td><td>2</td><td>Scheduled jobs with errors</td><td>Jobs with a last error or an error count.</td><td>The work of the job is not done.</td></tr>
+        <tr><td>IH-004</td><td>3</td><td>Data collector jobs with errors or warnings</td><td>Performance Analytics data collector jobs whose latest run ended with errors or warnings.</td><td>Indicator scores and dashboards miss data.</td></tr>
+        <tr><td>IH-029</td><td>3</td><td>Virtual CIs with assets</td><td>CIs flagged as virtual that have an asset.</td><td>Virtual machines should not count as hardware assets.</td></tr>
+        <tr><td>IH-030</td><td>3</td><td>Computers and network gear without serial number</td><td>Computers and network gear that are not retired and have no serial number.</td><td>The serial number is the main identification attribute of hardware.</td></tr>
+        <tr><td>IH-032</td><td>3</td><td>CIs with an invalid discovery source</td><td>CIs whose discovery source is not a valid value.</td><td>It tells which source owns the CI; an unknown source breaks reconciliation.</td></tr>
+        <tr><td>IH-034</td><td>3</td><td>Update sets with duplicate names</td><td>Update sets that share a name (the name &ldquo;Default&rdquo; is excluded).</td><td>They cannot be told apart when moving changes.</td></tr>
+        <tr><td>IH-035</td><td>3</td><td>Knowledge bases without retire workflow</td><td>Active knowledge bases with no, or a deleted, retire workflow.</td><td>Articles cannot be retired in a controlled way.</td></tr>
+        <tr><td>IH-040</td><td>3</td><td>Groups with an inactive manager</td><td>Active groups whose manager is inactive.</td><td>Approvals and escalations go nowhere.</td></tr>
+        <tr><td>IH-041</td><td>3</td><td>Groups without members</td><td>Active groups with no members.</td><td>Tasks assigned to them are not worked on.</td></tr>
+        <tr><td>IH-044</td><td>3</td><td>Dictionary entries for tables that do not exist</td><td>Dictionary entries whose table is missing.</td><td>Leftovers of deleted tables cause errors and clutter.</td></tr>
+        <tr><td>IH-045</td><td>3</td><td>List layouts with duplicate positions</td><td>List layouts where two elements share a position.</td><td>The column order is undefined.</td></tr>
+        <tr><td>IH-046</td><td>3</td><td>Catalog tasks without requested item or request</td><td>Catalog tasks that are not linked to a requested item or request.</td><td>Fulfillment cannot be followed; the task is an orphan.</td></tr>
+        <tr><td>IH-049</td><td>3</td><td>Active tasks opened by an inactive user</td><td>Active tasks whose &ldquo;opened by&rdquo; user is inactive.</td><td>Follow-up questions reach nobody.</td></tr>
+        <tr><td>IH-054</td><td>3</td><td>Active tasks with a closed date</td><td>Active tasks that have a closed date.</td><td>Reopened tasks keep wrong closure data.</td></tr>
+        <tr><td>IH-055</td><td>3</td><td>Update sets without description</td><td>Update sets with no description.</td><td>Nobody knows what they contain or why.</td></tr>
+        <tr><td>IH-056</td><td>3</td><td>Share of active CIs not discovered or updated for 60 days</td><td>More than 5 % of active CIs were neither discovered nor updated for 60 days.</td><td>The CMDB drifts away from reality.</td></tr>
+        <tr><td>IH-070</td><td>3</td><td>Share of unique location names</td><td>Locations that share a name, so less than 100 % are unique.</td><td>Users pick the wrong location.</td></tr>
+        <tr><td>IH-071</td><td>3</td><td>Hardware, application and VM instance CIs without name</td><td>CIs of these classes with an empty name.</td><td>Identification, search and reports depend on the name.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="bh-card" id="notes">
+    <h2>What the checks do not cover</h2>
+    <ul>
+      <li>ServiceNow&rsquo;s own code: code checks report custom records only.</li>
+      <li>Records that ServiceNow generates itself (for example Generative AI Framework scripts) are never treated as custom.</li>
+      <li>Checks that cannot run in the app scope: the skipped items of an upgrade are summarized in one finding (IH-021), and the priority of skipped items is not checked.</li>
+    </ul>
+    <p>The resolution for each check is written in the check itself (field <em>Resolution details</em> in Instance Scan) and on every finding.</p>
+  </div>
+
+  <div class="bh-contact">
+    Questions or problems? Contact <strong>Thomas Buecker</strong>.
+  </div>
+
+</div>
