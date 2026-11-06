@@ -246,6 +246,27 @@ Record({
     },
 })
 
+// First menu entry: the dashboard "Instance Health" (dashboard.now.ts). The URL needs the dashboard
+// sys_id; it is the build-generated id of the key 'ih-dashboard' in generated/keys.ts.
+Record({
+    $id: Now.ID['ih-module-dashboard'],
+    table: 'sys_app_module',
+    data: {
+        title: 'Dashboard',
+        mobile_title: 'Dashboard',
+        active: true,
+        override_menu_roles: false,
+        uncancelable: false,
+        require_confirmation: false,
+        application: instanceHealthMenu,
+        link_type: 'DIRECT',
+        query: '/now/platform-analytics-workspace/dashboards/params/edit/false/sys-id/98b85d0ceeef44509f1410077e872192',
+        order: 50,
+        roles: ['admin'],
+        hint: 'Dashboard with the health score trend, trend line filter and the list of health scores',
+    },
+})
+
 Record({
     $id: Now.ID['ih-module-health-scores'],
     table: 'sys_app_module',
@@ -272,7 +293,8 @@ Record({
     data: {
         title: 'Health Score Trend',
         mobile_title: 'Health Score Trend',
-        active: true,
+        // Deactivated 2026-11-06 (user request): the trend is shown on the dashboard
+        active: false,
         override_menu_roles: false,
         uncancelable: false,
         require_confirmation: false,

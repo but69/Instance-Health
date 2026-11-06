@@ -1,6 +1,7 @@
 import {
     Acl,
     BooleanColumn,
+    ChoiceColumn,
     DateTimeColumn,
     DecimalColumn,
     IntegerColumn,
@@ -39,7 +40,63 @@ export const x_bits2_inst_hlth_health_score = Table({
     },
 })
 
+// One row per health score and dimension (health score and the four category scores), so a dashboard
+// filter can choose which trend lines are shown (user request 2026-11-06). Filled by IHHealthScore.
+export const x_bits2_inst_hlth_health_score_value = Table({
+    name: 'x_bits2_inst_hlth_health_score_value',
+    label: 'Instance Health Score Value',
+    display: 'health_score',
+    schema: {
+        health_score: ReferenceColumn({ label: 'Health score record', referenceTable: 'x_bits2_inst_hlth_health_score', mandatory: true }),
+        scan_date: DateTimeColumn({ label: 'Scan date' }),
+        dimension: ChoiceColumn({
+            label: 'Trend line',
+            choices: {
+                health_score: 'Health score',
+                security: 'Security',
+                performance: 'Performance',
+                manageability: 'Manageability',
+                upgradability: 'Upgradability',
+            },
+            dropdown: 'dropdown_with_none',
+        }),
+        score: DecimalColumn({ label: 'Score' }),
+    },
+})
+
 // Access only for admin (readRoles etc. on Table do not generate ACLs in SDK 4.14.0, checked in the build)
+Acl({
+    $id: Now.ID['ih-health-score-value-acl-read'],
+    type: 'record',
+    table: 'x_bits2_inst_hlth_health_score_value',
+    operation: 'read',
+    roles: ['admin'],
+    description: 'Instance Health: read access to health score values for admin',
+})
+Acl({
+    $id: Now.ID['ih-health-score-value-acl-write'],
+    type: 'record',
+    table: 'x_bits2_inst_hlth_health_score_value',
+    operation: 'write',
+    roles: ['admin'],
+    description: 'Instance Health: write access to health score values for admin',
+})
+Acl({
+    $id: Now.ID['ih-health-score-value-acl-create'],
+    type: 'record',
+    table: 'x_bits2_inst_hlth_health_score_value',
+    operation: 'create',
+    roles: ['admin'],
+    description: 'Instance Health: create access to health score values for admin',
+})
+Acl({
+    $id: Now.ID['ih-health-score-value-acl-delete'],
+    type: 'record',
+    table: 'x_bits2_inst_hlth_health_score_value',
+    operation: 'delete',
+    roles: ['admin'],
+    description: 'Instance Health: delete access to health score values for admin',
+})
 Acl({
     $id: Now.ID['ih-health-score-acl-read'],
     type: 'record',
@@ -85,6 +142,7 @@ export const ihHealthScore = ScriptInclude({
 IHHealthScore.prototype = {
     SUITE_NAME: 'Instance health',
     SCORE_TABLE: 'x_bits2_inst_hlth_health_score',
+    VALUE_TABLE: 'x_bits2_inst_hlth_health_score_value',
     // Weight of a check in the health score and points per finding, by check priority
     WEIGHTS: { '1': 5, '2': 3, '3': 1 },
     DEDUCTIONS: { '1': 20, '2': 5, '3': 2 },
@@ -194,7 +252,34 @@ IHHealthScore.prototype = {
         record.setValue('checks_failed', failed.join(', '));
         record.setValue('details', deductions.join('\\n').substring(0, 7900));
         if (isNew) record.insert(); else record.update();
+        this._storeValues(record, {
+            health_score: capped,
+            security: byCategory.security,
+            performance: byCategory.performance,
+            manageability: byCategory.manageability,
+            upgradability: byCategory.upgradability
+        });
         return record;
+    },
+
+    // One row per dimension in VALUE_TABLE (trend lines of the dashboard); replaces existing rows
+    _storeValues: function(record, values) {
+        var old = new GlideRecord(this.VALUE_TABLE);
+        old.addQuery('health_score', record.getUniqueValue());
+        old.deleteMultiple();
+        for (var dimension in values) {
+            var value = values[dimension];
+            if (value === undefined || value === null) continue;
+            var score = typeof value == 'number' ? this._round(value) : this._average(value);
+            if (score === '') continue;
+            var row = new GlideRecord(this.VALUE_TABLE);
+            row.initialize();
+            row.setValue('health_score', record.getUniqueValue());
+            row.setValue('scan_date', record.getValue('scan_date'));
+            row.setValue('dimension', dimension);
+            row.setValue('score', score);
+            row.insert();
+        }
     },
 
     _checkScore: function(id, priority, count, resultId, checkId) {
