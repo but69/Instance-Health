@@ -11,7 +11,9 @@ Dropped (without number since the renumbering on 2026-11-06): Java package colle
   - IH-029 test data: a platform job (runs as `admin`, seen at 12:30) creates "Unknown" model assets for computers without asset, including virtual ones, which is what IH-029 reports. The negative case is now a physical computer; the remove script also deletes these automatically created assets.
   - IH-035: 11 instead of 8; 3 knowledge bases are not readable for the admin user (user criteria) but are seen by the scan engine. Real findings.
   - Noted for review: IH-012 has 24 real findings in generated configuration records (`sys_one_extend_resource_mapping`), IH-009 2 in generated GAF jobs; they count as custom.
-- Second suite run after the fixes started 2026-11-06; checks are marked `validated` after it.
+- **Second suite run (SR00014619, 2026-11-06):** completed without failed checks, 946 findings, 1 warning. All deviations of the first run are fixed (IH-016 7, IH-017 167, IH-029 1, IH-037 2, IH-049 1, IH-054 16); every positive test record is found, no negative one, real findings as expected.
+- **Validation (2026-11-06):** 60 checks are `validated` (confirmed by a test record or real findings and no wrong finding). 13 checks stay `built`: they found nothing on bithawkdemo1 and have no test data, because a test would need instance-wide settings, a platform upgrade or 5 million rows; the scan only showed that they produce no false findings: IH-007, IH-019, IH-022, IH-031, IH-036, IH-050, IH-051, IH-056, IH-058, IH-060, IH-061, IH-067, IH-068. They can be validated on a customer instance or with a temporary setting change on a test instance.
+- Open for review with the user: IH-012 reports 24 hard-coded sys_ids in generated configuration records (`sys_one_extend_resource_mapping`) and IH-009 2 dot-walks in generated GAF jobs; they count as custom by the current rule.
 
 - IH-001 to IH-008 are deployed to bithawkdemo1. The user ran them; results look fine, but the demo instance has few findings.
 - Batch 2 (IH-009 to IH-015, IH-017, IH-018) and the helper `IHScanUtil` are built and deployed to bithawkdemo1 (2026-11-06). IH-003 now uses the helper. IH-016 was built afterwards (option 1, reduced check) and deployed the same day.
@@ -34,79 +36,79 @@ Field and table names marked ✔ were verified on bithawkdemo1 (2026-11-05).
 
 | ID | Check | Area | Category | Type | Status |
 |----|-------|------|----------|------|--------|
-| IH-001 | Reports published to public | Administration | security | TableCheck | built |
-| IH-002 | Slow reports (> 5 s) | Performance | performance | TableCheck (advanced) | built |
-| IH-003 | Tables with > 10 custom client scripts | Maintenance | manageability | ScriptOnlyCheck | built |
-| IH-004 | Data collector jobs with errors or warnings | Maintenance | manageability | TableCheck (advanced) | built |
-| IH-005 | Global UI scripts | Performance | performance | TableCheck | built |
-| IH-006 | Global client scripts | Performance | performance | TableCheck | built |
+| IH-001 | Reports published to public | Administration | security | TableCheck | validated |
+| IH-002 | Slow reports (> 5 s) | Performance | performance | TableCheck (advanced) | validated |
+| IH-003 | Tables with > 10 custom client scripts | Maintenance | manageability | ScriptOnlyCheck | validated |
+| IH-004 | Data collector jobs with errors or warnings | Maintenance | manageability | TableCheck (advanced) | validated |
+| IH-005 | Global UI scripts | Performance | performance | TableCheck | validated |
+| IH-006 | Global client scripts | Performance | performance | TableCheck | validated |
 | IH-007 | Import set rows > 5 million | Maintenance | performance | ScriptOnlyCheck | built |
-| IH-008 | Scripts using gs.sql | Maintenance | upgradability | ColumnTypeCheck | built |
-| IH-009 | Unnecessary dot-walk to sys_id | Performance | performance | ColumnTypeCheck | built |
-| IH-010 | Synchronous AJAX in client code | Performance | performance | ColumnTypeCheck | built |
-| IH-011 | Hard-coded instance URL | Maintenance | manageability | ColumnTypeCheck | built |
-| IH-012 | Hard-coded sys_ids in scripts | Maintenance | manageability | ColumnTypeCheck | built |
-| IH-013 | Before business rules that update or insert other records | Maintenance | manageability | TableCheck (advanced) | built |
-| IH-014 | Global business rules | Performance | performance | TableCheck (advanced) | built |
-| IH-015 | Script includes with duplicate names | Maintenance | manageability | ScriptOnlyCheck | built |
-| IH-016 | Transform map coalesces on non-indexed fields | Performance | performance | ScriptOnlyCheck | built |
-| IH-017 | Tables without ACLs | Administration | security | ScriptOnlyCheck | built |
-| IH-018 | Read ACLs with GlideRecord / GlideAggregate | Performance | performance | TableCheck (advanced) | built |
+| IH-008 | Scripts using gs.sql | Maintenance | upgradability | ColumnTypeCheck | validated |
+| IH-009 | Unnecessary dot-walk to sys_id | Performance | performance | ColumnTypeCheck | validated |
+| IH-010 | Synchronous AJAX in client code | Performance | performance | ColumnTypeCheck | validated |
+| IH-011 | Hard-coded instance URL | Maintenance | manageability | ColumnTypeCheck | validated |
+| IH-012 | Hard-coded sys_ids in scripts | Maintenance | manageability | ColumnTypeCheck | validated |
+| IH-013 | Before business rules that update or insert other records | Maintenance | manageability | TableCheck (advanced) | validated |
+| IH-014 | Global business rules | Performance | performance | TableCheck (advanced) | validated |
+| IH-015 | Script includes with duplicate names | Maintenance | manageability | ScriptOnlyCheck | validated |
+| IH-016 | Transform map coalesces on non-indexed fields | Performance | performance | ScriptOnlyCheck | validated |
+| IH-017 | Tables without ACLs | Administration | security | ScriptOnlyCheck | validated |
+| IH-018 | Read ACLs with GlideRecord / GlideAggregate | Performance | performance | TableCheck (advanced) | validated |
 | IH-019 | SLA engine runs synchronously | Performance | performance | ScriptOnlyCheck | built |
-| IH-020 | Business rules with outbound REST/SOAP must be async | Performance | performance | TableCheck (advanced) | built |
-| IH-021 | Skipped items in the last upgrade | Maintenance | upgradability | ScriptOnlyCheck | specified (blocked) |
+| IH-020 | Business rules with outbound REST/SOAP must be async | Performance | performance | TableCheck (advanced) | validated |
+| IH-021 | Skipped items in the last upgrade | Maintenance | upgradability | ScriptOnlyCheck | validated |
 | IH-022 | Default rows per page at most 50 | Performance | performance | TableCheck (advanced) | built |
-| IH-023 | Long running (slow) scripts | Performance | performance | TableCheck (advanced) | built |
-| IH-024 | Differs from baseline: business rules | Maintenance | upgradability | ScriptOnlyCheck | built |
-| IH-025 | Differs from baseline: script includes | Maintenance | upgradability | ScriptOnlyCheck | built |
-| IH-026 | Differs from baseline: client scripts and UI scripts | Maintenance | upgradability | ScriptOnlyCheck | built |
-| IH-027 | Differs from baseline: UI macros and UI pages | Maintenance | upgradability | ScriptOnlyCheck | built |
-| IH-028 | Differs from baseline: UI actions | Maintenance | upgradability | ScriptOnlyCheck | built |
-| IH-029 | Virtual CIs with assets | Administration | manageability | ScriptOnlyCheck | built |
-| IH-030 | Computers and network gear without serial number | Administration | manageability | TableCheck | built |
+| IH-023 | Long running (slow) scripts | Performance | performance | TableCheck (advanced) | validated |
+| IH-024 | Differs from baseline: business rules | Maintenance | upgradability | ScriptOnlyCheck | validated |
+| IH-025 | Differs from baseline: script includes | Maintenance | upgradability | ScriptOnlyCheck | validated |
+| IH-026 | Differs from baseline: client scripts and UI scripts | Maintenance | upgradability | ScriptOnlyCheck | validated |
+| IH-027 | Differs from baseline: UI macros and UI pages | Maintenance | upgradability | ScriptOnlyCheck | validated |
+| IH-028 | Differs from baseline: UI actions | Maintenance | upgradability | ScriptOnlyCheck | validated |
+| IH-029 | Virtual CIs with assets | Administration | manageability | ScriptOnlyCheck | validated |
+| IH-030 | Computers and network gear without serial number | Administration | manageability | TableCheck | validated |
 | IH-031 | Create Asset business rules active | Administration | manageability | ScriptOnlyCheck | built |
-| IH-032 | CIs with an invalid discovery source | Administration | manageability | TableCheck (advanced) | built |
-| IH-033 | Impersonation in production | Administration | security | ScriptOnlyCheck | built |
-| IH-034 | Update sets with duplicate names | Maintenance | manageability | ScriptOnlyCheck | built |
-| IH-035 | Knowledge bases without retire workflow | Administration | manageability | TableCheck (advanced) | built |
+| IH-032 | CIs with an invalid discovery source | Administration | manageability | TableCheck (advanced) | validated |
+| IH-033 | Impersonation in production | Administration | security | ScriptOnlyCheck | validated |
+| IH-034 | Update sets with duplicate names | Maintenance | manageability | ScriptOnlyCheck | validated |
+| IH-035 | Knowledge bases without retire workflow | Administration | manageability | TableCheck (advanced) | validated |
 | IH-036 | Business rule call stack logging enabled | Performance | performance | TableCheck | built |
-| IH-037 | Script includes that update current | Maintenance | manageability | ScriptOnlyCheck | built |
-| IH-038 | Business rules with complex script conditions | Maintenance | manageability | TableCheck (advanced) | built |
-| IH-039 | Inactive users in groups | Administration | security | TableCheck | built |
-| IH-040 | Groups with an inactive manager | Administration | manageability | TableCheck | built |
-| IH-041 | Groups without members | Administration | manageability | TableCheck (advanced) | built |
-| IH-042 | Roles assigned directly to users | Administration | security | TableCheck | built |
-| IH-043 | Groups with roles without a group type | Administration | security | TableCheck (advanced) | built |
-| IH-044 | Dictionary entries for tables that do not exist | Maintenance | manageability | ScriptOnlyCheck | built |
-| IH-045 | List layouts with duplicate positions | Maintenance | manageability | ScriptOnlyCheck | built |
-| IH-046 | Catalog tasks without requested item or request | Administration | manageability | TableCheck | built |
-| IH-047 | Active scheduled jobs run as a deleted user | Administration | manageability | TableCheck (advanced) | built |
-| IH-048 | Active scheduled jobs run as an inactive user | Administration | security | TableCheck (advanced) | built |
-| IH-049 | Active tasks opened by an inactive user | Administration | manageability | ScriptOnlyCheck | built |
+| IH-037 | Script includes that update current | Maintenance | manageability | ScriptOnlyCheck | validated |
+| IH-038 | Business rules with complex script conditions | Maintenance | manageability | TableCheck (advanced) | validated |
+| IH-039 | Inactive users in groups | Administration | security | TableCheck | validated |
+| IH-040 | Groups with an inactive manager | Administration | manageability | TableCheck | validated |
+| IH-041 | Groups without members | Administration | manageability | TableCheck (advanced) | validated |
+| IH-042 | Roles assigned directly to users | Administration | security | TableCheck | validated |
+| IH-043 | Groups with roles without a group type | Administration | security | TableCheck (advanced) | validated |
+| IH-044 | Dictionary entries for tables that do not exist | Maintenance | manageability | ScriptOnlyCheck | validated |
+| IH-045 | List layouts with duplicate positions | Maintenance | manageability | ScriptOnlyCheck | validated |
+| IH-046 | Catalog tasks without requested item or request | Administration | manageability | TableCheck | validated |
+| IH-047 | Active scheduled jobs run as a deleted user | Administration | manageability | TableCheck (advanced) | validated |
+| IH-048 | Active scheduled jobs run as an inactive user | Administration | security | TableCheck (advanced) | validated |
+| IH-049 | Active tasks opened by an inactive user | Administration | manageability | ScriptOnlyCheck | validated |
 | IH-050 | System locale is valid | Administration | manageability | ScriptOnlyCheck | built |
 | IH-051 | Single currency mode configured correctly | Administration | manageability | ScriptOnlyCheck | built |
-| IH-052 | Resolved fields set by mark_resolved | Administration | manageability | ScriptOnlyCheck | built |
-| IH-053 | Closed fields set on problems | Administration | manageability | ScriptOnlyCheck | built |
-| IH-054 | Active tasks with a closed date | Administration | manageability | ScriptOnlyCheck | built |
-| IH-055 | Update sets without description | Maintenance | manageability | TableCheck | built |
+| IH-052 | Resolved fields set by mark_resolved | Administration | manageability | ScriptOnlyCheck | validated |
+| IH-053 | Closed fields set on problems | Administration | manageability | ScriptOnlyCheck | validated |
+| IH-054 | Active tasks with a closed date | Administration | manageability | ScriptOnlyCheck | validated |
+| IH-055 | Update sets without description | Maintenance | manageability | TableCheck | validated |
 | IH-056 | Share of active CIs not discovered or updated for 60 days | Administration | manageability | ScriptOnlyCheck | built |
-| IH-057 | Scripted REST resources without security | Administration | security | TableCheck (advanced) | built |
+| IH-057 | Scripted REST resources without security | Administration | security | TableCheck (advanced) | validated |
 | IH-058 | Property glide.security.ui.filter set to true | Administration | security | TableCheck | built |
-| IH-059 | UI actions with complex conditions | Maintenance | manageability | TableCheck (advanced) | built |
+| IH-059 | UI actions with complex conditions | Maintenance | manageability | TableCheck (advanced) | validated |
 | IH-060 | Remote tables with 1000 rows or more | Performance | performance | TableCheck (advanced) | built |
 | IH-061 | Scheduled jobs running longer than their interval | Performance | performance | ScriptOnlyCheck | built |
-| IH-062 | Scheduled jobs with errors | Maintenance | manageability | TableCheck (advanced) | built |
-| IH-063 | Scripts that flush the cache | Performance | performance | ColumnTypeCheck | built |
-| IH-064 | Active user accounts without login | Administration | security | TableCheck (advanced) | built |
-| IH-065 | Slow list reports with group by | Performance | performance | TableCheck (advanced) | built |
-| IH-066 | Changed ServiceNow dictionary entries | Maintenance | upgradability | ScriptOnlyCheck | built |
+| IH-062 | Scheduled jobs with errors | Maintenance | manageability | TableCheck (advanced) | validated |
+| IH-063 | Scripts that flush the cache | Performance | performance | ColumnTypeCheck | validated |
+| IH-064 | Active user accounts without login | Administration | security | TableCheck (advanced) | validated |
+| IH-065 | Slow list reports with group by | Performance | performance | TableCheck (advanced) | validated |
+| IH-066 | Changed ServiceNow dictionary entries | Maintenance | upgradability | ScriptOnlyCheck | validated |
 | IH-067 | Update set table not audited | Administration | security | ScriptOnlyCheck | built |
 | IH-068 | ServiceNow CI classes with more than 10 custom fields | Maintenance | upgradability | ScriptOnlyCheck | built |
-| IH-069 | current.update() in business rules | Maintenance | manageability | TableCheck (advanced) | built |
-| IH-070 | Share of unique location names | Administration | manageability | ScriptOnlyCheck | built |
-| IH-071 | Hardware, application and VM instance CIs without name | Administration | manageability | TableCheck | built |
-| IH-072 | Scheduled imports at the same time | Performance | performance | ScriptOnlyCheck | built |
-| IH-073 | UI actions with synchronous outbound calls | Performance | performance | TableCheck (advanced) | built |
+| IH-069 | current.update() in business rules | Maintenance | manageability | TableCheck (advanced) | validated |
+| IH-070 | Share of unique location names | Administration | manageability | ScriptOnlyCheck | validated |
+| IH-071 | Hardware, application and VM instance CIs without name | Administration | manageability | TableCheck | validated |
+| IH-072 | Scheduled imports at the same time | Performance | performance | ScriptOnlyCheck | validated |
+| IH-073 | UI actions with synchronous outbound calls | Performance | performance | TableCheck (advanced) | validated |
 
 ---
 
