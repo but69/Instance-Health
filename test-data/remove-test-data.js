@@ -96,7 +96,7 @@ runInGlobal(function removeInstanceHealthTestData() {
     deleteWhere('kb_knowledge_base', 'title', 'STARTSWITH', MARKER, false);
     deleteWhere('sys_update_set', 'name', 'STARTSWITH', MARKER + ' ', false);
 
-    // Customization rows of the deleted test records (synthetic rows for IH-025 to IH-029)
+    // Customization rows of the deleted test records (synthetic rows for IH-024 to IH-028)
     if (removedSysIds.length > 0)
         deleteWhere('sys_metadata_customization', 'sys_metadata', 'IN', removedSysIds.join(','), false);
 

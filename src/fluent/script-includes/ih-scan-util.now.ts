@@ -1,7 +1,7 @@
 import { ScriptInclude } from '@servicenow/sdk/core'
 
-// Shared helper for the scan checks: the "custom" rule (IH-003, IH-010 to IH-016, IH-019, IH-021),
-// the line-by-line reporting of regex matches in scripts, and the baseline checks (IH-025 to IH-029).
+// Shared helper for the scan checks: the "custom" rule (IH-003, IH-009 to IH-015, IH-018, IH-020),
+// the line-by-line reporting of regex matches in scripts, and the baseline checks (IH-024 to IH-028).
 export const ihScanUtil = ScriptInclude({
     $id: Now.ID['ih-scan-util'],
     name: 'IHScanUtil',
@@ -78,7 +78,7 @@ IHScanUtil.prototype = {
         engine.finding.increment();
     },
 
-    // IH-039, IH-061: reasons why a script condition is complex (user decision 2026-11-06:
+    // IH-038, IH-059: reasons why a script condition is complex (user decision 2026-11-06:
     // longer than 200 characters, a query, a statement separator or a function). [] if simple.
     conditionComplexity: function(condition) {
         var reasons = [];
@@ -90,7 +90,7 @@ IHScanUtil.prototype = {
         return reasons;
     },
 
-    // IH-049, IH-050: resolve a scheduled job's run_as value. It is a sys_user reference, but some
+    // IH-047, IH-048: resolve a scheduled job's run_as value. It is a sys_user reference, but some
     // jobs hold a user name ("admin") or an internal platform user ("system", "maint").
     // Returns { state: 'internal' | 'missing' | 'inactive' | 'active', user: GlideRecord or null }
     resolveRunAs: function(value) {
@@ -103,7 +103,7 @@ IHScanUtil.prototype = {
         return { state: user.active == true ? 'active' : 'inactive', user: user };
     },
 
-    // IH-038: lines of a business rule script that pass current to a script include which calls
+    // IH-037: lines of a business rule script that pass current to a script include which calls
     // update() on one of its function parameters. Returns "line N: <code> -> <include>: <param>.update()"
     findIndirectCurrentUpdates: function(script) {
         var lines = this.stripComments(script + '').split('\\n');
@@ -162,7 +162,7 @@ IHScanUtil.prototype = {
         return result;
     },
 
-    // IH-025 to IH-029: ServiceNow records that were changed, from the platform's own list
+    // IH-024 to IH-028: ServiceNow records that were changed, from the platform's own list
     // sys_metadata_customization (author_type ServiceNow = record shipped by ServiceNow)
     // skip (optional): function(record) returning true for records that must not be reported
     reportBaselineChanges: function(engine, classNames, skip) {

@@ -39,10 +39,10 @@ export const ih003TooManyClientScripts = ScriptOnlyCheck({
         'Consolidate client scripts on the table, move field visibility and mandatory logic to UI policies, and remove obsolete scripts.',
 })
 
-// IH-008: if all import set rows together exceed 5 million, report the 10 runs with the most rows
+// IH-007: if all import set rows together exceed 5 million, report the 10 runs with the most rows
 export const ih008ImportSetRowGrowth = ScriptOnlyCheck({
     $id: Now.ID['ih-008-import-set-row-growth'],
-    name: 'IH-008 Import set rows over 5 million',
+    name: 'IH-007 Import set rows over 5 million',
     active: true,
     category: 'performance',
     priority: '3',
@@ -118,10 +118,10 @@ export const ih004DataCollectorJobIssues = TableCheck({
         'Open the latest job log and its log rows (pa_job_log_rows) and fix the failing indicators or breakdowns, or deactivate the job if it is no longer needed.',
 })
 
-// IH-009: gs.sql calls in any script column, ignoring commented-out code
+// IH-008: gs.sql calls in any script column, ignoring commented-out code
 export const ih009GsSqlUsage = ColumnTypeCheck({
     $id: Now.ID['ih-009-gs-sql-usage'],
-    name: 'IH-009 Scripts using gs.sql',
+    name: 'IH-008 Scripts using gs.sql',
     active: true,
     category: 'upgradability',
     priority: '2',
@@ -149,10 +149,10 @@ export const ih009GsSqlUsage = ColumnTypeCheck({
         'Replace gs.sql with GlideRecord or GlideAggregate queries.',
 })
 
-// IH-012: instance URLs (any instance) in custom scripts
+// IH-011: instance URLs (any instance) in custom scripts
 export const ih012HardCodedInstanceUrl = ColumnTypeCheck({
     $id: Now.ID['ih-012-hard-coded-instance-url'],
-    name: 'IH-012 Hard-coded instance URL',
+    name: 'IH-011 Hard-coded instance URL',
     active: true,
     category: 'manageability',
     priority: '3',
@@ -169,10 +169,10 @@ export const ih012HardCodedInstanceUrl = ColumnTypeCheck({
         'Build the URL from gs.getProperty(\'glide.servlet.uri\') or the instance_name property, or store external URLs in a system property.',
 })
 
-// IH-013: quoted 32-character hex strings (sys_ids) in custom scripts
+// IH-012: quoted 32-character hex strings (sys_ids) in custom scripts
 export const ih013HardCodedSysIds = ColumnTypeCheck({
     $id: Now.ID['ih-013-hard-coded-sys-ids'],
-    name: 'IH-013 Hard-coded sys_ids in scripts',
+    name: 'IH-012 Hard-coded sys_ids in scripts',
     active: true,
     category: 'manageability',
     priority: '3',
@@ -189,10 +189,10 @@ export const ih013HardCodedSysIds = ColumnTypeCheck({
         'Store the value in a system property, look the record up by a stable key (name, number), or reference it through configuration.',
 })
 
-// IH-014: update()/insert() in custom before business rules (current.update() included)
+// IH-013: update()/insert() in custom before business rules (current.update() included)
 export const ih014BeforeRuleUpdates = TableCheck({
     $id: Now.ID['ih-014-before-rule-updates'],
-    name: 'IH-014 Before business rules that update or insert records',
+    name: 'IH-013 Before business rules that update or insert records',
     active: true,
     category: 'manageability',
     priority: '3',
@@ -213,10 +213,10 @@ export const ih014BeforeRuleUpdates = TableCheck({
         'Move updates and inserts of other records to an after or async business rule; for the current record, set the values without calling current.update().',
 })
 
-// IH-016: same api_name used by more than one script include; reported if a member is custom
+// IH-015: same api_name used by more than one script include; reported if a member is custom
 export const ih016DuplicateScriptIncludes = ScriptOnlyCheck({
     $id: Now.ID['ih-016-duplicate-script-includes'],
-    name: 'IH-016 Script includes with duplicate names',
+    name: 'IH-015 Script includes with duplicate names',
     active: true,
     category: 'manageability',
     priority: '3',
@@ -259,10 +259,10 @@ export const ih016DuplicateScriptIncludes = ScriptOnlyCheck({
         'Rename or delete the duplicate script include so every API name is unique, and update the callers.',
 })
 
-// IH-035: update sets sharing a name ("Default" excluded, every application has one)
+// IH-034: update sets sharing a name ("Default" excluded, every application has one)
 export const ih035DuplicateUpdateSetNames = ScriptOnlyCheck({
     $id: Now.ID['ih-035-duplicate-update-set-names'],
-    name: 'IH-035 Update sets with duplicate names',
+    name: 'IH-034 Update sets with duplicate names',
     active: true,
     category: 'manageability',
     priority: '3',
@@ -293,11 +293,11 @@ export const ih035DuplicateUpdateSetNames = ScriptOnlyCheck({
         'Rename the update sets with a unique, meaningful name, for example the story number and a short title.',
 })
 
-// IH-038: business rules passing current to a script include that calls update() on a parameter
-// (escapes the current.update() check IH-014); heuristic in IHScanUtil.findIndirectCurrentUpdates
+// IH-037: business rules passing current to a script include that calls update() on a parameter
+// (escapes the current.update() check IH-013); heuristic in IHScanUtil.findIndirectCurrentUpdates
 export const ih038IndirectCurrentUpdate = TableCheck({
     $id: Now.ID['ih-038-indirect-current-update'],
-    name: 'IH-038 Script includes that update current',
+    name: 'IH-037 Script includes that update current',
     active: true,
     category: 'manageability',
     priority: '3',
@@ -318,10 +318,10 @@ export const ih038IndirectCurrentUpdate = TableCheck({
         'In a before rule, set the values on current and let the platform save it; in other rules, avoid updating current or pass the values the script include needs instead of the record.',
 })
 
-// IH-039: complex script conditions on custom business rules (user decision: length or logic)
+// IH-038: complex script conditions on custom business rules (user decision: length or logic)
 export const ih039ComplexConditions = TableCheck({
     $id: Now.ID['ih-039-complex-conditions'],
-    name: 'IH-039 Business rules with complex script conditions',
+    name: 'IH-038 Business rules with complex script conditions',
     active: true,
     category: 'manageability',
     priority: '3',
@@ -345,11 +345,11 @@ export const ih039ComplexConditions = TableCheck({
         'Use the condition builder or a short expression and move the logic into the script or a script include.',
 })
 
-// IH-046: dictionary entries (class sys_dictionary only) whose table does not exist; internal
+// IH-044: dictionary entries (class sys_dictionary only) whose table does not exist; internal
 // storage of list fields (<table><field> with sys_id, parent_id, value, sequence) is excluded
 export const ih046OrphanedDictionaryEntries = ScriptOnlyCheck({
     $id: Now.ID['ih-046-orphaned-dictionary-entries'],
-    name: 'IH-046 Dictionary entries for tables that do not exist',
+    name: 'IH-044 Dictionary entries for tables that do not exist',
     active: true,
     category: 'manageability',
     priority: '3',
@@ -396,10 +396,10 @@ export const ih046OrphanedDictionaryEntries = ScriptOnlyCheck({
         'Delete the orphaned dictionary entries, or recreate the table if it was deleted by mistake.',
 })
 
-// IH-047: list layouts (sys_ui_list) where two elements share a position
+// IH-045: list layouts (sys_ui_list) where two elements share a position
 export const ih047ListLayoutDuplicatePositions = ScriptOnlyCheck({
     $id: Now.ID['ih-047-list-layout-duplicate-positions'],
-    name: 'IH-047 List layouts with duplicate positions',
+    name: 'IH-045 List layouts with duplicate positions',
     active: true,
     category: 'manageability',
     priority: '3',
@@ -443,10 +443,10 @@ export const ih047ListLayoutDuplicatePositions = ScriptOnlyCheck({
         'Open the list layout (Configure > List Layout) and save it again, or fix the positions so each element has its own.',
 })
 
-// IH-057: update sets without description ("Default" excluded)
+// IH-055: update sets without description ("Default" excluded)
 export const ih057UpdateSetWithoutDescription = TableCheck({
     $id: Now.ID['ih-057-update-set-without-description'],
-    name: 'IH-057 Update sets without description',
+    name: 'IH-055 Update sets without description',
     active: true,
     category: 'manageability',
     priority: '3',
@@ -459,10 +459,10 @@ export const ih057UpdateSetWithoutDescription = TableCheck({
         'Describe the content and purpose of the update set, for example the story number and a short summary.',
 })
 
-// IH-061: complex conditions on custom UI actions (same rule as IH-039)
+// IH-059: complex conditions on custom UI actions (same rule as IH-038)
 export const ih061UiActionComplexConditions = TableCheck({
     $id: Now.ID['ih-061-ui-action-complex-conditions'],
-    name: 'IH-061 UI actions with complex conditions',
+    name: 'IH-059 UI actions with complex conditions',
     active: true,
     category: 'manageability',
     priority: '3',
@@ -486,10 +486,10 @@ export const ih061UiActionComplexConditions = TableCheck({
         'Move the logic into a script include function and call it from a short condition.',
 })
 
-// IH-064: scheduled jobs with an error on their trigger; linked to the job when it exists
+// IH-062: scheduled jobs with an error on their trigger; linked to the job when it exists
 export const ih064ScheduledJobErrors = TableCheck({
     $id: Now.ID['ih-064-scheduled-job-errors'],
-    name: 'IH-064 Scheduled jobs with errors',
+    name: 'IH-062 Scheduled jobs with errors',
     active: true,
     category: 'manageability',
     priority: '3',
@@ -515,11 +515,11 @@ export const ih064ScheduledJobErrors = TableCheck({
         'Fix the job script or configuration (for "Unable to find the specified job handler", the plugin or job definition is missing); deactivate or delete obsolete jobs.',
 })
 
-// IH-069: changed ServiceNow dictionary entries; u_ tables and u_ fields are skipped because the
+// IH-066: changed ServiceNow dictionary entries; u_ tables and u_ fields are skipped because the
 // platform list marks some of them as ServiceNow (seen: u_sys_choice.u_table)
 export const ih069ChangedDictionaryEntries = ScriptOnlyCheck({
     $id: Now.ID['ih-069-changed-dictionary-entries'],
-    name: 'IH-069 Changed ServiceNow dictionary entries',
+    name: 'IH-066 Changed ServiceNow dictionary entries',
     active: true,
     category: 'upgradability',
     priority: '2',
@@ -535,10 +535,10 @@ export const ih069ChangedDictionaryEntries = ScriptOnlyCheck({
         'Revert the dictionary entry to the base system version and use a dictionary override on the child table where possible.',
 })
 
-// IH-071: ServiceNow CI classes with more than 10 custom fields (u_ fields or fields from a customer app)
+// IH-068: ServiceNow CI classes with more than 10 custom fields (u_ fields or fields from a customer app)
 export const ih071CiClassesWithCustomFields = ScriptOnlyCheck({
     $id: Now.ID['ih-071-ci-classes-with-custom-fields'],
-    name: 'IH-071 ServiceNow CI classes with more than 10 custom fields',
+    name: 'IH-068 ServiceNow CI classes with more than 10 custom fields',
     active: true,
     category: 'upgradability',
     priority: '3',
@@ -576,16 +576,16 @@ export const ih071CiClassesWithCustomFields = ScriptOnlyCheck({
         'Review the custom fields: use existing attributes, move class-specific data to a custom child class, or store related data in a separate table.',
 })
 
-// IH-072: current.update() in custom business rules that are not before rules (before rules: IH-014)
+// IH-069: current.update() in custom business rules that are not before rules (before rules: IH-013)
 export const ih072CurrentUpdateInBusinessRules = TableCheck({
     $id: Now.ID['ih-072-current-update-in-business-rules'],
-    name: 'IH-072 current.update() in business rules',
+    name: 'IH-069 current.update() in business rules',
     active: true,
     category: 'manageability',
     priority: '3',
     shortDescription: 'Finds custom after, async and display business rules that call current.update()',
     description:
-        'current.update() in a business rule saves the record again and runs all business rules a second time, which can cause loops and duplicate notifications. Before rules are covered by IH-014. Only custom business rules are checked; every matching line is listed. Ideal state: no business rule calls current.update().',
+        'current.update() in a business rule saves the record again and runs all business rules a second time, which can cause loops and duplicate notifications. Before rules are covered by IH-013. Only custom business rules are checked; every matching line is listed. Ideal state: no business rule calls current.update().',
     table: 'sys_script',
     conditions: 'active=true^when!=before^scriptLIKEcurrent.update(',
     advanced: true,
@@ -600,11 +600,11 @@ export const ih072CurrentUpdateInBusinessRules = TableCheck({
         'Set the values in a before rule instead, or move the logic so that current does not need to be saved again.',
 })
 
-// IH-022: summary of the last platform upgrade (the per-item log sys_upgrade_history_log cannot be
+// IH-021: summary of the last platform upgrade (the per-item log sys_upgrade_history_log cannot be
 // read from other scopes); items that need a review = skipped and different + errors + manual merges
 export const ih022UpgradeSkippedItems = ScriptOnlyCheck({
     $id: Now.ID['ih-022-upgrade-skipped-items'],
-    name: 'IH-022 Skipped items in the last upgrade',
+    name: 'IH-021 Skipped items in the last upgrade',
     active: true,
     category: 'upgradability',
     priority: '2',
@@ -638,12 +638,12 @@ export const ih022UpgradeSkippedItems = ScriptOnlyCheck({
         'Open the upgrade history, filter the skipped records that differ, have errors or need a manual merge, and for each one revert to the base system, merge the changes, or keep the customization and mark it reviewed.',
 })
 
-// IH-025 to IH-029: ServiceNow records changed by the customer (sys_metadata_customization,
+// IH-024 to IH-028: ServiceNow records changed by the customer (sys_metadata_customization,
 // author_type ServiceNow), one check per record type group
 
 export const ih025BaselineBusinessRules = ScriptOnlyCheck({
     $id: Now.ID['ih-025-baseline-business-rules'],
-    name: 'IH-025 Differs from baseline: business rules',
+    name: 'IH-024 Differs from baseline: business rules',
     active: true,
     category: 'upgradability',
     priority: '2',
@@ -659,7 +659,7 @@ export const ih025BaselineBusinessRules = ScriptOnlyCheck({
 
 export const ih026BaselineScriptIncludes = ScriptOnlyCheck({
     $id: Now.ID['ih-026-baseline-script-includes'],
-    name: 'IH-026 Differs from baseline: script includes',
+    name: 'IH-025 Differs from baseline: script includes',
     active: true,
     category: 'upgradability',
     priority: '2',
@@ -675,7 +675,7 @@ export const ih026BaselineScriptIncludes = ScriptOnlyCheck({
 
 export const ih027BaselineClientScripts = ScriptOnlyCheck({
     $id: Now.ID['ih-027-baseline-client-scripts'],
-    name: 'IH-027 Differs from baseline: client scripts and UI scripts',
+    name: 'IH-026 Differs from baseline: client scripts and UI scripts',
     active: true,
     category: 'upgradability',
     priority: '2',
@@ -691,7 +691,7 @@ export const ih027BaselineClientScripts = ScriptOnlyCheck({
 
 export const ih028BaselineUiMacrosPages = ScriptOnlyCheck({
     $id: Now.ID['ih-028-baseline-ui-macros-pages'],
-    name: 'IH-028 Differs from baseline: UI macros and UI pages',
+    name: 'IH-027 Differs from baseline: UI macros and UI pages',
     active: true,
     category: 'upgradability',
     priority: '2',
@@ -707,7 +707,7 @@ export const ih028BaselineUiMacrosPages = ScriptOnlyCheck({
 
 export const ih029BaselineUiActions = ScriptOnlyCheck({
     $id: Now.ID['ih-029-baseline-ui-actions'],
-    name: 'IH-029 Differs from baseline: UI actions',
+    name: 'IH-028 Differs from baseline: UI actions',
     active: true,
     category: 'upgradability',
     priority: '2',

@@ -16,11 +16,11 @@ export const ih001PublicReports = TableCheck({
         'Unpublish the report, or share it with the required roles or groups instead of publishing it.',
 })
 
-// IH-018: tables without an active record ACL on the table or any parent table.
+// IH-017: tables without an active record ACL on the table or any parent table.
 // Table rotation shards (name ends in 4 digits) and wildcard (*) ACLs are ignored.
 export const ih018TablesWithoutAcls = ScriptOnlyCheck({
     $id: Now.ID['ih-018-tables-without-acls'],
-    name: 'IH-018 Tables without ACLs',
+    name: 'IH-017 Tables without ACLs',
     active: true,
     category: 'security',
     priority: '2',
@@ -77,11 +77,11 @@ export const ih018TablesWithoutAcls = ScriptOnlyCheck({
         'Create record ACLs (at least read, write, create and delete) for the roles that need access, or confirm that the table is intentionally covered by wildcard ACLs only.',
 })
 
-// IH-030: the virtual flag is defined on many CI classes (not on cmdb_ci); check every top-most
+// IH-029: the virtual flag is defined on many CI classes (not on cmdb_ci); check every top-most
 // class that defines it for virtual CIs that have an asset
 export const ih030VirtualCisWithAssets = ScriptOnlyCheck({
     $id: Now.ID['ih-030-virtual-cis-with-assets'],
-    name: 'IH-030 Virtual CIs with assets',
+    name: 'IH-029 Virtual CIs with assets',
     active: true,
     category: 'manageability',
     priority: '3',
@@ -129,10 +129,10 @@ export const ih030VirtualCisWithAssets = ScriptOnlyCheck({
         'Retire or delete the asset of the virtual CI and check the model and model category, so that virtual CIs do not create assets.',
 })
 
-// IH-031: computers and network gear (all subclasses) without serial number, retired CIs excluded
+// IH-030: computers and network gear (all subclasses) without serial number, retired CIs excluded
 export const ih031MissingSerialNumbers = TableCheck({
     $id: Now.ID['ih-031-missing-serial-numbers'],
-    name: 'IH-031 Computers and network gear without serial number',
+    name: 'IH-030 Computers and network gear without serial number',
     active: true,
     category: 'manageability',
     priority: '3',
@@ -145,10 +145,10 @@ export const ih031MissingSerialNumbers = TableCheck({
         'Populate the serial number through Discovery, an import or manually, and check the identification rules of the class.',
 })
 
-// IH-060: glide.security.ui.filter must not exist or must be false (user's draft)
+// IH-058: glide.security.ui.filter must not exist or must be false (user's draft)
 export const ih060SecurityUiFilter = TableCheck({
     $id: Now.ID['ih-060-security-ui-filter'],
-    name: 'IH-060 Property glide.security.ui.filter set to true',
+    name: 'IH-058 Property glide.security.ui.filter set to true',
     active: true,
     category: 'security',
     priority: '2',
@@ -161,10 +161,10 @@ export const ih060SecurityUiFilter = TableCheck({
         'Delete the property glide.security.ui.filter or set it to false.',
 })
 
-// IH-067: active, non-web-service users without login for 90 days (or never, created 90+ days ago)
+// IH-064: active, non-web-service users without login for 90 days (or never, created 90+ days ago)
 export const ih067UsersWithoutLogin = TableCheck({
     $id: Now.ID['ih-067-users-without-login'],
-    name: 'IH-067 Active user accounts without login',
+    name: 'IH-064 Active user accounts without login',
     active: true,
     category: 'security',
     priority: '2',
@@ -195,10 +195,10 @@ export const ih067UsersWithoutLogin = TableCheck({
         'Deactivate the account through the offboarding process (remove roles and group memberships), or mark technical accounts as web service only.',
 })
 
-// IH-070: the update set table must be audited (only sys_update_set, user decision)
+// IH-067: the update set table must be audited (only sys_update_set, user decision)
 export const ih070UpdateSetAudit = ScriptOnlyCheck({
     $id: Now.ID['ih-070-update-set-audit'],
-    name: 'IH-070 Update set table not audited',
+    name: 'IH-067 Update set table not audited',
     active: true,
     category: 'security',
     priority: '2',
@@ -219,10 +219,10 @@ export const ih070UpdateSetAudit = ScriptOnlyCheck({
         'Enable Audit on the dictionary collection entry of sys_update_set.',
 })
 
-// IH-073: share of unique location names (should be 100 %); one summary finding below 100 %
+// IH-070: share of unique location names (should be 100 %); one summary finding below 100 %
 export const ih073UniqueLocationNames = ScriptOnlyCheck({
     $id: Now.ID['ih-073-unique-location-names'],
-    name: 'IH-073 Share of unique location names',
+    name: 'IH-070 Share of unique location names',
     active: true,
     category: 'manageability',
     priority: '3',
@@ -259,10 +259,10 @@ export const ih073UniqueLocationNames = ScriptOnlyCheck({
         'Merge duplicate locations (move references to the one that stays) or give them distinct names.',
 })
 
-// IH-074: hardware, application and VM instance CIs (incl. subclasses) without name
+// IH-071: hardware, application and VM instance CIs (incl. subclasses) without name
 export const ih074CisWithoutName = TableCheck({
     $id: Now.ID['ih-074-cis-without-name'],
-    name: 'IH-074 Hardware, application and VM instance CIs without name',
+    name: 'IH-071 Hardware, application and VM instance CIs without name',
     active: true,
     category: 'manageability',
     priority: '3',
@@ -275,10 +275,10 @@ export const ih074CisWithoutName = TableCheck({
         'Set the name (from Discovery, the import source or manually) and check the identification rules of the class.',
 })
 
-// IH-048: catalog tasks without requested item or request
+// IH-046: catalog tasks without requested item or request
 export const ih048OrphanedCatalogTasks = TableCheck({
     $id: Now.ID['ih-048-orphaned-catalog-tasks'],
-    name: 'IH-048 Catalog tasks without requested item or request',
+    name: 'IH-046 Catalog tasks without requested item or request',
     active: true,
     category: 'manageability',
     priority: '3',
@@ -291,10 +291,10 @@ export const ih048OrphanedCatalogTasks = TableCheck({
         'Link the task to its requested item (which sets the request), and create catalog tasks only through the catalog fulfillment process.',
 })
 
-// IH-049: active scheduled jobs whose run_as user does not exist (all jobs, user decision)
+// IH-047: active scheduled jobs whose run_as user does not exist (all jobs, user decision)
 export const ih049JobsRunAsDeletedUser = TableCheck({
     $id: Now.ID['ih-049-jobs-run-as-deleted-user'],
-    name: 'IH-049 Active scheduled jobs run as a deleted user',
+    name: 'IH-047 Active scheduled jobs run as a deleted user',
     active: true,
     category: 'manageability',
     priority: '3',
@@ -315,10 +315,10 @@ export const ih049JobsRunAsDeletedUser = TableCheck({
         'Set Run as to an existing (service) user, or deactivate the job if it is no longer needed.',
 })
 
-// IH-050: active scheduled jobs whose run_as user is inactive
+// IH-048: active scheduled jobs whose run_as user is inactive
 export const ih050JobsRunAsInactiveUser = TableCheck({
     $id: Now.ID['ih-050-jobs-run-as-inactive-user'],
-    name: 'IH-050 Active scheduled jobs run as an inactive user',
+    name: 'IH-048 Active scheduled jobs run as an inactive user',
     active: true,
     category: 'security',
     priority: '2',
@@ -339,10 +339,10 @@ export const ih050JobsRunAsInactiveUser = TableCheck({
         'Set Run as to an active service user that has only the roles the job needs.',
 })
 
-// IH-051: active tasks opened by an inactive user
+// IH-049: active tasks opened by an inactive user
 export const ih051TasksOpenedByInactiveUser = TableCheck({
     $id: Now.ID['ih-051-tasks-opened-by-inactive-user'],
-    name: 'IH-051 Active tasks opened by an inactive user',
+    name: 'IH-049 Active tasks opened by an inactive user',
     active: true,
     category: 'manageability',
     priority: '3',
@@ -355,10 +355,10 @@ export const ih051TasksOpenedByInactiveUser = TableCheck({
         'Check whether the task is still needed and hand it over to an active caller or requester.',
 })
 
-// IH-052: glide.system.locale is empty (default) or <language>[.|_<COUNTRY>] with ISO codes
+// IH-050: glide.system.locale is empty (default) or <language>[.|_<COUNTRY>] with ISO codes
 export const ih052SystemLocale = ScriptOnlyCheck({
     $id: Now.ID['ih-052-system-locale'],
-    name: 'IH-052 System locale is valid',
+    name: 'IH-050 System locale is valid',
     active: true,
     category: 'manageability',
     priority: '3',
@@ -388,10 +388,10 @@ export const ih052SystemLocale = ScriptOnlyCheck({
         'Set glide.system.locale to a valid locale such as de.CH or en.US, or clear it to use the platform default.',
 })
 
-// IH-053: single currency mode on with a valid code, or off while several currencies are active
+// IH-051: single currency mode on with a valid code, or off while several currencies are active
 export const ih053SingleCurrencyMode = ScriptOnlyCheck({
     $id: Now.ID['ih-053-single-currency-mode'],
-    name: 'IH-053 Single currency mode configured correctly',
+    name: 'IH-051 Single currency mode configured correctly',
     active: true,
     category: 'manageability',
     priority: '3',
@@ -434,10 +434,10 @@ export const ih053SingleCurrencyMode = ScriptOnlyCheck({
         'Set glide.i18n.single_currency.code to an active currency, or switch single currency mode on when only one currency is used.',
 })
 
-// IH-054: mark_resolved on incident active, and resolved/closed incidents have Resolved and Resolved by
+// IH-052: mark_resolved on incident active, and resolved/closed incidents have Resolved and Resolved by
 export const ih054MarkResolved = ScriptOnlyCheck({
     $id: Now.ID['ih-054-mark-resolved'],
-    name: 'IH-054 Resolved fields set by mark_resolved',
+    name: 'IH-052 Resolved fields set by mark_resolved',
     active: true,
     category: 'manageability',
     priority: '3',
@@ -479,11 +479,11 @@ export const ih054MarkResolved = ScriptOnlyCheck({
         'Activate the business rule mark_resolved (revert customizations), then fill Resolved and Resolved by on the affected incidents.',
 })
 
-// IH-055: problems have no mark_closed rule in this release; "Update fields on Problem Closure" sets
+// IH-053: problems have no mark_closed rule in this release; "Update fields on Problem Closure" sets
 // Closed and Closed by. Reports the rule when missing/inactive and closed problems without the fields.
 export const ih055ProblemClosedFields = ScriptOnlyCheck({
     $id: Now.ID['ih-055-problem-closed-fields'],
-    name: 'IH-055 Closed fields set on problems',
+    name: 'IH-053 Closed fields set on problems',
     active: true,
     category: 'manageability',
     priority: '3',
@@ -524,10 +524,10 @@ export const ih055ProblemClosedFields = ScriptOnlyCheck({
         'Activate the closure business rule, then fill Closed and Closed by on the affected problems.',
 })
 
-// IH-056: active tasks that have a closed date
+// IH-054: active tasks that have a closed date
 export const ih056ActiveTasksWithClosedDate = TableCheck({
     $id: Now.ID['ih-056-active-tasks-with-closed-date'],
-    name: 'IH-056 Active tasks with a closed date',
+    name: 'IH-054 Active tasks with a closed date',
     active: true,
     category: 'manageability',
     priority: '3',
@@ -540,10 +540,10 @@ export const ih056ActiveTasksWithClosedDate = TableCheck({
         'Check the task state: close the task properly, or clear the closed date when it was reopened, and fix the process that reopens tasks.',
 })
 
-// IH-058: share of active CIs neither discovered nor updated for 60 days, finding above 5 % (user decision)
+// IH-056: share of active CIs neither discovered nor updated for 60 days, finding above 5 % (user decision)
 export const ih058StaleConfigurationItems = ScriptOnlyCheck({
     $id: Now.ID['ih-058-stale-configuration-items'],
-    name: 'IH-058 Share of active CIs not discovered or updated for 60 days',
+    name: 'IH-056 Share of active CIs not discovered or updated for 60 days',
     active: true,
     category: 'manageability',
     priority: '3',
@@ -585,10 +585,10 @@ export const ih058StaleConfigurationItems = ScriptOnlyCheck({
         'Filter active CIs by Most recent discovery and Updated older than 60 days, retire CIs that no longer exist and bring the others under Discovery or a regular import.',
 })
 
-// IH-059: custom scripted REST resources without authentication or ACL authorization (user decision)
+// IH-057: custom scripted REST resources without authentication or ACL authorization (user decision)
 export const ih059UnsecuredScriptedRest = TableCheck({
     $id: Now.ID['ih-059-unsecured-scripted-rest'],
-    name: 'IH-059 Scripted REST resources without security',
+    name: 'IH-057 Scripted REST resources without security',
     active: true,
     category: 'security',
     priority: '2',
@@ -611,10 +611,10 @@ export const ih059UnsecuredScriptedRest = TableCheck({
         'Enable Requires authentication and Requires ACL authorization on the resource and add an ACL for the REST endpoint, or document why the endpoint must be public.',
 })
 
-// IH-032: the Asset Management rules on cmdb_ci that create assets must be active
+// IH-031: the Asset Management rules on cmdb_ci that create assets must be active
 export const ih032CreateAssetRules = ScriptOnlyCheck({
     $id: Now.ID['ih-032-create-asset-rules'],
-    name: 'IH-032 Create Asset business rules active',
+    name: 'IH-031 Create Asset business rules active',
     active: true,
     category: 'manageability',
     priority: '3',
@@ -638,10 +638,10 @@ export const ih032CreateAssetRules = ScriptOnlyCheck({
         'Activate the business rule, then check CIs created while it was inactive for missing assets.',
 })
 
-// IH-033: discovery source set but not in the choice list; empty values are not a finding (user decision)
+// IH-032: discovery source set but not in the choice list; empty values are not a finding (user decision)
 export const ih033InvalidDiscoverySource = ScriptOnlyCheck({
     $id: Now.ID['ih-033-invalid-discovery-source'],
-    name: 'IH-033 CIs with an invalid discovery source',
+    name: 'IH-032 CIs with an invalid discovery source',
     active: true,
     category: 'manageability',
     priority: '3',
@@ -681,10 +681,10 @@ export const ih033InvalidDiscoverySource = ScriptOnlyCheck({
         'Set a valid discovery source on the CI and fix the import, integration or script that writes the invalid value; add a choice only if the source is a real, permanent data source.',
 })
 
-// IH-034: impersonate button enabled on an instance flagged as production
+// IH-033: impersonate button enabled on an instance flagged as production
 export const ih034ImpersonationInProduction = ScriptOnlyCheck({
     $id: Now.ID['ih-034-impersonation-in-production'],
-    name: 'IH-034 Impersonation in production',
+    name: 'IH-033 Impersonation in production',
     active: true,
     category: 'security',
     priority: '2',
@@ -720,11 +720,11 @@ export const ih034ImpersonationInProduction = ScriptOnlyCheck({
         'Set glide.ui.impersonate_button.enable to false on the production instance and remove the impersonator role where it is not needed.',
 })
 
-// IH-036: active knowledge bases whose retire workflow is empty or points to a workflow that does
+// IH-035: active knowledge bases whose retire workflow is empty or points to a workflow that does
 // not exist (seen on bithawkdemo1: 6 of 7 knowledge bases reference a deleted workflow)
 export const ih036KnowledgeBaseRetireWorkflow = TableCheck({
     $id: Now.ID['ih-036-knowledge-base-retire-workflow'],
-    name: 'IH-036 Knowledge bases without retire workflow',
+    name: 'IH-035 Knowledge bases without retire workflow',
     active: true,
     category: 'manageability',
     priority: '3',
@@ -752,10 +752,10 @@ export const ih036KnowledgeBaseRetireWorkflow = TableCheck({
         'Assign a retire workflow to the knowledge base (an instant retire workflow or one with approval).',
 })
 
-// IH-040: memberships of inactive users in active groups
+// IH-039: memberships of inactive users in active groups
 export const ih040InactiveGroupMembers = TableCheck({
     $id: Now.ID['ih-040-inactive-group-members'],
-    name: 'IH-040 Inactive users in groups',
+    name: 'IH-039 Inactive users in groups',
     active: true,
     category: 'security',
     priority: '2',
@@ -768,10 +768,10 @@ export const ih040InactiveGroupMembers = TableCheck({
         'Remove the membership (offboarding should remove group memberships of deactivated users).',
 })
 
-// IH-041: active groups whose manager is inactive
+// IH-040: active groups whose manager is inactive
 export const ih041InactiveGroupManager = TableCheck({
     $id: Now.ID['ih-041-inactive-group-manager'],
-    name: 'IH-041 Groups with an inactive manager',
+    name: 'IH-040 Groups with an inactive manager',
     active: true,
     category: 'manageability',
     priority: '3',
@@ -784,10 +784,10 @@ export const ih041InactiveGroupManager = TableCheck({
         'Assign an active manager to the group.',
 })
 
-// IH-042: active groups without any member
+// IH-041: active groups without any member
 export const ih042GroupsWithoutMembers = TableCheck({
     $id: Now.ID['ih-042-groups-without-members'],
-    name: 'IH-042 Groups without members',
+    name: 'IH-041 Groups without members',
     active: true,
     category: 'manageability',
     priority: '3',
@@ -810,10 +810,10 @@ export const ih042GroupsWithoutMembers = TableCheck({
         'Add members to the group or deactivate it.',
 })
 
-// IH-043: roles assigned directly to active users; snc_internal / snc_external are assigned by the platform
+// IH-042: roles assigned directly to active users; snc_internal / snc_external are assigned by the platform
 export const ih043DirectRoleAssignments = TableCheck({
     $id: Now.ID['ih-043-direct-role-assignments'],
-    name: 'IH-043 Roles assigned directly to users',
+    name: 'IH-042 Roles assigned directly to users',
     active: true,
     category: 'security',
     priority: '2',
@@ -827,10 +827,10 @@ export const ih043DirectRoleAssignments = TableCheck({
         'Remove the direct role and add the user to a group that grants the role.',
 })
 
-// IH-044: active groups that grant roles but have no group type (any type is enough, user decision)
+// IH-043: active groups that grant roles but have no group type (any type is enough, user decision)
 export const ih044RoleGroupsWithoutType = TableCheck({
     $id: Now.ID['ih-044-role-groups-without-type'],
-    name: 'IH-044 Groups with roles without a group type',
+    name: 'IH-043 Groups with roles without a group type',
     active: true,
     category: 'security',
     priority: '2',

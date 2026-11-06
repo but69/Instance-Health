@@ -50,10 +50,10 @@ export const ih005GlobalUiScripts = TableCheck({
         'Load the UI script only where it is needed (on demand via g_ui_scripts or ScriptLoader) and set Global to false.',
 })
 
-// IH-007: client scripts on table "global" run on every form and list
+// IH-006: client scripts on table "global" run on every form and list
 export const ih007GlobalClientScripts = TableCheck({
     $id: Now.ID['ih-007-global-client-scripts'],
-    name: 'IH-007 Global client scripts',
+    name: 'IH-006 Global client scripts',
     active: true,
     category: 'performance',
     priority: '3',
@@ -66,11 +66,11 @@ export const ih007GlobalClientScripts = TableCheck({
         'Move the logic to a client script on the specific table, or into a UI script that is loaded on demand.',
 })
 
-// IH-010: <var>.<reference>.sys_id in custom scripts; "this." and common non-reference objects
+// IH-009: <var>.<reference>.sys_id in custom scripts; "this." and common non-reference objects
 // (data, options, input, ...) are skipped to avoid widget and helper false positives
 export const ih010DotWalkToSysId = ColumnTypeCheck({
     $id: Now.ID['ih-010-dot-walk-to-sys-id'],
-    name: 'IH-010 Unnecessary dot-walk to sys_id',
+    name: 'IH-009 Unnecessary dot-walk to sys_id',
     active: true,
     category: 'performance',
     priority: '3',
@@ -87,10 +87,10 @@ export const ih010DotWalkToSysId = ColumnTypeCheck({
         'Replace gr.field.sys_id with gr.getValue(\'field\') (or gr.field + \'\'); the reference field already contains the sys_id.',
 })
 
-// IH-011: synchronous AJAX patterns, only in client-side script columns of custom records
+// IH-010: synchronous AJAX patterns, only in client-side script columns of custom records
 export const ih011SynchronousAjax = ColumnTypeCheck({
     $id: Now.ID['ih-011-synchronous-ajax'],
-    name: 'IH-011 Synchronous AJAX in client code',
+    name: 'IH-010 Synchronous AJAX in client code',
     active: true,
     category: 'performance',
     priority: '3',
@@ -129,10 +129,10 @@ export const ih011SynchronousAjax = ColumnTypeCheck({
         'Use GlideAjax with getXMLAnswer() or getXML(callback), g_form.getReference(field, callback), and client GlideRecord query(callback); never set async: false.',
 })
 
-// IH-015: business rules on table global are loaded on every transaction; custom rules only
+// IH-014: business rules on table global are loaded on every transaction; custom rules only
 export const ih015GlobalBusinessRules = TableCheck({
     $id: Now.ID['ih-015-global-business-rules'],
-    name: 'IH-015 Global business rules',
+    name: 'IH-014 Global business rules',
     active: true,
     category: 'performance',
     priority: '3',
@@ -151,12 +151,12 @@ export const ih015GlobalBusinessRules = TableCheck({
         'Move shared functions into a script include, and move table logic into a business rule on the specific table.',
 })
 
-// IH-017: per active transform map, finding if none of its coalesce fields starts a database index.
+// IH-016: per active transform map, finding if none of its coalesce fields starts a database index.
 // Indexes come from v_db_index (physical names). Fields whose physical column name is unknown
 // (child table stored in its parent, e.g. CMDB) cannot be checked and are skipped.
 export const ih017CoalesceWithoutIndex = TableCheck({
     $id: Now.ID['ih-017-coalesce-without-index'],
-    name: 'IH-017 Transform map coalesces on non-indexed fields',
+    name: 'IH-016 Transform map coalesces on non-indexed fields',
     active: true,
     category: 'performance',
     priority: '3',
@@ -235,10 +235,10 @@ export const ih017CoalesceWithoutIndex = TableCheck({
         'Add a database index on the coalesce field (or a composite index starting with one of the coalesce fields) on the target table, or coalesce on a field that is already indexed.',
 })
 
-// IH-019: database queries in read ACL scripts run for every record and field that is read
+// IH-018: database queries in read ACL scripts run for every record and field that is read
 export const ih019ReadAclQueries = TableCheck({
     $id: Now.ID['ih-019-read-acl-queries'],
-    name: 'IH-019 Read ACLs with GlideRecord or GlideAggregate',
+    name: 'IH-018 Read ACLs with GlideRecord or GlideAggregate',
     active: true,
     category: 'performance',
     priority: '3',
@@ -259,11 +259,11 @@ export const ih019ReadAclQueries = TableCheck({
         'Replace the query with roles or a condition, check a value the user session already has, or cache the result (for example in the session) instead of querying for each record.',
 })
 
-// IH-020: com.snc.sla.engine.version selects the task rule: 2010 (default) = async "Process SLAs",
+// IH-019: com.snc.sla.engine.version selects the task rule: 2010 (default) = async "Process SLAs",
 // 2011 = synchronous "Run SLAs"
 export const ih020SlaEngineSynchronous = ScriptOnlyCheck({
     $id: Now.ID['ih-020-sla-engine-synchronous'],
-    name: 'IH-020 SLA engine runs synchronously',
+    name: 'IH-019 SLA engine runs synchronously',
     active: true,
     category: 'performance',
     priority: '3',
@@ -295,10 +295,10 @@ export const ih020SlaEngineSynchronous = ScriptOnlyCheck({
         'Set com.snc.sla.engine.version to 2011 so that SLAs are processed synchronously by "Run SLAs". Test custom SLA logic first.',
 })
 
-// IH-021: outbound REST/SOAP calls in custom business rules that are not async
+// IH-020: outbound REST/SOAP calls in custom business rules that are not async
 export const ih021SyncOutboundCalls = TableCheck({
     $id: Now.ID['ih-021-sync-outbound-calls'],
-    name: 'IH-021 Business rules with outbound REST or SOAP calls must be async',
+    name: 'IH-020 Business rules with outbound REST or SOAP calls must be async',
     active: true,
     category: 'performance',
     priority: '3',
@@ -319,10 +319,10 @@ export const ih021SyncOutboundCalls = TableCheck({
         'Change the business rule to async, or trigger the call through an event and script action or a flow.',
 })
 
-// IH-037: business rule call stack logging (debug setting) switched on
+// IH-036: business rule call stack logging (debug setting) switched on
 export const ih037BusinessRuleCallstack = TableCheck({
     $id: Now.ID['ih-037-business-rule-callstack'],
-    name: 'IH-037 Business rule call stack logging enabled',
+    name: 'IH-036 Business rule call stack logging enabled',
     active: true,
     category: 'performance',
     priority: '3',
@@ -335,11 +335,11 @@ export const ih037BusinessRuleCallstack = TableCheck({
         'Set glide.businessrule.callstack to false or delete the property.',
 })
 
-// IH-062: custom remote tables that return 1000 rows or more (ServiceNow remote tables are not
+// IH-060: custom remote tables that return 1000 rows or more (ServiceNow remote tables are not
 // queried, their scripts can call external systems; user decision)
 export const ih062LargeRemoteTables = TableCheck({
     $id: Now.ID['ih-062-large-remote-tables'],
-    name: 'IH-062 Remote tables with 1000 rows or more',
+    name: 'IH-060 Remote tables with 1000 rows or more',
     active: true,
     category: 'performance',
     priority: '3',
@@ -367,12 +367,12 @@ export const ih062LargeRemoteTables = TableCheck({
         'Filter the remote table script: use the query conditions, pagination or a narrower data source so it returns only the rows needed.',
 })
 
-// IH-063: recurring jobs (trigger type Repeat or Interval) whose average run time over the last
+// IH-061: recurring jobs (trigger type Repeat or Interval) whose average run time over the last
 // 7 days (sys_scheduler_job_history, "Recurring.<name>", ms) is longer than the interval
 // (user decision 2026-11-06: average, not the longest run, so short spikes are not reported)
 export const ih063JobsLongerThanInterval = ScriptOnlyCheck({
     $id: Now.ID['ih-063-jobs-longer-than-interval'],
-    name: 'IH-063 Scheduled jobs running longer than their interval',
+    name: 'IH-061 Scheduled jobs running longer than their interval',
     active: true,
     category: 'performance',
     priority: '3',
@@ -425,10 +425,10 @@ export const ih063JobsLongerThanInterval = ScriptOnlyCheck({
         'Optimize the job (fewer records per run, indexes) or increase its repeat interval so it finishes before the next run.',
 })
 
-// IH-065: cache flush calls in custom scripts
+// IH-063: cache flush calls in custom scripts
 export const ih065CacheFlush = ColumnTypeCheck({
     $id: Now.ID['ih-065-cache-flush'],
-    name: 'IH-065 Scripts that flush the cache',
+    name: 'IH-063 Scripts that flush the cache',
     active: true,
     category: 'performance',
     priority: '3',
@@ -445,10 +445,10 @@ export const ih065CacheFlush = ColumnTypeCheck({
         'Remove the cache flush; the platform invalidates the affected caches when records change. If a cache really has to be cleared, clear only that cache.',
 })
 
-// IH-068: list reports with a group by, recent average 15 s or more, run in the last 60 days
+// IH-065: list reports with a group by, recent average 15 s or more, run in the last 60 days
 export const ih068SlowGroupedListReports = TableCheck({
     $id: Now.ID['ih-068-slow-grouped-list-reports'],
-    name: 'IH-068 Slow list reports with group by',
+    name: 'IH-065 Slow list reports with group by',
     active: true,
     category: 'performance',
     priority: '3',
@@ -474,10 +474,10 @@ export const ih068SlowGroupedListReports = TableCheck({
         'Remove the group by or limit the data set with filters or a shorter period; consider a chart or aggregate report instead.',
 })
 
-// IH-075: active scheduled imports (without parent) that share their schedule with another one
+// IH-072: active scheduled imports (without parent) that share their schedule with another one
 export const ih075ConcurrentScheduledImports = ScriptOnlyCheck({
     $id: Now.ID['ih-075-concurrent-scheduled-imports'],
-    name: 'IH-075 Scheduled imports at the same time',
+    name: 'IH-072 Scheduled imports at the same time',
     active: true,
     category: 'performance',
     priority: '3',
@@ -523,10 +523,10 @@ export const ih075ConcurrentScheduledImports = ScriptOnlyCheck({
         'Stagger the start times, or chain dependent imports with the Parent field so they run one after another.',
 })
 
-// IH-076: synchronous outbound calls in custom server-side UI actions (business rules: IH-021)
+// IH-073: synchronous outbound calls in custom server-side UI actions (business rules: IH-020)
 export const ih076UiActionOutboundCalls = TableCheck({
     $id: Now.ID['ih-076-ui-action-outbound-calls'],
-    name: 'IH-076 UI actions with synchronous outbound calls',
+    name: 'IH-073 UI actions with synchronous outbound calls',
     active: true,
     category: 'performance',
     priority: '3',
@@ -549,10 +549,10 @@ export const ih076UiActionOutboundCalls = TableCheck({
         'Trigger the call asynchronously (event and script action, flow, or executeAsync()) and tell the user that the request was sent.',
 })
 
-// IH-023: system default of rows per page (preference rowcount without user)
+// IH-022: system default of rows per page (preference rowcount without user)
 export const ih023DefaultRowsPerPage = TableCheck({
     $id: Now.ID['ih-023-default-rows-per-page'],
-    name: 'IH-023 Default rows per page at most 50',
+    name: 'IH-022 Default rows per page at most 50',
     active: true,
     category: 'performance',
     priority: '3',
@@ -574,10 +574,10 @@ export const ih023DefaultRowsPerPage = TableCheck({
         'Set the value of the system preference rowcount to 50 or less.',
 })
 
-// IH-024: slow script patterns (average in ms) seen in the last 30 days, all scripts
+// IH-023: slow script patterns (average in ms) seen in the last 30 days, all scripts
 export const ih024SlowScripts = TableCheck({
     $id: Now.ID['ih-024-slow-scripts'],
-    name: 'IH-024 Long running scripts',
+    name: 'IH-023 Long running scripts',
     active: true,
     category: 'performance',
     priority: '3',

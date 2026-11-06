@@ -12,8 +12,8 @@ ServiceNow Fluent app (scope `x_bits2_inst_hlth`, SDK 4.14.0) that delivers Inst
 ## Conventions
 
 - One file per area: `src/fluent/scan-checks/administration.now.ts`, `maintenance.now.ts`, `performance.now.ts`.
-- Check IDs `IH-NNN` (never reuse a number, also not for dropped checks).
-- `$id`: `Now.ID['ih-NNN-kebab-name']`. Export name: `ihNNNCamelName`.
+- Check IDs `IH-NNN` are consecutive without gaps (user decision 2026-11-06). A new check gets the next free number. If a check is dropped, renumber the later checks by name only (`tools/renumber-checks.js`); never change `$id` keys or export names, they keep the number the check was created with. The catalogue documents which visible number belongs to which key number.
+- `$id`: `Now.ID['ih-KKK-kebab-name']`. Export name: `ihKKKCamelName`. `KKK` is a key number that is never reused: new checks take the next unused key number (077 as of 2026-11-06), which can differ from their visible number `IH-NNN`.
 - `name`: `IH-NNN <short title>` so all checks group together in Instance Scan.
 - Always set `description` (with the ideal state) and `resolutionDetails`.
 - Every finding must link to the record the user has to act on, whenever such a record exists (user requirement, 2026-11-05). In scripts, call `engine.finding.setCurrentSource(<that record>)` before `increment()`. If the check scans a helper table (stats, logs), resolve and link the real record (report, job, script), falling back to the scanned record.
