@@ -145,6 +145,342 @@ export const ih031MissingSerialNumbers = TableCheck({
         'Populate the serial number through Discovery, an import or manually, and check the identification rules of the class.',
 })
 
+// IH-048: catalog tasks without requested item or request
+export const ih048OrphanedCatalogTasks = TableCheck({
+    $id: Now.ID['ih-048-orphaned-catalog-tasks'],
+    name: 'IH-048 Catalog tasks without requested item or request',
+    active: true,
+    category: 'manageability',
+    priority: '3',
+    shortDescription: 'Finds catalog tasks that are not linked to a requested item and a request',
+    description:
+        'Catalog tasks outside the request hierarchy are missing in request reporting, approvals and fulfillment flows. Ideal state: every catalog task is linked to a requested item and a request.',
+    table: 'sc_task',
+    conditions: 'request_itemISEMPTY^ORrequestISEMPTY',
+    resolutionDetails:
+        'Link the task to its requested item (which sets the request), and create catalog tasks only through the catalog fulfillment process.',
+})
+
+// IH-049: active scheduled jobs whose run_as user does not exist (all jobs, user decision)
+export const ih049JobsRunAsDeletedUser = TableCheck({
+    $id: Now.ID['ih-049-jobs-run-as-deleted-user'],
+    name: 'IH-049 Active scheduled jobs run as a deleted user',
+    active: true,
+    category: 'manageability',
+    priority: '3',
+    shortDescription: 'Finds active scheduled jobs whose Run as user does not exist',
+    description:
+        'A scheduled job that runs as a user who no longer exists may fail or run with unexpected rights. The internal users "system" and "maint" are accepted. ServiceNow jobs are included. Ideal state: every active scheduled job runs as an existing user.',
+    table: 'sysauto',
+    conditions: 'active=true^run_asISNOTEMPTY',
+    advanced: true,
+    script: `(function(engine, current) {
+    var runAs = current.getValue('run_as');
+    if (new x_bits2_inst_hlth.IHScanUtil().resolveRunAs(runAs).state != 'missing') return;
+    engine.finding.setCurrentSource(current);
+    engine.finding.setValue('finding_details', current.getClassDisplayValue() + ' runs as "' + runAs + '", which is not an existing user');
+    engine.finding.increment();
+})(engine, current);`,
+    resolutionDetails:
+        'Set Run as to an existing (service) user, or deactivate the job if it is no longer needed.',
+})
+
+// IH-050: active scheduled jobs whose run_as user is inactive
+export const ih050JobsRunAsInactiveUser = TableCheck({
+    $id: Now.ID['ih-050-jobs-run-as-inactive-user'],
+    name: 'IH-050 Active scheduled jobs run as an inactive user',
+    active: true,
+    category: 'security',
+    priority: '2',
+    shortDescription: 'Finds active scheduled jobs whose Run as user is inactive',
+    description:
+        'A job that runs as an inactive user keeps using the rights of a deactivated account, which bypasses offboarding. Ideal state: no active scheduled job runs as an inactive user.',
+    table: 'sysauto',
+    conditions: 'active=true^run_asISNOTEMPTY',
+    advanced: true,
+    script: `(function(engine, current) {
+    var resolved = new x_bits2_inst_hlth.IHScanUtil().resolveRunAs(current.getValue('run_as'));
+    if (resolved.state != 'inactive') return;
+    engine.finding.setCurrentSource(current);
+    engine.finding.setValue('finding_details', current.getClassDisplayValue() + ' runs as inactive user ' + resolved.user.getValue('user_name'));
+    engine.finding.increment();
+})(engine, current);`,
+    resolutionDetails:
+        'Set Run as to an active service user that has only the roles the job needs.',
+})
+
+// IH-051: active tasks opened by an inactive user
+export const ih051TasksOpenedByInactiveUser = TableCheck({
+    $id: Now.ID['ih-051-tasks-opened-by-inactive-user'],
+    name: 'IH-051 Active tasks opened by an inactive user',
+    active: true,
+    category: 'manageability',
+    priority: '3',
+    shortDescription: 'Finds active tasks whose Opened by user is inactive',
+    description:
+        'Notifications and follow-up questions for these tasks go to a user who has left. Ideal state: no active task is opened by an inactive user.',
+    table: 'task',
+    conditions: 'active=true^opened_by.active=false',
+    resolutionDetails:
+        'Check whether the task is still needed and hand it over to an active caller or requester.',
+})
+
+// IH-052: glide.system.locale is empty (default) or <language>[.|_<COUNTRY>] with ISO codes
+export const ih052SystemLocale = ScriptOnlyCheck({
+    $id: Now.ID['ih-052-system-locale'],
+    name: 'IH-052 System locale is valid',
+    active: true,
+    category: 'manageability',
+    priority: '3',
+    shortDescription: 'Checks that glide.system.locale is empty or a valid locale',
+    description:
+        'An invalid system locale breaks date, time and number formats. The value must be empty (platform default) or a language code with an optional country code, for example de.CH. Scoped scripts cannot read the Java locale list, so the check uses ISO language format and the countries in core_country. Ideal state: glide.system.locale is empty or a valid locale.',
+    script: `(function(engine) {
+    var property = new GlideRecord('sys_properties');
+    if (!property.get('name', 'glide.system.locale')) return;
+    var value = property.getValue('value');
+    if (!value) return;
+
+    var reason = '';
+    var match = /^([a-z]{2,3})(?:[._]([A-Za-z]{2}))?$/.exec(value);
+    if (!match) {
+        reason = 'not in the format language or language.COUNTRY (for example de.CH)';
+    } else if (match[2]) {
+        var country = new GlideRecord('core_country');
+        if (!country.get('iso3166_2', match[2].toUpperCase())) reason = 'unknown country code ' + match[2];
+    }
+    if (!reason) return;
+    engine.finding.setCurrentSource(property);
+    engine.finding.setValue('finding_details', 'glide.system.locale is "' + value + '": ' + reason);
+    engine.finding.increment();
+})(engine);`,
+    resolutionDetails:
+        'Set glide.system.locale to a valid locale such as de.CH or en.US, or clear it to use the platform default.',
+})
+
+// IH-053: single currency mode on with a valid code, or off while several currencies are active
+export const ih053SingleCurrencyMode = ScriptOnlyCheck({
+    $id: Now.ID['ih-053-single-currency-mode'],
+    name: 'IH-053 Single currency mode configured correctly',
+    active: true,
+    category: 'manageability',
+    priority: '3',
+    shortDescription: 'Checks the single currency settings against the active currencies',
+    description:
+        'With single currency mode on, all currency values use glide.i18n.single_currency.code, which must be an active currency. With only one active currency, single currency mode should be on, otherwise users can enter amounts in currencies that are not maintained. Ideal state: the mode and the code match the active currencies.',
+    script: `(function(engine) {
+    function property(name) {
+        var prop = new GlideRecord('sys_properties');
+        return prop.get('name', name) ? prop : null;
+    }
+    var mode = property('glide.i18n.single_currency');
+    var code = property('glide.i18n.single_currency.code');
+    var singleCurrency = mode && mode.getValue('value') == 'true';
+    var codeValue = code ? code.getValue('value') : '';
+
+    var active = [];
+    var currency = new GlideRecord('fx_currency');
+    currency.addActiveQuery();
+    currency.query();
+    while (currency.next()) active.push(currency.getValue('code'));
+
+    var details = '';
+    var source = mode;
+    if (singleCurrency && !codeValue) {
+        details = 'Single currency mode is on, but glide.i18n.single_currency.code is empty';
+        source = code || mode;
+    } else if (singleCurrency && active.indexOf(codeValue) == -1) {
+        details = 'Single currency mode is on, but the code ' + codeValue + ' is not an active currency';
+        source = code || mode;
+    } else if (!singleCurrency && active.length == 1) {
+        details = 'Single currency mode is off, but only one currency is active (' + active[0] + ')';
+    }
+    if (!details || !source) return;
+    engine.finding.setCurrentSource(source);
+    engine.finding.setValue('finding_details', details + '. Active currencies: ' + (active.join(', ') || 'none'));
+    engine.finding.increment();
+})(engine);`,
+    resolutionDetails:
+        'Set glide.i18n.single_currency.code to an active currency, or switch single currency mode on when only one currency is used.',
+})
+
+// IH-054: mark_resolved on incident active, and resolved/closed incidents have Resolved and Resolved by
+export const ih054MarkResolved = ScriptOnlyCheck({
+    $id: Now.ID['ih-054-mark-resolved'],
+    name: 'IH-054 Resolved fields set by mark_resolved',
+    active: true,
+    category: 'manageability',
+    priority: '3',
+    shortDescription: 'Checks the mark_resolved rule and resolved incidents without Resolved or Resolved by',
+    description:
+        'The business rule mark_resolved fills Resolved and Resolved by when an incident is resolved. If it is missing or inactive, resolution reporting and SLAs are wrong. Reports the rule when it is missing or inactive, and every resolved or closed incident without these fields. Ideal state: the rule is active and every resolved incident has both fields.',
+    script: `(function(engine) {
+    var rule = new GlideRecord('sys_script');
+    rule.addQuery('collection', 'incident');
+    rule.addQuery('name', 'mark_resolved');
+    rule.query();
+    var hasRule = rule.next();
+    if (hasRule && rule.active != true) {
+        engine.finding.setCurrentSource(rule);
+        engine.finding.setValue('finding_details', 'Business rule mark_resolved on incident is inactive');
+        engine.finding.increment();
+    } else if (!hasRule) {
+        var table = new GlideRecord('sys_db_object');
+        if (table.get('name', 'incident')) {
+            engine.finding.setCurrentSource(table);
+            engine.finding.setValue('finding_details', 'Business rule mark_resolved on incident does not exist');
+            engine.finding.increment();
+        }
+    }
+
+    var incident = new GlideRecord('incident');
+    incident.addEncodedQuery('stateIN6,7^resolved_atISEMPTY^ORresolved_byISEMPTY');
+    incident.query();
+    while (incident.next()) {
+        var missing = [];
+        if (!incident.getValue('resolved_at')) missing.push('Resolved');
+        if (!incident.getValue('resolved_by')) missing.push('Resolved by');
+        engine.finding.setCurrentSource(incident);
+        engine.finding.setValue('finding_details', incident.getDisplayValue('state') + ' incident without ' + missing.join(' and '));
+        engine.finding.increment();
+    }
+})(engine);`,
+    resolutionDetails:
+        'Activate the business rule mark_resolved (revert customizations), then fill Resolved and Resolved by on the affected incidents.',
+})
+
+// IH-055: problems have no mark_closed rule in this release; "Update fields on Problem Closure" sets
+// Closed and Closed by. Reports the rule when missing/inactive and closed problems without the fields.
+export const ih055ProblemClosedFields = ScriptOnlyCheck({
+    $id: Now.ID['ih-055-problem-closed-fields'],
+    name: 'IH-055 Closed fields set on problems',
+    active: true,
+    category: 'manageability',
+    priority: '3',
+    shortDescription: 'Checks the problem closure rule and closed problems without Closed or Closed by',
+    description:
+        'When a problem is closed, Closed and Closed by must be set (by the business rule "Update fields on Problem Closure"; older releases used mark_closed). Reports the rule when it is missing or inactive, and every closed problem without these fields. Ideal state: every closed problem has both fields.',
+    script: `(function(engine) {
+    var rule = new GlideRecord('sys_script');
+    rule.addQuery('collection', 'problem');
+    rule.addQuery('name', 'IN', 'Update fields on Problem Closure,mark_closed');
+    rule.addActiveQuery();
+    rule.query();
+    if (!rule.hasNext()) {
+        var inactive = new GlideRecord('sys_script');
+        inactive.addQuery('collection', 'problem');
+        inactive.addQuery('name', 'IN', 'Update fields on Problem Closure,mark_closed');
+        inactive.query();
+        if (inactive.next()) {
+            engine.finding.setCurrentSource(inactive);
+            engine.finding.setValue('finding_details', 'Business rule ' + inactive.getValue('name') + ' on problem is inactive');
+            engine.finding.increment();
+        }
+    }
+
+    var problem = new GlideRecord('problem');
+    problem.addEncodedQuery('state=107^closed_atISEMPTY^ORclosed_byISEMPTY');
+    problem.query();
+    while (problem.next()) {
+        var missing = [];
+        if (!problem.getValue('closed_at')) missing.push('Closed');
+        if (!problem.getValue('closed_by')) missing.push('Closed by');
+        engine.finding.setCurrentSource(problem);
+        engine.finding.setValue('finding_details', 'Closed problem without ' + missing.join(' and '));
+        engine.finding.increment();
+    }
+})(engine);`,
+    resolutionDetails:
+        'Activate the closure business rule, then fill Closed and Closed by on the affected problems.',
+})
+
+// IH-056: active tasks that have a closed date
+export const ih056ActiveTasksWithClosedDate = TableCheck({
+    $id: Now.ID['ih-056-active-tasks-with-closed-date'],
+    name: 'IH-056 Active tasks with a closed date',
+    active: true,
+    category: 'manageability',
+    priority: '3',
+    shortDescription: 'Finds active tasks that have a closed date',
+    description:
+        'A closed date on an active task means the task was reopened without clearing the date, or the state model does not set active correctly. Durations and reports become wrong. Ideal state: active tasks have no closed date.',
+    table: 'task',
+    conditions: 'active=true^closed_atISNOTEMPTY',
+    resolutionDetails:
+        'Check the task state: close the task properly, or clear the closed date when it was reopened, and fix the process that reopens tasks.',
+})
+
+// IH-058: share of active CIs neither discovered nor updated for 60 days, finding above 5 % (user decision)
+export const ih058StaleConfigurationItems = ScriptOnlyCheck({
+    $id: Now.ID['ih-058-stale-configuration-items'],
+    name: 'IH-058 Share of active CIs not discovered or updated for 60 days',
+    active: true,
+    category: 'manageability',
+    priority: '3',
+    shortDescription: 'Reports when more than 5% of active CIs were neither discovered nor updated for 60 days',
+    description:
+        'CIs that no source has touched for a long time are likely outdated. Active CIs are those not retired (install status and operational status). A CI is stale when it was not discovered (or never) and not updated for 60 days. One finding when more than 5% of active CIs are stale. Ideal state: at most 5% of active CIs are stale.',
+    script: `(function(engine) {
+    var DAYS = 60;
+    var MAX_SHARE = 5;
+    var since = new GlideDateTime();
+    since.addDaysUTC(-DAYS);
+
+    function count(stale) {
+        var ci = new GlideAggregate('cmdb_ci');
+        ci.addQuery('install_status', '!=', '7');
+        ci.addQuery('operational_status', '!=', '6');
+        if (stale) {
+            ci.addQuery('sys_updated_on', '<', since.getValue());
+            var discovered = ci.addNullQuery('last_discovered');
+            discovered.addOrCondition('last_discovered', '<', since.getValue());
+        }
+        ci.addAggregate('COUNT');
+        ci.query();
+        return ci.next() ? parseInt(ci.getAggregate('COUNT'), 10) : 0;
+    }
+    var total = count(false);
+    if (total == 0) return;
+    var stale = count(true);
+    var share = stale * 100 / total;
+    if (share <= MAX_SHARE) return;
+
+    var table = new GlideRecord('sys_db_object');
+    if (!table.get('name', 'cmdb_ci')) return;
+    engine.finding.setCurrentSource(table);
+    engine.finding.setValue('finding_details', stale + ' of ' + total + ' active CIs (' + share.toFixed(1) + '%) were neither discovered nor updated for ' + DAYS + ' days (limit ' + MAX_SHARE + '%)');
+    engine.finding.increment();
+})(engine);`,
+    resolutionDetails:
+        'Filter active CIs by Most recent discovery and Updated older than 60 days, retire CIs that no longer exist and bring the others under Discovery or a regular import.',
+})
+
+// IH-059: custom scripted REST resources without authentication or ACL authorization (user decision)
+export const ih059UnsecuredScriptedRest = TableCheck({
+    $id: Now.ID['ih-059-unsecured-scripted-rest'],
+    name: 'IH-059 Scripted REST resources without security',
+    active: true,
+    category: 'security',
+    priority: '2',
+    shortDescription: 'Finds custom scripted REST resources that do not require authentication or ACL authorization',
+    description:
+        'A resource without authentication is public; without ACL authorization any authenticated user can call it. Only custom resources are checked; ServiceNow endpoints are covered by the check "Review Public REST API Endpoints". Ideal state: every custom scripted REST resource requires authentication and ACL authorization.',
+    table: 'sys_ws_operation',
+    conditions: 'active=true^requires_authentication=false^ORrequires_acl_authorization=false',
+    advanced: true,
+    script: `(function(engine, current) {
+    if (!new x_bits2_inst_hlth.IHScanUtil().isCustom(current)) return;
+    var missing = [];
+    if (current.requires_authentication != true) missing.push('authentication');
+    if (current.requires_acl_authorization != true) missing.push('ACL authorization');
+    engine.finding.setCurrentSource(current);
+    engine.finding.setValue('finding_details', current.getValue('http_method') + ' ' + current.web_service_definition.getDisplayValue() + ' ' + (current.getValue('relative_path') || '') + ' does not require ' + missing.join(' and '));
+    engine.finding.increment();
+})(engine, current);`,
+    resolutionDetails:
+        'Enable Requires authentication and Requires ACL authorization on the resource and add an ACL for the REST endpoint, or document why the endpoint must be public.',
+})
+
 // IH-032: the Asset Management rules on cmdb_ci that create assets must be active
 export const ih032CreateAssetRules = ScriptOnlyCheck({
     $id: Now.ID['ih-032-create-asset-rules'],

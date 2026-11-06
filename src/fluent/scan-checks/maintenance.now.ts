@@ -349,6 +349,120 @@ export const ih039ComplexConditions = TableCheck({
         'Use the condition builder or a short expression and move the logic into the script or a script include.',
 })
 
+// IH-046: dictionary entries (class sys_dictionary only) whose table does not exist; internal
+// storage of list fields (<table><field> with sys_id, parent_id, value, sequence) is excluded
+export const ih046OrphanedDictionaryEntries = ScriptOnlyCheck({
+    $id: Now.ID['ih-046-orphaned-dictionary-entries'],
+    name: 'IH-046 Dictionary entries for tables that do not exist',
+    active: true,
+    category: 'manageability',
+    priority: '3',
+    shortDescription: 'Finds dictionary entries that belong to a table that does not exist',
+    description:
+        'Dictionary entries left over from deleted tables clutter the dictionary and can break upgrades and table re-creation. Variables of flows, actions and tests that are stored in the dictionary are ignored, as is the internal storage of list fields. One finding per missing table. Ideal state: every dictionary entry belongs to an existing table.',
+    script: `(function(engine) {
+    var tables = {};
+    var table = new GlideRecord('sys_db_object');
+    table.query();
+    while (table.next()) tables[table.getValue('name')] = true;
+
+    var storageElements = { sys_id: true, parent_id: true, value: true, sequence: true };
+    var names = new GlideAggregate('sys_dictionary');
+    names.addQuery('sys_class_name', 'sys_dictionary');
+    names.groupBy('name');
+    names.query();
+    while (names.next()) {
+        var name = names.getValue('name');
+        if (!name || tables[name]) continue;
+        var entry = new GlideRecord('sys_dictionary');
+        entry.addQuery('name', name);
+        entry.addQuery('sys_class_name', 'sys_dictionary');
+        entry.orderBy('element');
+        entry.query();
+        var elements = [];
+        var onlyStorage = true;
+        var first = null;
+        while (entry.next()) {
+            var element = entry.getValue('element') || '(table entry)';
+            elements.push(element);
+            if (!storageElements[element]) onlyStorage = false;
+            if (!first) first = entry.getUniqueValue();
+        }
+        if (onlyStorage || !first) continue;
+        var source = new GlideRecord('sys_dictionary');
+        source.get(first);
+        engine.finding.setCurrentSource(source);
+        engine.finding.setValue('finding_details', 'Table ' + name + ' does not exist; ' + elements.length + ' dictionary entr' + (elements.length == 1 ? 'y' : 'ies') + ': ' + elements.slice(0, 20).join(', '));
+        engine.finding.increment();
+    }
+})(engine);`,
+    resolutionDetails:
+        'Delete the orphaned dictionary entries, or recreate the table if it was deleted by mistake.',
+})
+
+// IH-047: list layouts (sys_ui_list) where two elements share a position
+export const ih047ListLayoutDuplicatePositions = ScriptOnlyCheck({
+    $id: Now.ID['ih-047-list-layout-duplicate-positions'],
+    name: 'IH-047 List layouts with duplicate positions',
+    active: true,
+    category: 'manageability',
+    priority: '3',
+    shortDescription: 'Finds list layouts where two columns have the same position',
+    description:
+        'When two elements of a list layout share a position, the column order is undefined and can change between users and releases. Elements without a position are ignored. One finding per list layout. Ideal state: every element of a list layout has its own position.',
+    script: `(function(engine) {
+    var positions = {};
+    // Elements without a position (empty rows without a field) are not counted as a shared position
+    var dup = new GlideAggregate('sys_ui_list_element');
+    dup.addNotNullQuery('position');
+    dup.groupBy('list_id');
+    dup.groupBy('position');
+    dup.addAggregate('COUNT');
+    dup.addHaving('COUNT', '>', '1');
+    dup.query();
+    while (dup.next()) {
+        var listId = dup.getValue('list_id');
+        if (!positions[listId]) positions[listId] = [];
+        positions[listId].push(dup.getValue('position'));
+    }
+    for (var id in positions) {
+        var list = new GlideRecord('sys_ui_list');
+        if (!list.get(id)) continue;
+        var details = [];
+        for (var i = 0; i < positions[id].length; i++) {
+            var element = new GlideRecord('sys_ui_list_element');
+            element.addQuery('list_id', id);
+            element.addQuery('position', positions[id][i]);
+            element.query();
+            var names = [];
+            while (element.next()) names.push(element.getValue('element'));
+            details.push('position ' + positions[id][i] + ': ' + names.join(', '));
+        }
+        engine.finding.setCurrentSource(list);
+        engine.finding.setValue('finding_details', 'List layout ' + list.getValue('name') + ' (view ' + (list.view.getDisplayValue() || 'Default') + '): ' + details.join('; '));
+        engine.finding.increment();
+    }
+})(engine);`,
+    resolutionDetails:
+        'Open the list layout (Configure > List Layout) and save it again, or fix the positions so each element has its own.',
+})
+
+// IH-057: update sets without description ("Default" excluded)
+export const ih057UpdateSetWithoutDescription = TableCheck({
+    $id: Now.ID['ih-057-update-set-without-description'],
+    name: 'IH-057 Update sets without description',
+    active: true,
+    category: 'manageability',
+    priority: '3',
+    shortDescription: 'Finds update sets without a description',
+    description:
+        'Without a description, reviewers and release managers cannot tell what an update set contains and why. "Default" update sets are ignored. Ideal state: every update set has a description.',
+    table: 'sys_update_set',
+    conditions: 'descriptionISEMPTY^name!=Default',
+    resolutionDetails:
+        'Describe the content and purpose of the update set, for example the story number and a short summary.',
+})
+
 // IH-022: summary of the last platform upgrade (the per-item log sys_upgrade_history_log cannot be
 // read from other scopes); items that need a review = skipped and different + errors + manual merges
 export const ih022UpgradeSkippedItems = ScriptOnlyCheck({

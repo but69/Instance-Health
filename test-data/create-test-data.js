@@ -2,14 +2,16 @@
 // Run in System Definition > Scripts - Background, scope global, as admin.
 // Creates positive (must be found) and negative (must not be found) records for
 // IH-001 to IH-003, IH-005, IH-007, IH-009 to IH-017, IH-019, IH-021, IH-024 to IH-031,
-// IH-033, IH-035, IH-036 and IH-038 to IH-044 (test users ih.test.*, the active one locked out).
+// IH-033, IH-035, IH-036, IH-038 to IH-044 (test users ih.test.*, the active one locked out),
+// IH-047 to IH-051, IH-054 to IH-057 and IH-059 (view ih_test, on-demand jobs, tasks marked IH-TEST).
 // Every record is marked with IH-TEST (script includes: name starts with IHTest, UI page:
 // ih_test_) and captured in the update set "Instance Health - Test Data". Records are created
 // in global with a customer update, so they count as custom for the checks that only report
 // custom code. IH-024 and IH-025 to IH-029 use synthetic statistics / customization rows.
 // Not covered: IH-004 and IH-008 (need a failing PA job / 5 million rows), IH-018 (would
-// need a new table; the instance has real findings), IH-020, IH-023, IH-032, IH-034 and
-// IH-037 (instance-wide settings), IH-022 (needs a platform upgrade).
+// need a new table; the instance has real findings), IH-046 (real findings), IH-020, IH-023,
+// IH-032, IH-034, IH-037, IH-052, IH-053 and IH-058 (instance-wide settings), IH-022 (needs a
+// platform upgrade).
 // Test business rules have condition "false" and test ACLs sit on a non-existent field,
 // so none of them ever runs or decides access.
 // Remove everything again with remove-test-data.js.
@@ -415,7 +417,8 @@ runInGlobal(function createInstanceHealthTestData() {
     // IH-035: two update sets with the same name (positive), one unique (negative); state complete
     insert('sys_update_set', { name: MARKER + ' IH-035 duplicate name', application: 'global', state: 'complete' });
     insert('sys_update_set', { name: MARKER + ' IH-035 duplicate name', application: 'global', state: 'complete' });
-    insert('sys_update_set', { name: MARKER + ' IH-035 unique name', application: 'global', state: 'complete' });
+    // The duplicates have no description (IH-057 positive), the unique one has one (IH-057 negative)
+    insert('sys_update_set', { name: MARKER + ' IH-035 unique name', application: 'global', state: 'complete', description: MARKER + ': test data for Instance Health' });
 
     // IH-036: active knowledge base without retire workflow (positive), with one and inactive (negative)
     // Any existing workflow is enough for the check; prefer one for kb_knowledge (bithawkdemo1 has none)
@@ -491,6 +494,69 @@ runInGlobal(function createInstanceHealthTestData() {
     // IH-044 groups are the negative case
     insert('sys_user_has_role', { user: activeUser, role: testRole.getUniqueValue() });
 
+    // IH-047: list layout of cmn_location in a test view, two elements at position 0 (positive)
+    var viewId = insert('sys_ui_view', { name: 'ih_test', title: MARKER + ' view' });
+    var listId = insert('sys_ui_list', { name: 'cmn_location', view: viewId });
+    insert('sys_ui_list_element', { list_id: listId, element: 'name', position: '0' });
+    insert('sys_ui_list_element', { list_id: listId, element: 'city', position: '0' });
+    insert('sys_ui_list_element', { list_id: listId, element: 'street', position: '1' });
+
+    // IH-048: catalog task without requested item and request (positive)
+    tryInsert('IH-048 catalog task', 'sc_task', { short_description: MARKER + ' IH-048 catalog task without request' });
+
+    // IH-049, IH-050: on-demand jobs (never scheduled) run as a missing user, an inactive user
+    // (positive), an active user and the internal user "system" (negative)
+    function job(name, runAs) {
+        return tryInsert(name, 'sysauto_script', {
+            name: MARKER + ' ' + name,
+            active: 'true',
+            run_type: 'on_demand',
+            run_as: runAs,
+            script: '// ' + MARKER + ': test data for Instance Health, safe to delete'
+        });
+    }
+    job('IH-049 run as deleted user', 'ih.test.deleted');
+    job('IH-050 run as inactive user', inactiveUser);
+    job('IH-049 run as active user', activeUser);
+    job('IH-049 run as system', 'system');
+
+    // IH-051 and IH-056: plain tasks
+    insert('task', { short_description: MARKER + ' IH-051 opened by inactive user', opened_by: inactiveUser, active: 'true' });
+    insert('task', { short_description: MARKER + ' IH-051 opened by active user', opened_by: activeUser, active: 'true' });
+    insert('task', { short_description: MARKER + ' IH-056 active with closed date', opened_by: activeUser, active: 'true', closed_at: new GlideDateTime().getValue() });
+
+    // IH-054, IH-055: resolved incident and closed problem inserted without business rules, so
+    // mark_resolved / the problem closure rule do not fill the fields (positive)
+    function insertWithoutRules(table, values) {
+        var gr = new GlideRecord(table);
+        gr.initialize();
+        gr.setWorkflow(false);
+        for (var field in values)
+            gr.setValue(field, values[field]);
+        var sysId = gr.insert();
+        if (!sysId)
+            throw new Error('Insert into ' + table + ' failed: ' + JSON.stringify(values));
+        created.push(table + ' ' + sysId);
+        return sysId;
+    }
+    insertWithoutRules('incident', { short_description: MARKER + ' IH-054 resolved without resolved by', caller_id: activeUser, opened_by: activeUser, state: '6' });
+    insertWithoutRules('problem', { short_description: MARKER + ' IH-055 closed without closed by', opened_by: activeUser, state: '107', active: 'false', closed_at: new GlideDateTime().getValue() });
+
+    // IH-059: scripted REST API with a resource without ACL authorization (positive) and one with
+    // both settings (negative). Both require authentication, so nothing is public.
+    var restApi = tryInsert('IH-059 API', 'sys_ws_definition', { name: MARKER + ' IH-059 API', service_id: 'ih_test_api', active: 'true' });
+    if (restApi) {
+        var noContent = '(function process(request, response) {\n    // ' + MARKER + ': test data for Instance Health, safe to delete\n    response.setStatus(204);\n})(request, response);';
+        tryInsert('IH-059 resource without ACL', 'sys_ws_operation', {
+            name: MARKER + ' IH-059 without ACL', web_service_definition: restApi, http_method: 'GET', relative_path: '/without_acl',
+            requires_authentication: 'true', requires_acl_authorization: 'false', active: 'true', operation_script: noContent
+        });
+        tryInsert('IH-059 resource with ACL', 'sys_ws_operation', {
+            name: MARKER + ' IH-059 with ACL', web_service_definition: restApi, http_method: 'GET', relative_path: '/with_acl',
+            requires_authentication: 'true', requires_acl_authorization: 'true', active: 'true', operation_script: noContent
+        });
+    }
+
     // Check that the records really landed in global and the public report is published
     var check = new GlideRecord('sys_report');
     if (!check.get(publicReport) || String(check.is_published) != 'true' || check.getValue('sys_scope') != 'global')
@@ -534,6 +600,17 @@ runInGlobal(function createInstanceHealthTestData() {
     gs.print('  IH-042: "' + MARKER + ' IH-042 without members" found, the other test groups not found');
     gs.print('  IH-043: direct role personalize_choices of ih.test.active found, the inherited ones not found');
     gs.print('  IH-044: "' + MARKER + ' IH-044 role without type" found, "... role with type" not found');
+    gs.print('  IH-046: no test data (real findings); IH-052, IH-053, IH-058: no test data (instance-wide settings)');
+    gs.print('  IH-047: list layout cmn_location (view ih_test) found, position 0: name, city');
+    gs.print('  IH-048: "' + MARKER + ' IH-048 catalog task without request" found');
+    gs.print('  IH-049: job "' + MARKER + ' IH-049 run as deleted user" found, active user and system not found');
+    gs.print('  IH-050: job "' + MARKER + ' IH-050 run as inactive user" found');
+    gs.print('  IH-051: task "' + MARKER + ' IH-051 opened by inactive user" found, active one not found');
+    gs.print('  IH-054: incident "' + MARKER + ' IH-054 resolved without resolved by" found');
+    gs.print('  IH-055: problem "' + MARKER + ' IH-055 closed without closed by" found');
+    gs.print('  IH-056: task "' + MARKER + ' IH-056 active with closed date" found');
+    gs.print('  IH-057: both IH-035 duplicate update sets found, the unique one (with description) not found');
+    gs.print('  IH-059: resource "' + MARKER + ' IH-059 without ACL" found, "... with ACL" not found');
     gs.print('  IH-001 to IH-009 test script includes and client scripts must not appear in IH-010 to IH-016.');
     gs.print('');
     for (var w = 0; w < warnings.length; w++)

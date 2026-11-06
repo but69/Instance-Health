@@ -78,6 +78,19 @@ IHScanUtil.prototype = {
         engine.finding.increment();
     },
 
+    // IH-049, IH-050: resolve a scheduled job's run_as value. It is a sys_user reference, but some
+    // jobs hold a user name ("admin") or an internal platform user ("system", "maint").
+    // Returns { state: 'internal' | 'missing' | 'inactive' | 'active', user: GlideRecord or null }
+    resolveRunAs: function(value) {
+        if (value == 'system' || value == 'maint') return { state: 'internal', user: null };
+        var user = new GlideRecord('sys_user');
+        if (!user.get(value)) {
+            user = new GlideRecord('sys_user');
+            if (!user.get('user_name', value)) return { state: 'missing', user: null };
+        }
+        return { state: user.active == true ? 'active' : 'inactive', user: user };
+    },
+
     // IH-038: lines of a business rule script that pass current to a script include which calls
     // update() on one of its function parameters. Returns "line N: <code> -> <include>: <param>.update()"
     findIndirectCurrentUpdates: function(script) {

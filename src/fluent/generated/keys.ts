@@ -181,6 +181,62 @@ declare global {
                         table: 'scan_table_check'
                         id: '4e10ab8932cd4daa814430039b278589'
                     }
+                    'ih-046-orphaned-dictionary-entries': {
+                        table: 'scan_script_only_check'
+                        id: '98395f89c5624e52a55424c63b30babd'
+                    }
+                    'ih-047-list-layout-duplicate-positions': {
+                        table: 'scan_script_only_check'
+                        id: 'e661823cf07c40749225ec27eeecfc49'
+                    }
+                    'ih-048-orphaned-catalog-tasks': {
+                        table: 'scan_table_check'
+                        id: '8ad8b8186fd84ae19fb9bcdbfdd4e00e'
+                    }
+                    'ih-049-jobs-run-as-deleted-user': {
+                        table: 'scan_table_check'
+                        id: '4c6694d3dd4147f4a09e3d5a7ef0d034'
+                    }
+                    'ih-050-jobs-run-as-inactive-user': {
+                        table: 'scan_table_check'
+                        id: 'fdd2043e3c0d473c874a7dc3892be6c1'
+                    }
+                    'ih-051-tasks-opened-by-inactive-user': {
+                        table: 'scan_table_check'
+                        id: '384a104d89d94bb38737e3962e849b3f'
+                    }
+                    'ih-052-system-locale': {
+                        table: 'scan_script_only_check'
+                        id: '43df7a0132844609a7475d27fdb37159'
+                    }
+                    'ih-053-single-currency-mode': {
+                        table: 'scan_script_only_check'
+                        id: '8a82f15a7f0148128fcc7b062219ebd6'
+                    }
+                    'ih-054-mark-resolved': {
+                        table: 'scan_script_only_check'
+                        id: 'a3584b0344de49bb81edddfa240661c7'
+                    }
+                    'ih-055-problem-closed-fields': {
+                        table: 'scan_script_only_check'
+                        id: '49c5600595bf4583b9bb4d12aeb75f07'
+                    }
+                    'ih-056-active-tasks-with-closed-date': {
+                        table: 'scan_table_check'
+                        id: '00e7564d189c4f91939994bd4baf34f6'
+                    }
+                    'ih-057-update-set-without-description': {
+                        table: 'scan_table_check'
+                        id: 'f4b961349cd946b0bc45bbaf88f11476'
+                    }
+                    'ih-058-stale-configuration-items': {
+                        table: 'scan_script_only_check'
+                        id: 'd826f51e328947a197dcffe7574951a4'
+                    }
+                    'ih-059-unsecured-scripted-rest': {
+                        table: 'scan_table_check'
+                        id: '2f73f6bfa42f425c992763e6a57f575b'
+                    }
                     'ih-scan-util': {
                         table: 'sys_script_include'
                         id: 'ab660315d1c14bb184dc5c20bc21f75c'

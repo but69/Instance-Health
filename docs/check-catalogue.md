@@ -67,20 +67,20 @@ Field and table names marked ✔ were verified on bithawkdemo1 (2026-11-05).
 | IH-043 | Roles assigned directly to users | Administration | security | TableCheck | built |
 | IH-044 | Groups with roles without a group type | Administration | security | TableCheck (advanced) | built |
 | IH-045 | Priority 1 items skipped in the last upgrade | Maintenance | upgradability | ScriptOnlyCheck | dropped |
-| IH-046 | Dictionary entries for tables that do not exist | Maintenance | manageability | ScriptOnlyCheck | specified |
-| IH-047 | List layouts with duplicate positions | Maintenance | manageability | ScriptOnlyCheck | specified |
-| IH-048 | Catalog tasks without requested item or request | Administration | manageability | TableCheck | specified |
-| IH-049 | Active scheduled jobs run as a deleted user | Administration | manageability | ScriptOnlyCheck | specified |
-| IH-050 | Active scheduled jobs run as an inactive user | Administration | security | TableCheck (advanced) | specified |
-| IH-051 | Active tasks opened by an inactive user | Administration | manageability | TableCheck | specified |
-| IH-052 | System locale is valid | Administration | manageability | ScriptOnlyCheck | specified |
-| IH-053 | Single currency mode configured correctly | Administration | manageability | ScriptOnlyCheck | specified |
-| IH-054 | Resolved fields set by mark_resolved | Administration | manageability | ScriptOnlyCheck | specified |
-| IH-055 | Closed fields set on problems | Administration | manageability | ScriptOnlyCheck | specified |
-| IH-056 | Active tasks with a closed date | Administration | manageability | TableCheck | specified |
-| IH-057 | Update sets without description | Maintenance | manageability | TableCheck | specified |
-| IH-058 | Share of active CIs not discovered or updated for 60 days | Administration | manageability | ScriptOnlyCheck | specified |
-| IH-059 | Scripted REST resources without security | Administration | security | TableCheck (advanced) | specified |
+| IH-046 | Dictionary entries for tables that do not exist | Maintenance | manageability | ScriptOnlyCheck | built |
+| IH-047 | List layouts with duplicate positions | Maintenance | manageability | ScriptOnlyCheck | built |
+| IH-048 | Catalog tasks without requested item or request | Administration | manageability | TableCheck | built |
+| IH-049 | Active scheduled jobs run as a deleted user | Administration | manageability | TableCheck (advanced) | built |
+| IH-050 | Active scheduled jobs run as an inactive user | Administration | security | TableCheck (advanced) | built |
+| IH-051 | Active tasks opened by an inactive user | Administration | manageability | TableCheck | built |
+| IH-052 | System locale is valid | Administration | manageability | ScriptOnlyCheck | built |
+| IH-053 | Single currency mode configured correctly | Administration | manageability | ScriptOnlyCheck | built |
+| IH-054 | Resolved fields set by mark_resolved | Administration | manageability | ScriptOnlyCheck | built |
+| IH-055 | Closed fields set on problems | Administration | manageability | ScriptOnlyCheck | built |
+| IH-056 | Active tasks with a closed date | Administration | manageability | TableCheck | built |
+| IH-057 | Update sets without description | Maintenance | manageability | TableCheck | built |
+| IH-058 | Share of active CIs not discovered or updated for 60 days | Administration | manageability | ScriptOnlyCheck | built |
+| IH-059 | Scripted REST resources without security | Administration | security | TableCheck (advanced) | built |
 
 ---
 
@@ -417,7 +417,9 @@ Overlap with OOB checks (bithawkdemo1, 2026-11-06): `sn_access_analyzer` "Users 
 
 ## Batch 5: drafts received 2026-11-06
 
-Drafts from the user ("same procedure as before"), specified 2026-11-06. IH-046 to IH-048, IH-050 to IH-057 follow the proposals below without an explicit decision; the user can still change them. IH-045 was dropped.
+Drafts from the user ("same procedure as before"), specified 2026-11-06.
+
+**Built 2026-11-06**, not deployed yet. Dry run in the app scope (built scripts, stub engine, no findings written) on bithawkdemo1, with the batch 1 to 4 test data present: IH-046 3, IH-047 2, IH-048 0, IH-049 4, IH-050 0, IH-051 0, IH-052 0, IH-053 0, IH-054 0, IH-055 5, IH-056 15, IH-057 15 (including the 2 IH-035 test update sets), IH-058 0, IH-059 0. Shared helper `IHScanUtil.resolveRunAs()` for IH-049 and IH-050. Test data: list layout in view `ih_test`, on-demand jobs, plain tasks, an incident and a problem inserted without business rules, and a test REST API (authentication required). IH-046 to IH-048, IH-050 to IH-057 follow the proposals below without an explicit decision; the user can still change them. IH-045 was dropped.
 Overlap with OOB checks (bithawkdemo1, 2026-11-06): `sn_vsc` "Review Public REST API Endpoints" (active) is close to IH-059; `sn_vsc` "Scheduled reports being emailed to external user run as inactive user" (inactive) is narrower than IH-050.
 
 ## IH-045 Priority 1 items skipped in the last upgrade
@@ -431,14 +433,14 @@ Overlap with OOB checks (bithawkdemo1, 2026-11-06): `sn_vsc` "Review Public REST
 
 - **Ideal:** Every dictionary entry belongs to an existing table.
 - **Logic:** `sys_dictionary` rows of class `sys_dictionary` only (subclasses such as flow and ATF variables use `name` for other purposes ✔) whose `name` is not in `sys_db_object`. Excluded: internal storage of list fields, named `<table><field>` with the elements `sys_id`, `parent_id`, `value`, `sequence` (e.g. `kb_knowledgeroles`). One finding per missing table name, linked to its first dictionary entry; details list the elements.
-- **Measured:** 119 names without table, nearly all list field storage (to be confirmed with the exclusion when building).
+- **Measured:** 119 names without table; 116 are list field storage. Built (2026-11-06): 3 findings (`sa_performance_config`, `sn_cmp_rb_dc_capablity`, `sn_itsm_gen_ai_overdue_incident_sla`). No test data needed.
 - **Resolution:** Delete the orphaned dictionary entries (or recreate the table if it was deleted by mistake).
 
 ## IH-047 List layouts with duplicate positions
 
 - **Ideal:** Every element of a list layout has its own position.
-- **Logic:** GlideAggregate on `sys_ui_list_element` ✔ grouped by `list_id` and `position`, count > 1. One finding per list layout (`sys_ui_list`), details list the positions and elements.
-- **Measured:** 6 list layouts.
+- **Logic:** GlideAggregate on `sys_ui_list_element` ✔ grouped by `list_id` and `position`, count > 1, elements without a position ignored. One finding per list layout (`sys_ui_list`), details list the positions and elements.
+- **Measured:** 6 list layouts in the first count; 4 of them only have empty rows (no element, no position, e.g. `dscy_router_interface` view "Switch with routing"), which is a broken layout but not a shared position. Built without them (2026-11-06): 2 findings (`sn_udc_developer_session_watch` and `sys_user_has_skill`, both with two elements at position 0).
 - **Resolution:** Open the list layout and save it again (or fix the positions), so the column order is defined.
 
 ## IH-048 Catalog tasks without requested item or request
