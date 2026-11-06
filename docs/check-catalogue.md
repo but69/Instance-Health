@@ -1,6 +1,6 @@
 # Instance Health: Check Catalogue
 
-Dropped: IH-006 Java package collection mode (2026-11-05).
+Dropped: IH-006 Java package collection mode (2026-11-05), IH-045 priority 1 skipped upgrade items (2026-11-06).
 
 ## Open items (as of 2026-11-06)
 
@@ -66,6 +66,21 @@ Field and table names marked ✔ were verified on bithawkdemo1 (2026-11-05).
 | IH-042 | Groups without members | Administration | manageability | TableCheck (advanced) | built |
 | IH-043 | Roles assigned directly to users | Administration | security | TableCheck | built |
 | IH-044 | Groups with roles without a group type | Administration | security | TableCheck (advanced) | built |
+| IH-045 | Priority 1 items skipped in the last upgrade | Maintenance | upgradability | ScriptOnlyCheck | dropped |
+| IH-046 | Dictionary entries for tables that do not exist | Maintenance | manageability | ScriptOnlyCheck | specified |
+| IH-047 | List layouts with duplicate positions | Maintenance | manageability | ScriptOnlyCheck | specified |
+| IH-048 | Catalog tasks without requested item or request | Administration | manageability | TableCheck | specified |
+| IH-049 | Active scheduled jobs run as a deleted user | Administration | manageability | ScriptOnlyCheck | specified |
+| IH-050 | Active scheduled jobs run as an inactive user | Administration | security | TableCheck (advanced) | specified |
+| IH-051 | Active tasks opened by an inactive user | Administration | manageability | TableCheck | specified |
+| IH-052 | System locale is valid | Administration | manageability | ScriptOnlyCheck | specified |
+| IH-053 | Single currency mode configured correctly | Administration | manageability | ScriptOnlyCheck | specified |
+| IH-054 | Resolved fields set by mark_resolved | Administration | manageability | ScriptOnlyCheck | specified |
+| IH-055 | Closed fields set on problems | Administration | manageability | ScriptOnlyCheck | specified |
+| IH-056 | Active tasks with a closed date | Administration | manageability | TableCheck | specified |
+| IH-057 | Update sets without description | Maintenance | manageability | TableCheck | specified |
+| IH-058 | Share of active CIs not discovered or updated for 60 days | Administration | manageability | ScriptOnlyCheck | specified |
+| IH-059 | Scripted REST resources without security | Administration | security | TableCheck (advanced) | specified |
 
 ---
 
@@ -397,3 +412,118 @@ Overlap with OOB checks (bithawkdemo1, 2026-11-06): `sn_access_analyzer` "Users 
 - **Decision:** any group type is enough; no specific type name is required (agreed 2026-11-06). Title changed to "Groups with roles without a group type".
 - **Measured:** 30 active groups with roles: 12 have some type, 18 none. Existing types: Agile Team, itil, survey, Knowledge, catalog, human_resources, schedule_visible_externally, schedule_visible_internally, hr_vendors; no "Authorization" type.
 - **Resolution:** Create the group type and set it on all role-granting groups; groups for assignment only should not hold roles.
+
+---
+
+## Batch 5: drafts received 2026-11-06
+
+Drafts from the user ("same procedure as before"), specified 2026-11-06. IH-046 to IH-048, IH-050 to IH-057 follow the proposals below without an explicit decision; the user can still change them. IH-045 was dropped.
+Overlap with OOB checks (bithawkdemo1, 2026-11-06): `sn_vsc` "Review Public REST API Endpoints" (active) is close to IH-059; `sn_vsc` "Scheduled reports being emailed to external user run as inactive user" (inactive) is narrower than IH-050.
+
+## IH-045 Priority 1 items skipped in the last upgrade
+
+- **Ideal:** No priority 1 item was skipped in the last upgrade.
+- **Blocked:** the priority is only in `sys_upgrade_history_log.type_priority` ✔, which the app scope cannot read (`read_access=0`, see IH-022). The summary record `sys_upgrade_history` has no counts per priority.
+- **Measured (from global):** last upgrade skipped items by priority: 0 with priority 1, 136 with 2, 1 with 3, 173 with 5, 3 without priority.
+- **Decision: dropped (2026-11-06).** IH-022 already reports skipped items that need a review; the number IH-045 is not reused.
+
+## IH-046 Dictionary entries for tables that do not exist
+
+- **Ideal:** Every dictionary entry belongs to an existing table.
+- **Logic:** `sys_dictionary` rows of class `sys_dictionary` only (subclasses such as flow and ATF variables use `name` for other purposes ✔) whose `name` is not in `sys_db_object`. Excluded: internal storage of list fields, named `<table><field>` with the elements `sys_id`, `parent_id`, `value`, `sequence` (e.g. `kb_knowledgeroles`). One finding per missing table name, linked to its first dictionary entry; details list the elements.
+- **Measured:** 119 names without table, nearly all list field storage (to be confirmed with the exclusion when building).
+- **Resolution:** Delete the orphaned dictionary entries (or recreate the table if it was deleted by mistake).
+
+## IH-047 List layouts with duplicate positions
+
+- **Ideal:** Every element of a list layout has its own position.
+- **Logic:** GlideAggregate on `sys_ui_list_element` ✔ grouped by `list_id` and `position`, count > 1. One finding per list layout (`sys_ui_list`), details list the positions and elements.
+- **Measured:** 6 list layouts.
+- **Resolution:** Open the list layout and save it again (or fix the positions), so the column order is defined.
+
+## IH-048 Catalog tasks without requested item or request
+
+- **Ideal:** Every catalog task is linked to a requested item and a request.
+- **Logic:** `sc_task` where `request_itemISEMPTY^ORrequestISEMPTY`.
+- **Measured:** 0 of 9.
+- **Resolution:** Link the task to its requested item; catalog tasks should only be created by the catalog fulfillment process.
+
+## IH-049 Active scheduled jobs run as a deleted user
+
+- **Ideal:** Every active scheduled job runs as an existing user.
+- **Logic:** `sysauto` ✔ (all job types) where `active=true^run_asISNOTEMPTY`. `run_as` is a reference to `sys_user`, but holds user names on some jobs ✔ (`admin`, `gaf-svc-account`). Resolve by sys_id, then by `user_name`; `system` and `maint` are internal platform users and skipped. Finding if no user is found; linked to the job.
+- **Measured:** 795 active jobs with `run_as`; 4 point to users that do not exist (`now.discovery_infra`, `syed.azam@snc`, `Tal.Kapon@snc`, `yair.leibkowiz@snc`), all ServiceNow jobs.
+- **Decision:** all jobs, including ServiceNow ones (agreed 2026-11-06).
+- **Resolution:** Set `run_as` to an existing (service) user.
+
+## IH-050 Active scheduled jobs run as an inactive user
+
+- **Ideal:** No active scheduled job runs as an inactive user.
+- **Logic:** as IH-049, finding if the resolved user is inactive.
+- **Measured:** 0.
+- **Resolution:** Set `run_as` to an active service user.
+
+## IH-051 Active tasks opened by an inactive user
+
+- **Ideal:** Active tasks are not opened by inactive users.
+- **Logic:** `task` where `active=true^opened_by.active=false`. Link to the task.
+- **Measured:** 0 of 13,084 active tasks.
+- **Resolution:** Check whether the task is still needed; follow-up questions go to the caller, not the inactive user.
+
+## IH-052 System locale is valid
+
+- **Ideal:** `glide.system.locale` is empty (default) or a valid locale.
+- **Logic:** property value ✔ (record exists, value empty on bithawkdemo1). Finding if the value is set and not `<language>` or `<language>.<COUNTRY>` / `<language>_<COUNTRY>` with an ISO 639 language and an ISO 3166 country (`core_country` ✔, 232 rows). Java's own locale list cannot be read from a scoped script, so the check approximates it with the ISO codes.
+- **Measured:** empty, no finding.
+- **Resolution:** Set a valid locale such as `de.CH` or clear the property.
+
+## IH-053 Single currency mode configured correctly
+
+- **Ideal:** Single currency mode is either off, or on with an active currency code.
+- **Logic:** `glide.i18n.single_currency` ✔ and `glide.i18n.single_currency.code` ✔. Finding if single currency is `true` and the code is empty or not an active `fx_currency` ✔; also if it is `false` while only one currency is active (single currency mode should be used).
+- **Measured:** `false`, code USD, 5 active currencies (CHF, EUR, GBP, JPY, USD): no finding.
+- **Resolution:** Set the code to an active currency, or switch single currency mode on when only one currency is used.
+
+## IH-054 Resolved fields set by mark_resolved
+
+- **Ideal:** The business rule `mark_resolved` on incident is active, so resolved incidents get "Resolved" and "Resolved by".
+- **Logic:** finding if `mark_resolved` ✔ on `incident` is missing or inactive (linked to the rule), and one finding per resolved or closed incident (`stateIN6,7`) without `resolved_at` or `resolved_by`.
+- **Measured:** rule active and unchanged; 0 of 3,406 resolved/closed incidents without the fields.
+- **Resolution:** Activate the rule (revert customizations), then fill the fields for affected incidents.
+
+## IH-055 Closed fields set on problems
+
+- **Ideal:** Closed problems have "Closed" and "Closed by".
+- **Logic:** there is no `mark_closed` rule on problem in this release ✔ (only on incident and change_request); "Update fields on Problem Closure" ✔ sets the fields. Finding if that rule is missing or inactive, and one finding per closed problem (`state=107`) without `closed_at` or `closed_by`.
+- **Measured:** rule active; 5 of 7 closed problems without `closed_by` (1 also without `closed_at`), all demo data from March 2026.
+- **Resolution:** Activate the rule and fill the fields for affected problems.
+
+## IH-056 Active tasks with a closed date
+
+- **Ideal:** Active tasks have no closed date.
+- **Logic:** `task` where `active=true^closed_atISNOTEMPTY`. Link to the task.
+- **Measured:** 15 (incident 8, change_request 4, HR cases 3).
+- **Resolution:** Check the task state; reopened tasks should clear the closed date.
+
+## IH-057 Update sets without description
+
+- **Ideal:** Every update set has a description.
+- **Logic:** `sys_update_set` where `descriptionISEMPTY^name!=Default`.
+- **Measured:** 15 of 33.
+- **Resolution:** Describe the content and purpose (e.g. story number and summary).
+
+## IH-058 Share of active CIs not discovered or updated for 60 days
+
+- **Ideal:** The share of active CIs that were neither discovered nor updated for 60 days stays below a threshold.
+- **Logic:** active CIs = `cmdb_ci` where `install_status!=7^operational_status!=6`. Stale = (`last_discovered` empty or older than 60 days) and `sys_updated_on` older than 60 days. One summary finding linked to the `cmdb_ci` table when the share is over the threshold; details show count, total and share.
+- **Measured:** 15 of 3,041 active CIs (0.5 %); 2,743 were never discovered but recently updated.
+- **Decision:** threshold 5 % (agreed 2026-11-06).
+- **Resolution:** Retire CIs that no longer exist, and bring the rest under Discovery or a regular import.
+
+## IH-059 Scripted REST resources without security
+
+- **Ideal:** Every active scripted REST resource requires authentication and ACL authorization.
+- **Logic:** `sys_ws_operation` ✔ where `active=true^requires_authentication=false^ORrequires_acl_authorization=false`. Link to the resource, details name the missing setting.
+- **Measured:** 2,538 active resources: 60 without authentication, 203 without ACL authorization, all ServiceNow; 0 custom.
+- **Decision:** custom resources only (same rule as the code checks); ServiceNow endpoints are covered by the OOB check "Review Public REST API Endpoints" (agreed 2026-11-06).
+- **Resolution:** Enable "Requires authentication" and "Requires ACL authorization", or document why the endpoint must be public.
