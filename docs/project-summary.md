@@ -8,7 +8,7 @@ ServiceNow Fluent app **Instance Health** (scope `x_bits2_inst_hlth`, now-sdk 4.
 
 - Dev instance: `bithawkdemo1`, auth alias `but-o`.
 - Build `npm run build`, deploy `npm run deploy` (only on the user's request).
-- Everything built so far (2026-11-05 to 2026-11-06) is deployed to bithawkdemo1, except the knowledge articles, which the catalogue lists as built but not deployed.
+- Everything built so far (2026-11-05 to 2026-11-06) is deployed to bithawkdemo1.
 
 ## 2. Result in numbers
 
@@ -71,7 +71,7 @@ ServiceNow Fluent app **Instance Health** (scope `x_bits2_inst_hlth`, now-sdk 4.
 - `remove-test-data.js` ends with `"g_tableName" is not defined` when it restores the app. The deletion is complete, the cause is not investigated.
 - Validate the 13 `built` checks on a customer instance or with temporary setting changes.
 - Run the checks on a real instance with real data (needs customer approval).
-- Deploy the knowledge articles and keep `docs/kb/*.html` in step with the checks and the scoring.
+- Keep `docs/kb/*.html` in step with the checks and the scoring.
 
 ## 8. History (git, 2026-11-05 to 2026-11-06)
 
