@@ -549,28 +549,46 @@ export const ih064ScheduledJobErrors = TableCheck({
         'Fix the job script or configuration (for "Unable to find the specified job handler", the plugin or job definition is missing); deactivate or delete obsolete jobs.',
 })
 
-// IH-074: store applications with a newer version available (update_available is set by the store sync)
-export const ih081StoreAppsNotLatest = TableCheck({
-    $id: Now.ID['ih-081-store-apps-not-latest'],
-    name: 'IH-074 Store applications not on the latest version',
+// IH-074: share of active store applications with an update available (outdated share, user decision
+// 2026-11-13 after the per-app TableCheck produced 408 findings); one summary finding above the threshold
+export const ih082StoreAppsOutdatedShare = ScriptOnlyCheck({
+    $id: Now.ID['ih-082-store-apps-outdated-share'],
+    name: 'IH-074 Share of store applications not on the latest version',
     active: true,
     category: 'upgradability',
     priority: '2',
     scoreScale: 5,
-    shortDescription: 'Finds active store applications for which a newer version is available',
+    shortDescription: 'Reports the share of active store applications for which a newer version is available when it is above 20%',
     description:
-        'Applications that fall behind the latest version miss fixes and security patches and make later upgrades harder. Uses the update information of the store sync (sys_store_app.update_available). Ideal state: every active application is on the latest available version.',
-    table: 'sys_store_app',
-    conditions: 'active=true^update_available=true',
-    advanced: true,
-    script: `(function(engine, current) {
-    engine.finding.setCurrentSource(current);
-    engine.finding.setValue('finding_details', current.getValue('name') + ' (' + current.getValue('scope') + '): installed ' +
-        current.getValue('version') + ', latest ' + current.getValue('latest_version'));
+        'Applications that fall behind the latest version miss fixes and security patches and make later upgrades harder. Counts active, visible store applications (sys_store_app, not hidden on the UI) and those with an update available (update_available, set by the store sync). One summary finding when more than 20% are outdated; the details show the share and the applications with the oldest versions. Ideal state: at most 20% of the active store applications are outdated.',
+    script: `(function(engine) {
+    var THRESHOLD = 20;
+
+    var apps = new GlideRecord('sys_store_app');
+    apps.addQuery('active', true);
+    apps.addQuery('hide_on_ui', false);
+    apps.query();
+    var total = 0;
+    var outdated = [];
+    while (apps.next()) {
+        total++;
+        if (apps.getValue('update_available') == '1') {
+            outdated.push(apps.getValue('name') + ' (' + apps.getValue('version') + ' to ' + apps.getValue('latest_version') + ')');
+        }
+    }
+    if (total == 0 || outdated.length == 0) return;
+
+    var share = outdated.length * 100 / total;
+    if (share <= THRESHOLD) return;
+
+    var table = new GlideRecord('sys_db_object');
+    if (!table.get('name', 'sys_store_app')) return;
+    engine.finding.setCurrentSource(table);
+    engine.finding.setValue('finding_details', share.toFixed(1) + '% of the active store applications are not on the latest version (' + outdated.length + ' of ' + total + '). Examples: ' + outdated.slice(0, 10).join(', ') + (outdated.length > 10 ? ', ...' : ''));
     engine.finding.increment();
-})(engine, current);`,
+})(engine);`,
     resolutionDetails:
-        'Open the application in Application Manager, read the release notes, update it in a sub-production instance first, then promote the update.',
+        'Open Application Manager, filter the applications with an update available, read the release notes and update them in a sub-production instance first, then promote. Plan regular update windows so the share stays below the threshold.',
 })
 
 // IH-066: changed ServiceNow dictionary entries; u_ tables and u_ fields are skipped because the

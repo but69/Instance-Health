@@ -56,7 +56,7 @@ import {
     ih071CiClassesWithCustomFields,
     ih072CurrentUpdateInBusinessRules,
     ih078IndirectCurrentUpdate,
-    ih081StoreAppsNotLatest,
+    ih082StoreAppsOutdatedShare,
 } from './maintenance.now'
 import {
     ih002SlowReports,
@@ -533,7 +533,7 @@ Record({
 })
 
 Record({
-    $id: Now.ID['ih-suite-check-081'],
+    $id: Now.ID['ih-suite-check-082'],
     table: 'scan_check_suite_check',
-    data: { suite: instanceHealthSuite, check: ih081StoreAppsNotLatest, score_weight: 1 },
+    data: { suite: instanceHealthSuite, check: ih082StoreAppsOutdatedShare, score_weight: 1 },
 })

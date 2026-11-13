@@ -37,7 +37,7 @@ Field and table names marked ✔ were verified on bithawkdemo1 (2026-11-05).
 
 Agreed with the user on 2026-11-06 (proposal accepted, knock-out cap at 60 added). 100 = completely healthy.
 
-- **Score per check (0 to 100):** 100 − findings × points per finding, at least 0. Points per finding by priority: P1 20 (0 after 5 findings), P2 5 (after 20), P3 2 (after 50). Setting checks (one finding means a setting or limit is wrong: IH-007, IH-019, IH-021, IH-022, IH-031, IH-033, IH-036, IH-050, IH-051, IH-058, IH-067): 0 with the first finding. Share checks use the share from the finding details: IH-070 score = share of unique location names, IH-056 score = 100 − share of stale CIs. The points per finding are also set as `scoreScale` on each check, so Instance Scan shows the same per-check score (share checks excepted).
+- **Score per check (0 to 100):** 100 − findings × points per finding, at least 0. Points per finding by priority: P1 20 (0 after 5 findings), P2 5 (after 20), P3 2 (after 50). Setting checks (one finding means a setting or limit is wrong: IH-007, IH-019, IH-021, IH-022, IH-031, IH-033, IH-036, IH-050, IH-051, IH-058, IH-067): 0 with the first finding. Share checks use the share from the finding details: IH-070 score = share of unique location names, IH-056 score = 100 − share of stale CIs, IH-074 score = 100 − share of outdated store apps. The points per finding are also set as `scoreScale` on each check, so Instance Scan shows the same per-check score (share checks excepted).
 - **Health score:** weighted average of the check scores, weight 5 for P1, 3 for P2, 1 for P3.
 - **Knock-out cap:** if a P1 check scores 0, the health score is at most 60 (`score_uncapped` keeps the value without cap).
 - **Sub-scores:** per priority and per category (security, performance, manageability, upgradability), same weighting.
@@ -133,7 +133,7 @@ Agreed with the user on 2026-11-06 (proposal accepted, knock-out cap at 60 added
 | IH-071 | Hardware, application and VM instance CIs without name | Administration | manageability | TableCheck | 3 | validated |
 | IH-072 | Scheduled imports at the same time | Performance | performance | ScriptOnlyCheck | 3 | validated |
 | IH-073 | UI actions with synchronous outbound calls | Performance | performance | TableCheck (advanced) | 2 | validated |
-| IH-074 | Store applications not on the latest version | Maintenance | upgradability | TableCheck (advanced) | 2 | built |
+| IH-074 | Share of store applications not on the latest version | Maintenance | upgradability | ScriptOnlyCheck | 2 | built |
 
 ---
 
@@ -716,12 +716,11 @@ Overlaps with own checks: IH-002 (slow reports > 5 s) vs IH-065, IH-013 (before 
 - **Measured:** 3 such UI actions, all ServiceNow; custom 0.
 - **Resolution:** Trigger the call asynchronously (event, flow or `executeAsync()`) and inform the user.
 
-## IH-074 Store applications not on the latest version
+## IH-074 Share of store applications not on the latest version
 
-- **Ideal:** Every installed application is on the latest version available (user request 2026-11-13: area upgradability, priority 2). Key number `ih-081`.
-- **Decisions 2026-11-13:** store apps only, inactive apps ignored, stale store sync accepted (user: yes to all three).
-- **Logic (built 2026-11-13):** advanced TableCheck on `sys_store_app` where `active=true^update_available=true` ✔ (fields `version`, `latest_version`, `update_available` exist ✔ on bithawkdemo1; the table API is blocked for the dev user, so values are still to be measured in a scan). Each match is a finding, linked to the application record; details show name, scope, installed and latest version (hence advanced, one short script). Not yet deployed. No test data: a store app record with an update cannot be faked safely; verify in the first scan.
-- **Note:** Plugins have no "latest version" and are not covered. `update_available` is only as current as the last store sync; if stale the check reports nothing.
-- **Resolution:** Open the application in Application Manager, read the release notes, update in a sub-production instance first, then promote.
-
-**Prefix "BiHa-" (user request 2026-11-13):** display names and labels of the main custom records now start with `BiHa-`: scan suite `BiHa-Instance health` (also `SUITE_NAME` in `IHHealthScore` and `IHScanStarter`, `tools/generate-suite.js`), dashboard, menu, the two table labels, report `BiHa-Instance Health Score Trend`, UI action `BiHa-Run Instance Health Scan` and the scheduled job. Not changed: scan check names (`IH-NNN`), table, script include and API names, `$id` keys, ACL descriptions, module titles. Not yet deployed.
+- **Ideal:** At most 20 % of the active store applications are outdated (user request 2026-11-13: area upgradability, priority 2).
+- **History:** First built as a TableCheck on `sys_store_app` (`active=true^update_available=true`, key `ih-081`). The first suite run (SR00015284, 2026-11-13) gave 408 findings and score 0, mostly ServiceNow platform apps (`sn_*`; vendor ServiceNow 261, none 147). Probe on bithawkdemo1: hidden apps (`hide_on_ui`) and dependency apps (`installed_as_dependency`) removed only 117 of 408 (291 left, `parent_app` empty, `auto_update` off everywhere), so a filter cannot separate managed apps from platform apps. Decision 2026-11-13 (user, option 3): share check. The type changed, so the check has a new key `ih-082` and the build deletes the `ih-081` record; the visible number stays IH-074.
+- **Logic (built 2026-11-13):** ScriptOnlyCheck on `sys_store_app` where `active=true^hide_on_ui=false` ✔; outdated = `update_available=true` ✔ (set by the store sync, stale if the sync is stale). One summary finding linked to the `sys_store_app` table when the share is over 20 %; details show the share, counts and ten example apps (installed to latest version). Threshold 20 % is a proposal without explicit user decision.
+- **Score:** share check, score = 100 − share of outdated apps (`SHARE_CHECKS` in `IHHealthScore`: `'IH-074': 'inverse'`).
+- **Measured (dry run with stub engine, 2026-11-13):** 297 of 863 active, visible apps outdated = 34.4 %, one finding. Deployed to bithawkdemo1 2026-11-13 (old ih-081 record deleted, one suite link). No test data (a store app with an update cannot be faked safely).
+- **Resolution:** Filter the applications with an update available in Application Manager, read the release notes, update in a sub-production instance first, then promote. Plan regular update windows.

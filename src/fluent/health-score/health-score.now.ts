@@ -151,7 +151,7 @@ IHHealthScore.prototype = {
     // A finding means a setting is wrong: score 0 with the first finding
     SETTING_CHECKS: ['IH-007', 'IH-019', 'IH-021', 'IH-022', 'IH-031', 'IH-033', 'IH-036', 'IH-050', 'IH-051', 'IH-058', 'IH-067'],
     // The finding carries a share in %: score = share ('value') or 100 - share ('inverse')
-    SHARE_CHECKS: { 'IH-056': 'inverse', 'IH-070': 'value' },
+    SHARE_CHECKS: { 'IH-056': 'inverse', 'IH-070': 'value', 'IH-074': 'inverse' },
 
     initialize: function() {},
 

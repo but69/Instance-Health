@@ -324,6 +324,11 @@ declare global {
                     'ih-081-store-apps-not-latest': {
                         table: 'scan_table_check'
                         id: 'ecffaca023de45d98c2d29b802e300b1'
+                        deleted: true
+                    }
+                    'ih-082-store-apps-outdated-share': {
+                        table: 'scan_script_only_check'
+                        id: 'c1b748c7e6564e73918341650c52f2db'
                     }
                     'ih-dashboard': {
                         table: 'par_dashboard'
@@ -781,6 +786,11 @@ declare global {
                     'ih-suite-check-081': {
                         table: 'scan_check_suite_check'
                         id: 'd71b08ead1d7493fa73265a75c6d03d5'
+                        deleted: true
+                    }
+                    'ih-suite-check-082': {
+                        table: 'scan_check_suite_check'
+                        id: 'c6d6f29580da414ca993de30b131e9dc'
                     }
                     'ih-suite-instance-health': {
                         table: 'scan_check_suite'
