@@ -19,7 +19,7 @@ const SCORE_LIST_COLUMNS =
 
 export const instanceHealthDashboard = Dashboard({
     $id: Now.ID['ih-dashboard'],
-    name: 'Instance Health',
+    name: 'BiHa-Instance Health',
     description: 'Health score of the instance and its categories per run of the scan suite "Instance health". 100 = completely healthy.',
     active: true,
     topLayout: {
@@ -58,7 +58,7 @@ export const instanceHealthDashboard = Dashboard({
                     $id: Now.ID['ih-dashboard-trend-chart'],
                     component: 'line',
                     componentProps: {
-                        headerTitle: 'Instance Health Score Trend',
+                        headerTitle: 'BiHa-Instance Health Score Trend',
                         showHeader: true,
                         showBorder: true,
                         description: 'Average score per scan date. Choose the trend lines with the filter "Trend lines" above.',

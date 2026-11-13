@@ -24,13 +24,13 @@ for (const f of files) {
     out += `import {\n${names.map(n => '    ' + n + ',').join('\n')}\n} from './${f}.now'\n`;
 }
 out += `
-// Scan suite "Instance health" with all Instance Health checks (user request 2026-11-06).
+// Scan suite "BiHa-Instance health" with all Instance Health checks (user request 2026-11-06).
 // Generated from the exported checks; when a check is added, add its suite check record here too.
 export const instanceHealthSuite = Record({
     $id: Now.ID['ih-suite-instance-health'],
     table: 'scan_check_suite',
     data: {
-        name: 'Instance health',
+        name: 'BiHa-Instance health',
         description: 'All Instance Health checks (IH-NNN): administration, maintenance and performance of the instance.',
         active: true,
         private: false,

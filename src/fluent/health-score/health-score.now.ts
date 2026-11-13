@@ -13,11 +13,11 @@ import {
     Table,
 } from '@servicenow/sdk/core'
 
-// Health score of the instance per run of the scan suite "Instance health" (user decision 2026-11-06,
+// Health score of the instance per run of the scan suite "BiHa-Instance health" (user decision 2026-11-06,
 // see docs/check-catalogue.md "Health score"). One record per scan result.
 export const x_bits2_inst_hlth_health_score = Table({
     name: 'x_bits2_inst_hlth_health_score',
-    label: 'Instance Health Score',
+    label: 'BiHa-Instance Health Score',
     display: 'scan_result',
     schema: {
         scan_result: ReferenceColumn({ label: 'Scan result', referenceTable: 'scan_result', mandatory: true }),
@@ -44,7 +44,7 @@ export const x_bits2_inst_hlth_health_score = Table({
 // filter can choose which trend lines are shown (user request 2026-11-06). Filled by IHHealthScore.
 export const x_bits2_inst_hlth_health_score_value = Table({
     name: 'x_bits2_inst_hlth_health_score_value',
-    label: 'Instance Health Score Value',
+    label: 'BiHa-Instance Health Score Value',
     display: 'health_score',
     schema: {
         health_score: ReferenceColumn({ label: 'Health score record', referenceTable: 'x_bits2_inst_hlth_health_score', mandatory: true }),
@@ -137,10 +137,10 @@ export const ihHealthScore = ScriptInclude({
     accessibleFrom: 'package_private',
     active: true,
     description:
-        'Calculates the instance health score (0 to 100) from a run of the scan suite "Instance health" and stores it in x_bits2_inst_hlth_health_score. calculatePending() handles all finished runs without score.',
+        'Calculates the instance health score (0 to 100) from a run of the scan suite "BiHa-Instance health" and stores it in x_bits2_inst_hlth_health_score. calculatePending() handles all finished runs without score.',
     script: `var IHHealthScore = Class.create();
 IHHealthScore.prototype = {
-    SUITE_NAME: 'Instance health',
+    SUITE_NAME: 'BiHa-Instance health',
     SCORE_TABLE: 'x_bits2_inst_hlth_health_score',
     VALUE_TABLE: 'x_bits2_inst_hlth_health_score_value',
     // Weight of a check in the health score and points per finding, by check priority
@@ -347,7 +347,7 @@ IHHealthScore.prototype = {
 // the table does not allow configuration from other scopes)
 export const ihHealthScoreJob = ScheduledScript({
     $id: Now.ID['ih-health-score-job'],
-    name: 'Instance Health - calculate health score',
+    name: 'BiHa-Instance Health - calculate health score',
     active: true,
     frequency: 'periodically',
     executionInterval: { minutes: 1 },

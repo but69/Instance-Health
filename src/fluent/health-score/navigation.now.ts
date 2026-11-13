@@ -5,9 +5,9 @@ import { x_bits2_inst_hlth_health_score } from './health-score.now'
 // Admin only, like the ACLs of the health score table.
 export const instanceHealthMenu = ApplicationMenu({
     $id: Now.ID['ih-menu'],
-    title: 'Instance Health',
-    hint: 'Health score of the instance from the scan suite "Instance health"',
-    description: 'Health scores per run of the scan suite "Instance health" and their trend.',
+    title: 'BiHa-Instance Health',
+    hint: 'Health score of the instance from the scan suite "BiHa-Instance health"',
+    description: 'Health scores per run of the scan suite "BiHa-Instance health" and their trend.',
     active: true,
     roles: ['admin'],
 })
@@ -18,11 +18,11 @@ export const instanceHealthMenu = ApplicationMenu({
 // (a server-side list action needs selected rows; user request 2026-11-12).
 UiAction({
     $id: Now.ID['ih-ui-action-run-suite'],
-    name: 'Run Instance Health Scan',
+    name: 'BiHa-Run Instance Health Scan',
     actionName: 'ih_run_instance_health_scan',
     table: x_bits2_inst_hlth_health_score.name,
     active: true,
-    hint: 'Starts the scan suite "Instance health"; the health score appears here when the scan is finished',
+    hint: 'Starts the scan suite "BiHa-Instance health"; the health score appears here when the scan is finished',
     roles: ['admin'],
     condition: "gs.hasRole('admin')",
     list: {
@@ -58,10 +58,10 @@ export const ihScanStarter = ScriptInclude({
     clientCallable: true,
     active: true,
     description:
-        'Client callable helper of the list button "Run Instance Health Scan": starts the scan suite "Instance health" unless a run is in progress. Admin only.',
+        'Client callable helper of the list button "BiHa-Run Instance Health Scan": starts the scan suite "BiHa-Instance health" unless a run is in progress. Admin only.',
     script: `var IHScanStarter = Class.create();
 IHScanStarter.prototype = Object.extendsObject(global.AbstractAjaxProcessor, {
-    SUITE_NAME: 'Instance health',
+    SUITE_NAME: 'BiHa-Instance health',
 
     start: function() {
         var message = this._start();
@@ -133,7 +133,7 @@ export const healthScoreTrendReport = Record({
     table: 'sys_report',
     data: {
         active: true,
-        name: 'Instance Health Score Trend',
+        name: 'BiHa-Instance Health Score Trend',
         source_type: 'table',
         show_chart_title: 'report',
         title_horizontal_alignment: 'center',
@@ -161,7 +161,7 @@ export const healthScoreTrendReport = Record({
         custom_chart_size: false,
         is_scheduled: false,
         exp_report_attrs: true,
-        title: 'Instance Health Score Trend',
+        title: 'BiHa-Instance Health Score Trend',
         description: 'Health score per scan date (average when the suite ran several times on one day). 100 = completely healthy; at most 60 while a priority 1 check scores 0.',
         table: x_bits2_inst_hlth_health_score.name,
         type: 'line',
