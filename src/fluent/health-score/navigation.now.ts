@@ -1,4 +1,4 @@
-import { ApplicationMenu, Record, UiAction } from '@servicenow/sdk/core'
+import { ApplicationMenu, Record, ScriptInclude, UiAction } from '@servicenow/sdk/core'
 import { x_bits2_inst_hlth_health_score } from './health-score.now'
 
 // Navigator menu "Instance Health" with the health scores and their trend (user request 2026-11-06).
@@ -13,7 +13,9 @@ export const instanceHealthMenu = ApplicationMenu({
 })
 
 // List banner button on the health scores: starts the scan suite (user request 2026-11-06). The
-// health score of the run is calculated by the scheduled job up to 15 minutes after the scan ends.
+// health score of the run is calculated by the scheduled job about a minute after the scan ends (scheduled job every minute).
+// Client-side action that calls IHScanStarter by GlideAjax, so it also works on an empty list
+// (a server-side list action needs selected rows; user request 2026-11-12).
 UiAction({
     $id: Now.ID['ih-ui-action-run-suite'],
     name: 'Run Instance Health Scan',
@@ -27,31 +29,68 @@ UiAction({
         showBannerButton: true,
         style: 'primary',
     },
-    script: `(function runInstanceHealthScan() {
-    var listUrl = 'x_bits2_inst_hlth_health_score_list.do?sysparm_query=ORDERBYDESCscan_date';
-    var suite = new GlideRecord('scan_check_suite');
-    if (!suite.get('name', 'Instance health')) {
-        gs.addErrorMessage('The scan suite "Instance health" does not exist.');
-        action.setRedirectURL(listUrl);
-        return;
-    }
+    client: {
+        isClient: true,
+        onClick: 'runInstanceHealthScan()',
+    },
+    script: `function runInstanceHealthScan() {
+    var ga = new GlideAjax('x_bits2_inst_hlth.IHScanStarter');
+    ga.addParam('sysparm_name', 'start');
+    ga.getXMLAnswer(function(answer) {
+        var result = {};
+        try {
+            result = JSON.parse(answer);
+        } catch (e) {
+            result = { message: 'The scan suite could not be started.' };
+        }
+        alert(result.message);
+        window.location.reload();
+    });
+}`,
+})
 
-    // Do not start a second run while one is still in progress
-    var running = new GlideRecord('scan_suite_execution');
-    running.addQuery('suite', suite.getUniqueValue());
-    running.addQuery('result.state', 'in_progress');
-    running.setLimit(1);
-    running.query();
-    if (running.next()) {
-        gs.addInfoMessage('The scan suite "Instance health" is already running (' + running.result.getDisplayValue() + '). The health score appears in this list up to 15 minutes after it has finished.');
-        action.setRedirectURL(listUrl);
-        return;
-    }
+// Starts the scan suite for the list button above (client callable, admin only)
+export const ihScanStarter = ScriptInclude({
+    $id: Now.ID['ih-scan-starter'],
+    name: 'IHScanStarter',
+    apiName: 'x_bits2_inst_hlth.IHScanStarter',
+    accessibleFrom: 'public',
+    clientCallable: true,
+    active: true,
+    description:
+        'Client callable helper of the list button "Run Instance Health Scan": starts the scan suite "Instance health" unless a run is in progress. Admin only.',
+    script: `var IHScanStarter = Class.create();
+IHScanStarter.prototype = Object.extendsObject(global.AbstractAjaxProcessor, {
+    SUITE_NAME: 'Instance health',
 
-    new sn_instance_scan.ScanInstance().triggerSuiteScan(suite.getUniqueValue());
-    gs.addInfoMessage('The scan suite "Instance health" was started. The scan takes about 15 minutes; the health score appears in this list up to 15 minutes after it has finished.');
-    action.setRedirectURL(listUrl);
-})();`,
+    start: function() {
+        var message = this._start();
+        return JSON.stringify({ message: message });
+    },
+
+    _start: function() {
+        if (!gs.hasRole('admin'))
+            return 'Only admins can start the scan suite.';
+
+        var suite = new GlideRecord('scan_check_suite');
+        if (!suite.get('name', this.SUITE_NAME))
+            return 'The scan suite "' + this.SUITE_NAME + '" does not exist.';
+
+        // Do not start a second run while one is still in progress
+        var running = new GlideRecord('scan_suite_execution');
+        running.addQuery('suite', suite.getUniqueValue());
+        running.addQuery('result.state', 'in_progress');
+        running.setLimit(1);
+        running.query();
+        if (running.next())
+            return 'The scan suite "' + this.SUITE_NAME + '" is already running (' + running.result.getDisplayValue() + '). The health score appears in this list about a minute after it has finished.';
+
+        new sn_instance_scan.ScanInstance().triggerSuiteScan(suite.getUniqueValue());
+        return 'The scan suite "' + this.SUITE_NAME + '" was started. The scan takes about 15 minutes; the health score appears in this list about a minute after it has finished.';
+    },
+
+    type: 'IHScanStarter'
+});`,
 })
 
 // List control: no "New" button on the health score list, records are only created by the

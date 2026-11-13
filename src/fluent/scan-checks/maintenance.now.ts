@@ -10,9 +10,10 @@ export const ih003TooManyClientScripts = ScriptOnlyCheck({
     scoreScale: 2,
     shortDescription: 'Finds tables with more than 10 active custom client scripts',
     description:
-        'Many client scripts on one table slow down forms and are hard to maintain. Counts active client scripts from customer scoped apps, and global client scripts that have a customer update. Scripts from ServiceNow plugins and store apps, inactive scripts and catalog client scripts do not count. Ideal state: at most 10 custom client scripts per table.',
+        'Many client scripts on one table slow down forms and are hard to maintain. Counts active client scripts from customer scoped apps, and global client scripts that have a customer update. Scripts from ServiceNow plugins and store apps, inactive scripts and catalog client scripts do not count. The limit is the system property x_bits2_inst_hlth.max_client_scripts_per_table (default 10). Ideal state: at most 10 custom client scripts per table.',
     script: `(function(engine) {
-    var MAX_SCRIPTS = 10;
+    var MAX_SCRIPTS = parseInt(gs.getProperty('x_bits2_inst_hlth.max_client_scripts_per_table', '10'), 10);
+    if (isNaN(MAX_SCRIPTS)) MAX_SCRIPTS = 10;
     var util = new x_bits2_inst_hlth.IHScanUtil();
 
     var counts = {};
@@ -40,7 +41,7 @@ export const ih003TooManyClientScripts = ScriptOnlyCheck({
         'Consolidate client scripts on the table, move field visibility and mandatory logic to UI policies, and remove obsolete scripts.',
 })
 
-// IH-007: if all import set rows together exceed 5 million, report the 10 runs with the most rows
+// IH-007: if all import set rows together exceed the limit (property max_import_set_rows, default 5 million), report the 10 runs with the most rows
 export const ih008ImportSetRowGrowth = ScriptOnlyCheck({
     $id: Now.ID['ih-008-import-set-row-growth'],
     name: 'IH-007 Import set rows over 5 million',
@@ -50,9 +51,10 @@ export const ih008ImportSetRowGrowth = ScriptOnlyCheck({
     scoreScale: 100,
     shortDescription: 'Reports the 10 largest import runs when import set rows exceed 5 million',
     description:
-        'Large import set tables slow down imports and cleanup and use database space. Counts all import set rows together; if there are more than 5 million, the 10 import runs with the most rows are reported. Ideal state: fewer than 5 million import set rows.',
+        'Large import set tables slow down imports and cleanup and use database space. Counts all import set rows together; if there are more than the limit (system property x_bits2_inst_hlth.max_import_set_rows, default 5 million), the 10 import runs with the most rows are reported. Ideal state: fewer than 5 million import set rows.',
     script: `(function(engine) {
-    var MAX_ROWS = 5000000;
+    var MAX_ROWS = parseInt(gs.getProperty('x_bits2_inst_hlth.max_import_set_rows', '5000000'), 10);
+    if (isNaN(MAX_ROWS)) MAX_ROWS = 5000000;
     var TOP_RUNS = 10;
 
     var total = new GlideAggregate('sys_import_set_row');
@@ -93,9 +95,9 @@ export const ih004DataCollectorJobIssues = TableCheck({
     category: 'manageability',
     priority: '3',
     scoreScale: 2,
-    shortDescription: 'Finds active PA data collector jobs whose latest run had errors or warnings',
+    shortDescription: 'Finds active PA data collector jobs whose latest run had errors or warnings, or is older than 7 days',
     description:
-        'Data collector jobs that end with errors or warnings leave gaps in Performance Analytics scores. Only the latest finished run of each active job is evaluated. Ideal state: no job ends with errors or warnings.',
+        'Data collector jobs that end with errors or warnings leave gaps in Performance Analytics scores. Only the latest finished run of each active job is evaluated. A job whose latest finished run is older than x_bits2_inst_hlth.data_collector_max_age_days (default 7, 0 = off) is reported as stale, because its scores are no longer updated. Ideal state: no job ends with errors or warnings and every job runs regularly.',
     table: 'sysauto_pa',
     conditions: 'active=true',
     advanced: true,
@@ -111,10 +113,21 @@ export const ih004DataCollectorJobIssues = TableCheck({
     var errors = parseInt(log.getValue('errors'), 10) || 0;
     var warnings = parseInt(log.getValue('warnings'), 10) || 0;
     var state = log.getValue('state');
-    if (errors == 0 && warnings == 0 && state != 'collected_error' && state != 'collected_warning') return;
+    var completedValue = log.getValue('completed') || log.getValue('sys_created_on');
+    var issues = [];
+    if (errors > 0 || warnings > 0 || state == 'collected_error' || state == 'collected_warning')
+        issues.push(errors + ' error(s) and ' + warnings + ' warning(s)');
+
+    var maxAgeDays = parseInt(gs.getProperty('x_bits2_inst_hlth.data_collector_max_age_days', '7'), 10);
+    if (isNaN(maxAgeDays)) maxAgeDays = 7;
+    if (maxAgeDays > 0 && completedValue) {
+        var ageDays = Math.floor(gs.dateDiff(completedValue, gs.nowDateTime(), true) / 86400);
+        if (ageDays > maxAgeDays) issues.push('no run for ' + ageDays + ' days (limit ' + maxAgeDays + ')');
+    }
+    if (issues.length == 0) return;
 
     engine.finding.setCurrentSource(current);
-    engine.finding.setValue('finding_details', 'Latest run completed ' + log.getValue('completed') + ' with ' + errors + ' error(s) and ' + warnings + ' warning(s)');
+    engine.finding.setValue('finding_details', 'Latest run completed ' + completedValue + ': ' + issues.join('; '));
     engine.finding.increment();
 })(engine, current);`,
     resolutionDetails:
@@ -534,6 +547,30 @@ export const ih064ScheduledJobErrors = TableCheck({
 })(engine, current);`,
     resolutionDetails:
         'Fix the job script or configuration (for "Unable to find the specified job handler", the plugin or job definition is missing); deactivate or delete obsolete jobs.',
+})
+
+// IH-074: store applications with a newer version available (update_available is set by the store sync)
+export const ih081StoreAppsNotLatest = TableCheck({
+    $id: Now.ID['ih-081-store-apps-not-latest'],
+    name: 'IH-074 Store applications not on the latest version',
+    active: true,
+    category: 'upgradability',
+    priority: '2',
+    scoreScale: 5,
+    shortDescription: 'Finds active store applications for which a newer version is available',
+    description:
+        'Applications that fall behind the latest version miss fixes and security patches and make later upgrades harder. Uses the update information of the store sync (sys_store_app.update_available). Ideal state: every active application is on the latest available version.',
+    table: 'sys_store_app',
+    conditions: 'active=true^update_available=true',
+    advanced: true,
+    script: `(function(engine, current) {
+    engine.finding.setCurrentSource(current);
+    engine.finding.setValue('finding_details', current.getValue('name') + ' (' + current.getValue('scope') + '): installed ' +
+        current.getValue('version') + ', latest ' + current.getValue('latest_version'));
+    engine.finding.increment();
+})(engine, current);`,
+    resolutionDetails:
+        'Open the application in Application Manager, read the release notes, update it in a sub-production instance first, then promote the update.',
 })
 
 // IH-066: changed ServiceNow dictionary entries; u_ tables and u_ fields are skipped because the

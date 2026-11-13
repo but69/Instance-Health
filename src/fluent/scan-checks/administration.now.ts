@@ -312,7 +312,7 @@ export const ih049JobsRunAsDeletedUser = TableCheck({
     scoreScale: 5,
     shortDescription: 'Finds active scheduled jobs whose Run as user does not exist',
     description:
-        'A scheduled job that runs as a user who no longer exists may fail or run with unexpected rights. The internal users "system" and "maint" are accepted. ServiceNow jobs are included. Ideal state: every active scheduled job runs as an existing user.',
+        'A scheduled job that runs as a user who no longer exists may fail or run with unexpected rights. The internal users "system" and "maint" are accepted, and jobs without a Run as value are ignored. ServiceNow jobs are included. Ideal state: every active scheduled job runs as an existing user.',
     table: 'sysauto',
     conditions: 'active=true^run_asISNOTEMPTY',
     advanced: true,

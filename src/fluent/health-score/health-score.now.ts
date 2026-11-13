@@ -163,6 +163,8 @@ IHHealthScore.prototype = {
         var execution = new GlideRecord('scan_suite_execution');
         execution.addQuery('suite', suite.getUniqueValue());
         execution.addQuery('result.state', 'IN', 'complete,failed');
+        // The job runs every minute: only look at recent runs to keep it cheap (older runs: call calculate() by hand)
+        execution.addQuery('sys_created_on', '>', gs.daysAgo(30));
         execution.query();
         while (execution.next()) {
             var existing = new GlideRecord(this.SCORE_TABLE);
@@ -348,6 +350,6 @@ export const ihHealthScoreJob = ScheduledScript({
     name: 'Instance Health - calculate health score',
     active: true,
     frequency: 'periodically',
-    executionInterval: { minutes: 15 },
+    executionInterval: { minutes: 1 },
     script: `new x_bits2_inst_hlth.IHHealthScore().calculatePending();`,
 })

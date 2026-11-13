@@ -1,6 +1,6 @@
 import { ColumnTypeCheck, ScriptOnlyCheck, TableCheck } from '@servicenow/sdk/core'
 
-// IH-002: reports whose recent average run time exceeds 5 s (durations are stored in ms)
+// IH-002: reports whose recent average run time exceeds the threshold (property slow_report_seconds, default 5 s; durations are stored in ms)
 export const ih002SlowReports = TableCheck({
     $id: Now.ID['ih-002-slow-reports'],
     name: 'IH-002 Slow reports',
@@ -8,14 +8,17 @@ export const ih002SlowReports = TableCheck({
     category: 'performance',
     priority: '2',
     scoreScale: 5,
-    shortDescription: 'Finds recently run reports with an average run time over 5 seconds',
+    shortDescription: 'Finds recently run reports with an average run time over the threshold (default 5 seconds)',
     description:
-        'Slow reports load dashboards and the database. Uses the recent average run time of reports that ran recently. Ideal state: every report loads in under 5 seconds.',
+        'Slow reports load dashboards and the database. Uses the recent average run time of reports that ran recently. The threshold is the system property x_bits2_inst_hlth.slow_report_seconds (default 5). Ideal state: every report loads faster than the threshold.',
     table: 'report_stats',
-    conditions: 'recent_avg_execution_duration>5000^recent_number_executions>0',
+    conditions: 'recent_avg_execution_duration>0^recent_number_executions>0',
     advanced: true,
     script: `(function(engine, current) {
+    var maxSeconds = parseInt(gs.getProperty('x_bits2_inst_hlth.slow_report_seconds', '5'), 10);
+    if (isNaN(maxSeconds)) maxSeconds = 5;
     var avgSeconds = parseInt(current.getValue('recent_avg_execution_duration'), 10) / 1000;
+    if (avgSeconds <= maxSeconds) return;
     var details = 'Recent average run time ' + avgSeconds.toFixed(1) + ' s over ' + current.getValue('recent_number_executions') + ' recent run(s)';
 
     // Link the finding to the report itself (sys_report or par_visualization), falling back to the stats record
@@ -80,11 +83,11 @@ export const ih010DotWalkToSysId = ColumnTypeCheck({
     scoreScale: 2,
     shortDescription: 'Finds custom scripts that read a reference value with .sys_id',
     description:
-        'A reference field already holds the sys_id of the referenced record. Reading it with gr.field.sys_id dot-walks to the referenced record for the same value. Only custom scripts are checked; every matching line is listed. Ideal state: reference values are read with getValue(field).',
+        'A reference field already holds the sys_id of the referenced record. Reading it with gr.field.sys_id dot-walks to the referenced record for the same value. Only custom scripts are checked; every matching line is listed. Lines where .sys_id is followed by another dot (gr.field.sys_id.toString()) and a middle part named sys_id are not reported. Ideal state: reference values are read with getValue(field).',
     columnType: 'script',
     script: `(function(engine, current, columnValue) {
     if (!columnValue || columnValue.indexOf('.sys_id') == -1) return;
-    var regex = /(^|[^\\w$.])(?!this\\.)[A-Za-z_$][\\w$]*\\.(?!(?:sys_id|data|options|input|params|body|request|response|result|answer)\\b)[A-Za-z_$][\\w$]*\\.sys_id\\b/;
+    var regex = /(^|[^\\w$.])(?!this\\.)[A-Za-z_$][\\w$]*\\.(?!(?:sys_id|data|options|input|params|body|request|response|result|answer)\\b)[A-Za-z_$][\\w$]*\\.sys_id\\b(?!\\s*\\.)/;
     new x_bits2_inst_hlth.IHScanUtil().checkScript(engine, current, columnValue, regex);
 })(engine, current, columnValue);`,
     resolutionDetails:

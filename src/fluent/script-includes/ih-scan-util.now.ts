@@ -96,8 +96,10 @@ IHScanUtil.prototype = {
 
     // IH-047, IH-048: resolve a scheduled job's run_as value. It is a sys_user reference, but some
     // jobs hold a user name ("admin") or an internal platform user ("system", "maint").
-    // Returns { state: 'internal' | 'missing' | 'inactive' | 'active', user: GlideRecord or null }
+    // Returns { state: 'empty' | 'internal' | 'missing' | 'inactive' | 'active', user: GlideRecord or null }
+    // 'empty' (no value, or only blanks): the job has no Run as user, which is not a finding (2026-11-12)
     resolveRunAs: function(value) {
+        if (value === null || value === undefined || (value + '').replace(/^\\s+|\\s+$/g, '') == '') return { state: 'empty', user: null };
         if (value == 'system' || value == 'maint') return { state: 'internal', user: null };
         var user = new GlideRecord('sys_user');
         if (!user.get(value)) {
@@ -107,62 +109,156 @@ IHScanUtil.prototype = {
         return { state: user.active == true ? 'active' : 'inactive', user: user };
     },
 
-    // IH-037: lines of a business rule script that pass current to a script include which calls
-    // update() on one of its function parameters. Returns "line N: <code> -> <include>: <param>.update()"
+    // IH-037: lines of a business rule script that pass current to a script include function which calls
+    // update() on the parameter that receives current. Only the function that is called is searched:
+    // new X(current) -> initialize, new X().m(current) and X.m(current) -> m (2026-11-12, was the whole include).
+    // Returns "line N: <code> -> script include X.m: <param>.update() (line L)"
     findIndirectCurrentUpdates: function(script) {
         var lines = this.stripComments(script + '').split('\\n');
         var original = (script + '').split('\\n');
         var passesCurrent = /\\([^()]*\\bcurrent\\b(?!\\s*\\.)/;
-        var callee = /\\bnew\\s+([A-Za-z_$][\\w$]*(?:\\.[A-Za-z_$][\\w$]*)?)\\s*\\(|\\b([A-Z][\\w$]*)\\s*\\.\\s*[A-Za-z_$][\\w$]*\\s*\\(/g;
         var out = [];
         for (var i = 0; i < lines.length; i++) {
             if (!passesCurrent.test(lines[i])) continue;
-            callee.lastIndex = 0;
-            var match;
-            while ((match = callee.exec(lines[i])) !== null) {
-                var name = (match[1] || match[2]).split('.').pop();
-                var updated = this._includeUpdatesParameter(name);
+            var calls = this._includeCalls(lines[i]);
+            for (var c = 0; c < calls.length; c++) {
+                var indexes = [];
+                for (var a = 0; a < calls[c].args.length; a++)
+                    if (calls[c].args[a] == 'current') indexes.push(a);
+                if (indexes.length == 0) continue;
+                var updated = this._includeUpdatesParameter(calls[c].name, calls[c].method, indexes);
                 if (updated)
                     out.push('line ' + (i + 1) + ': ' + (original[i] || '').replace(/^\\s+|\\s+$/g, '').substring(0, this.MAX_LINE_LENGTH) +
-                        ' -> script include ' + name + ': ' + updated);
+                        ' -> script include ' + calls[c].name + '.' + calls[c].method + ': ' + updated);
             }
         }
         return out;
     },
 
-    // Returns e.g. "record.update() (line 5)" if a function of the script include calls update() on
-    // one of its parameters, '' otherwise. Cached per name.
-    _includeUpdatesParameter: function(name) {
+    // Calls of script includes in one line: { name, method, args } for new X(args), new X().m(args) and X.m(args)
+    _includeCalls: function(line) {
+        var calls = [];
+        var ctor = /\\bnew\\s+(?:[A-Za-z_$][\\w$]*\\.)*([A-Za-z_$][\\w$]*)\\s*\\(/g;
+        var m;
+        while ((m = ctor.exec(line)) !== null) {
+            var parsed = this._callArgs(line, m.index + m[0].length - 1);
+            if (!parsed) continue;
+            calls.push({ name: m[1], method: 'initialize', args: parsed.args });
+            var chain = /^\\s*\\.\\s*([A-Za-z_$][\\w$]*)\\s*\\(/.exec(line.substring(parsed.end + 1));
+            if (chain) {
+                var chainParsed = this._callArgs(line, parsed.end + chain[0].length);
+                if (chainParsed) calls.push({ name: m[1], method: chain[1], args: chainParsed.args });
+            }
+        }
+        var stat = /\\b([A-Z][\\w$]*)\\s*\\.\\s*([A-Za-z_$][\\w$]*)\\s*\\(/g;
+        while ((m = stat.exec(line)) !== null) {
+            var staticParsed = this._callArgs(line, m.index + m[0].length - 1);
+            if (staticParsed) calls.push({ name: m[1], method: m[2], args: staticParsed.args });
+        }
+        return calls;
+    },
+
+    // Arguments of the call whose opening parenthesis is at text[open]: { args: [trimmed strings], end: index of ")" }
+    _callArgs: function(text, open) {
+        var depth = 0;
+        var quote = '';
+        var start = open + 1;
+        var args = [];
+        for (var i = open; i < text.length; i++) {
+            var ch = text.charAt(i);
+            if (quote) {
+                if (ch == '\\\\') i++;
+                else if (ch == quote) quote = '';
+                continue;
+            }
+            if (ch == "'" || ch == '"') quote = ch;
+            else if (ch == '(' || ch == '[' || ch == '{') depth++;
+            else if (ch == ')' || ch == ']' || ch == '}') {
+                depth--;
+                if (depth == 0) {
+                    var last = text.substring(start, i).replace(/^\\s+|\\s+$/g, '');
+                    if (last || args.length > 0) args.push(last);
+                    return { args: args, end: i };
+                }
+            } else if (ch == ',' && depth == 1) {
+                args.push(text.substring(start, i).replace(/^\\s+|\\s+$/g, ''));
+                start = i + 1;
+            }
+        }
+        return null;
+    },
+
+    // Index of the "}" that closes the "{" at code[open], -1 if not found
+    _matchBrace: function(code, open) {
+        var depth = 0;
+        var quote = '';
+        for (var i = open; i < code.length; i++) {
+            var ch = code.charAt(i);
+            if (quote) {
+                if (ch == '\\\\') i++;
+                else if (ch == quote) quote = '';
+                continue;
+            }
+            if (ch == "'" || ch == '"') quote = ch;
+            else if (ch == '{') depth++;
+            else if (ch == '}') {
+                depth--;
+                if (depth == 0) return i;
+            }
+        }
+        return -1;
+    },
+
+    // The function "method" of a script: m: function(a, b) {...}, X.prototype.m = function(a) {...} or function m(a) {...}.
+    // Returns { params, body, startLine } or null.
+    _findFunction: function(code, method) {
+        var name = method.replace(/\\$/g, '\\\\$');
+        var patterns = [
+            new RegExp('\\\\b' + name + '\\\\s*[:=]\\\\s*function\\\\s*[\\\\w$]*\\\\s*\\\\(([^)]*)\\\\)\\\\s*\\\\{'),
+            new RegExp('\\\\bfunction\\\\s+' + name + '\\\\s*\\\\(([^)]*)\\\\)\\\\s*\\\\{')
+        ];
+        for (var p = 0; p < patterns.length; p++) {
+            var m = patterns[p].exec(code);
+            if (!m) continue;
+            var open = m.index + m[0].length - 1;
+            var end = this._matchBrace(code, open);
+            if (end < 0) continue;
+            var params = m[1].split(',');
+            for (var i = 0; i < params.length; i++) params[i] = params[i].replace(/^\\s+|\\s+$/g, '');
+            return { params: params, body: code.substring(open, end + 1), startLine: code.substring(0, open).split('\\n').length };
+        }
+        return null;
+    },
+
+    // Returns e.g. "record.update() (line 5)" if the function "method" of the script include calls update() on
+    // the parameter at one of the given positions (the ones that receive current), '' otherwise. Cached.
+    _includeUpdatesParameter: function(name, method, indexes) {
         if (!this._includeCache) this._includeCache = {};
-        if (this._includeCache.hasOwnProperty(name)) return this._includeCache[name];
+        var key = name + '.' + method + '.' + indexes.join(',');
+        if (this._includeCache.hasOwnProperty(key)) return this._includeCache[key];
         var result = '';
         var include = new GlideRecord('sys_script_include');
         include.addQuery('name', name);
         include.addActiveQuery();
         include.query();
         if (include.next()) {
-            var lines = this.stripComments(include.getValue('script') || '').split('\\n');
-            var params = {};
-            var fn = /function\\s*[A-Za-z_$]*[\\w$]*\\s*\\(([^)]*)\\)/g;
-            var all = lines.join('\\n');
-            var f;
-            while ((f = fn.exec(all)) !== null) {
-                var names = f[1].split(',');
-                for (var p = 0; p < names.length; p++) {
-                    var param = names[p].replace(/^\\s+|\\s+$/g, '');
-                    if (/^[A-Za-z_$][\\w$]*$/.test(param)) params[param] = true;
-                }
-            }
-            for (var i = 0; i < lines.length && !result; i++) {
-                for (var param2 in params) {
-                    if (new RegExp('\\\\b' + param2.replace(/\\$/g, '\\\\$') + '\\\\s*\\\\.\\\\s*update\\\\s*\\\\(').test(lines[i])) {
-                        result = param2 + '.update() (line ' + (i + 1) + ')';
-                        break;
+            var fn = this._findFunction(this.stripComments(include.getValue('script') || ''), method);
+            if (fn) {
+                var params = [];
+                for (var k = 0; k < indexes.length; k++)
+                    if (indexes[k] < fn.params.length && /^[A-Za-z_$][\\w$]*$/.test(fn.params[indexes[k]])) params.push(fn.params[indexes[k]]);
+                var bodyLines = fn.body.split('\\n');
+                for (var i = 0; i < bodyLines.length && !result; i++) {
+                    for (var p = 0; p < params.length; p++) {
+                        if (new RegExp('\\\\b' + params[p].replace(/\\$/g, '\\\\$') + '\\\\s*\\\\.\\\\s*update\\\\s*\\\\(').test(bodyLines[i])) {
+                            result = params[p] + '.update() (line ' + (fn.startLine + i) + ')';
+                            break;
+                        }
                     }
                 }
             }
         }
-        this._includeCache[name] = result;
+        this._includeCache[key] = result;
         return result;
     },
 

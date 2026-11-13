@@ -227,6 +227,8 @@ runInGlobal(function createInstanceHealthTestData() {
         '        var gr = new GlideRecord(\'incident\');\n        return gr.caller_id.sys_id + \'\';'));
     insert('sys_script_include', scriptInclude('IHTestDotWalkAvoided', 'IH-009 getValue instead of dot-walk',
         '        var gr = new GlideRecord(\'incident\');\n        // return gr.caller_id.sys_id + \'\';\n        return gr.getValue(\'caller_id\');'));
+    insert('sys_script_include', scriptInclude('IHTestDotWalkChained', 'IH-009 sys_id followed by a dot',
+        '        var gr = new GlideRecord(\'incident\');\n        var a = gr.caller_id.sys_id.toString();\n        return a + gr.sys_id.sys_id;'));
 
     // IH-010: synchronous (positive) and asynchronous (negative) client calls on cmn_location
     insert('sys_script_client', {
@@ -458,6 +460,11 @@ runInGlobal(function createInstanceHealthTestData() {
         '    new IHTestUpdatesParam().touch(current);'));
     insert('sys_script', testRule('IH-037 calls reading include', 'cmn_location', 'before',
         '    new IHTestReadsParam().read(current);'));
+    // Only the called function counts: peek() only reads, although touch() of the same include updates its parameter
+    insert('sys_script_include', scriptInclude('IHTestUpdatesOther', 'IH-037 other function updates',
+        '        return null;\n    },\n    touch: function(record) {\n        record.update();\n    },\n    peek: function(record) {\n        return record.getValue(\'name\');'));
+    insert('sys_script', testRule('IH-037 calls other function', 'cmn_location', 'before',
+        '    new IHTestUpdatesOther().peek(current);'));
 
     // IH-038: complex condition (positive); all other test rules have the simple condition "false".
     // The condition short-circuits, so the function is never called.
@@ -523,6 +530,7 @@ runInGlobal(function createInstanceHealthTestData() {
     job('IH-048 run as inactive user', inactiveUser);
     job('IH-047 run as active user', activeUser);
     job('IH-047 run as system', 'system');
+    job('IH-047 run as empty', '');
 
     // IH-049 and IH-054: plain tasks
     insert('task', { short_description: MARKER + ' IH-049 opened by inactive user', opened_by: inactiveUser, active: 'true' });
@@ -644,7 +652,7 @@ runInGlobal(function createInstanceHealthTestData() {
     gs.print('  IH-005: IH_TEST_IH005_global found, IH_TEST_IH005_not_global not found');
     gs.print('  IH-006: "' + MARKER + ' IH-006 global active" found, inactive one not found');
     gs.print('  IH-008: script include IHTestGsSqlUsed found, IHTestGsSqlCommented not found');
-    gs.print('  IH-009: IHTestDotWalkUsed found (line 6), IHTestDotWalkAvoided not found');
+    gs.print('  IH-009: IHTestDotWalkUsed found (line 6), IHTestDotWalkAvoided and IHTestDotWalkChained not found');
     gs.print('  IH-010: "' + MARKER + ' IH-010 synchronous ajax" found (line 5), asynchronous one not found');
     gs.print('  IH-011: IHTestUrlHardCoded found (line 5), IHTestUrlProperty not found');
     gs.print('  IH-012: IHTestSysIdHardCoded found (line 6), IHTestSysIdLookup not found');
@@ -666,7 +674,7 @@ runInGlobal(function createInstanceHealthTestData() {
     gs.print('  IH-032: "' + MARKER + ' IH-032 invalid source" found, valid and retired ones not found');
     gs.print('  IH-034: both "' + MARKER + ' IH-034 duplicate name" update sets found, unique one not found');
     gs.print('  IH-035: "' + MARKER + ' IH-035 KB without retire workflow" found, the other two not found');
-    gs.print('  IH-037: "' + MARKER + ' IH-037 calls updating include" found (IHTestUpdatesParam), "... reading include" not found');
+    gs.print('  IH-037: "' + MARKER + ' IH-037 calls updating include" found (IHTestUpdatesParam), "... reading include" and "... calls other function" (only another function of the include updates) not found');
     gs.print('  IH-038: "' + MARKER + ' IH-038 complex condition" found (several statements, function)');
     gs.print('  IH-039: membership of ih.test.inactive in "' + MARKER + ' IH-039 inactive member" found, ih.test.active not found');
     gs.print('  IH-040: "' + MARKER + ' IH-040 inactive manager" found');
@@ -676,7 +684,7 @@ runInGlobal(function createInstanceHealthTestData() {
     gs.print('  IH-044: no test data (real findings); IH-050, IH-051, IH-056: no test data (instance-wide settings)');
     gs.print('  IH-045: list layout cmn_location (view ih_test) found, position 0: name, city');
     gs.print('  IH-046: "' + MARKER + ' IH-046 catalog task without request" found');
-    gs.print('  IH-047: job "' + MARKER + ' IH-047 run as deleted user" found, active user and system not found');
+    gs.print('  IH-047: job "' + MARKER + ' IH-047 run as deleted user" found, active user, system and empty run as not found');
     gs.print('  IH-048: job "' + MARKER + ' IH-048 run as inactive user" found');
     gs.print('  IH-049: task "' + MARKER + ' IH-049 opened by inactive user" found, active one not found');
     gs.print('  IH-052: incident "' + MARKER + ' IH-052 resolved without resolved by" found');

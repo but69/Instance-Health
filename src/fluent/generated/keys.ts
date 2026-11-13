@@ -321,6 +321,10 @@ declare global {
                         table: 'scan_script_only_check'
                         id: '9439518029594f8b9ac2ddf66a3f148f'
                     }
+                    'ih-081-store-apps-not-latest': {
+                        table: 'scan_table_check'
+                        id: 'ecffaca023de45d98c2d29b802e300b1'
+                    }
                     'ih-dashboard': {
                         table: 'par_dashboard'
                         id: '98b85d0ceeef44509f1410077e872192'
@@ -418,6 +422,22 @@ declare global {
                         table: 'sys_app_module'
                         id: '98f7c6e7cd014fdf87f5e28ec8181530'
                     }
+                    'ih-prop-collector-max-age-days': {
+                        table: 'sys_properties'
+                        id: 'f2d216ac54d54952ab2f22fd597a42ee'
+                    }
+                    'ih-prop-max-client-scripts': {
+                        table: 'sys_properties'
+                        id: '0183e1f09a9647baa17c4abb2aaeee93'
+                    }
+                    'ih-prop-max-import-set-rows': {
+                        table: 'sys_properties'
+                        id: '3bfea8f7c8014463a45186a25c4ad11c'
+                    }
+                    'ih-prop-slow-report-seconds': {
+                        table: 'sys_properties'
+                        id: 'c8833d942d704b0c8cbcf4cadc32c94e'
+                    }
                     'ih-report-health-score-trend': {
                         table: 'sys_report'
                         id: 'a8e15075f41f4ff9a1c5a979b5f74f86'
@@ -437,6 +457,10 @@ declare global {
                     'ih-report-layer-upgradability': {
                         table: 'sys_report_layer'
                         id: 'a3ffa9887d4b44ae89c1b9758416c0c5'
+                    }
+                    'ih-scan-starter': {
+                        table: 'sys_script_include'
+                        id: '85a92da40589472a9c96c1012159ab8f'
                     }
                     'ih-scan-util': {
                         table: 'sys_script_include'
@@ -753,6 +777,10 @@ declare global {
                     'ih-suite-check-080': {
                         table: 'scan_check_suite_check'
                         id: 'f3809cd44d3046e8b21c8d4ae796cc48'
+                    }
+                    'ih-suite-check-081': {
+                        table: 'scan_check_suite_check'
+                        id: 'd71b08ead1d7493fa73265a75c6d03d5'
                     }
                     'ih-suite-instance-health': {
                         table: 'scan_check_suite'
