@@ -129,5 +129,5 @@ runInGlobal(function removeInstanceHealthTestData() {
     }
 
     for (var table in deleted)
-        gs.print('Deleted ' + deleted[table] + ' record(s) from ' + table);
+        gs.info('Deleted ' + deleted[table] + ' record(s) from ' + table);
 });
