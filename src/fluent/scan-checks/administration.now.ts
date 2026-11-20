@@ -19,6 +19,7 @@ export const ih001PublicReports = TableCheck({
 
 // IH-017: tables without an active record ACL on the table or any parent table.
 // Table rotation shards (name ends in 4 digits) and wildcard (*) ACLs are ignored.
+// Only custom tables are reported (IHScanUtil.isCustom); out-of-the-box tables are excluded.
 export const ih018TablesWithoutAcls = ScriptOnlyCheck({
     $id: Now.ID['ih-018-tables-without-acls'],
     name: 'IH-017 Tables without ACLs',
@@ -28,7 +29,7 @@ export const ih018TablesWithoutAcls = ScriptOnlyCheck({
     scoreScale: 20,
     shortDescription: 'Finds tables that are not secured by any ACL, neither their own nor a parent table\'s',
     description:
-        'A table without record ACLs is only protected by wildcard rules and the default deny setting. Checks all tables; ACLs on a parent table count as protection. Table rotation shards (for example syslog0001) are ignored because they are covered by their base table. Ideal state: every table is secured by ACLs.',
+        'A table without record ACLs is only protected by wildcard rules and the default deny setting. Checks custom tables only (out-of-the-box and store application tables are excluded); ACLs on a parent table count as protection. Table rotation shards (for example syslog0001) are ignored because they are covered by their base table. Ideal state: every custom table is secured by ACLs.',
     script: `(function(engine) {
     var protectedTables = {};
     var acl = new GlideAggregate('sys_security_acl');
@@ -65,12 +66,15 @@ export const ih018TablesWithoutAcls = ScriptOnlyCheck({
         return false;
     }
 
+    var util = new x_bits2_inst_hlth.IHScanUtil();
     for (var name in tableIdByName) {
         if (!name || protectedTables[name]) continue;
         if (/\\d{4}$/.test(name)) continue;
         if (inheritsAcl(name)) continue;
         var table = new GlideRecord('sys_db_object');
         if (!table.get(tableIdByName[name])) continue;
+        // custom tables only: out-of-the-box and store application tables are skipped
+        if (!util.isCustom(table)) continue;
         engine.finding.setCurrentSource(table);
         engine.finding.setValue('finding_details', 'Table ' + name + ' has no active record ACL, and none of its parent tables has one');
         engine.finding.increment();
@@ -167,7 +171,7 @@ export const ih060SecurityUiFilter = TableCheck({
         'Delete the property glide.security.ui.filter or set it to false.',
 })
 
-// IH-064: active, non-web-service users without login for 90 days (or never, created 90+ days ago)
+// IH-064 (information only, not in the health score): active, non-web-service users without login for 90 days (or never, created 90+ days ago)
 export const ih067UsersWithoutLogin = TableCheck({
     $id: Now.ID['ih-067-users-without-login'],
     name: 'IH-064 Active user accounts without login',
@@ -177,7 +181,7 @@ export const ih067UsersWithoutLogin = TableCheck({
     scoreScale: 5,
     shortDescription: 'Finds active user accounts that have not logged in for 90 days',
     description:
-        'Unused active accounts keep their roles and data access and are a target for misuse. Reports active users (not web service only) whose last login is older than 90 days, or who never logged in and were created more than 90 days ago. Ideal state: unused accounts are deactivated.',
+        'Unused active accounts keep their roles and data access and are a target for misuse. Reports active users (not web service only) whose last login is older than 90 days, or who never logged in and were created more than 90 days ago. Information only: not part of the health score. Ideal state: unused accounts are deactivated.',
     table: 'sys_user',
     conditions: 'active=true^web_service_access_only=false',
     advanced: true,
@@ -729,7 +733,7 @@ export const ih034ImpersonationInProduction = ScriptOnlyCheck({
     name: 'IH-033 Impersonation in production',
     active: true,
     category: 'security',
-    priority: '1',
+    priority: '2',
     scoreScale: 100,
     shortDescription: 'Checks that impersonation is switched off on production instances',
     description:

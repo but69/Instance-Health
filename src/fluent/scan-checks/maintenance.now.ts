@@ -686,7 +686,7 @@ export const ih022UpgradeSkippedItems = ScriptOnlyCheck({
     name: 'IH-021 Skipped items in the last upgrade',
     active: true,
     category: 'upgradability',
-    priority: '1',
+    priority: '2',
     scoreScale: 100,
     shortDescription: 'Reports the last platform upgrade if skipped items still need a review',
     description:

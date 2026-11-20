@@ -14,7 +14,7 @@ ServiceNow Fluent app **Instance Health** (scope `x_bits2_inst_hlth`, now-sdk 4.
 
 - **73 scan checks** `IH-001` to `IH-073`, in three files: `administration.now.ts`, `maintenance.now.ts`, `performance.now.ts` (`src/fluent/scan-checks/`).
 - **Validation:** 60 checks `validated` (confirmed by a test record or real findings, no wrong finding). 13 checks `built`, because they find nothing on the demo instance and a test would need instance-wide settings, an upgrade or 5 million rows: IH-007, 019, 022, 031, 036, 050, 051, 056, 058, 060, 061, 067, 068.
-- **Priorities** (by impact on instance health): 13 × priority 1, 31 × priority 2, 29 × priority 3.
+- **Priorities** (by impact on instance health): 11 × priority 1, 34 × priority 2, 29 × priority 3 (IH-021 and IH-033 moved to 2 on 2026-11-20).
 - **Suite runs:** SR00014613 (first run, 770 findings, 66 of 73 checks as expected) and SR00014619 (second run, 946 findings, no failed check, every positive test record found, no negative one).
 - **Health score:** first values 60 (knock-out cap, uncapped about 81 to 83). Priority 1/2/3 sub-scores 76.9 / 81.3 / 87.5. Category scores: security 53.1, performance 93.1, manageability 89.8, upgradability 67.8.
 

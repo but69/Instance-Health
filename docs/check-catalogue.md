@@ -38,6 +38,9 @@ Field and table names marked ✔ were verified on bithawkdemo1 (2026-11-05).
 Agreed with the user on 2026-11-06 (proposal accepted, knock-out cap at 60 added). 100 = completely healthy.
 
 - **Score per check (0 to 100):** 100 − findings × points per finding, at least 0. Points per finding by priority: P1 20 (0 after 5 findings), P2 5 (after 20), P3 2 (after 50). Setting checks (one finding means a setting or limit is wrong: IH-007, IH-019, IH-021, IH-022, IH-031, IH-033, IH-036, IH-050, IH-051, IH-058, IH-067): 0 with the first finding. Share checks use the share from the finding details: IH-070 score = share of unique location names, IH-056 score = 100 − share of stale CIs, IH-074 score = 100 − share of outdated store apps. The points per finding are also set as `scoreScale` on each check, so Instance Scan shows the same per-check score (share checks excepted).
+- **Details (2026-11-20, user request):** each line of `details` starts with the complete check name (e.g. `IH-017 Tables without ACLs (P1, security): 3 finding(s), score 40`), no longer only the number. `knock_out_checks` and `checks_failed` still list the numbers. Existing records keep the old text until recalculated. Built, not yet deployed.
+- **Form (2026-11-20, user request):** default view of `x_bits2_inst_hlth_health_score` in `src/fluent/health-score/form.now.ts` (Fluent `Form`), three sections. General: left scan result, scan date, findings; right health score, score without knock-out cap, knock-out cap applied. Scan check groups: left score priority 1/2/3; right score upgradability, performance, manageability, security. Details (one column): details, knock-out checks, checks evaluated. The field `checks_failed` is not on the form. Built, not yet deployed.
+- **Information-only checks (2026-11-20):** `INFO_CHECKS` in `IHHealthScore` lists checks that run and show findings but are left out of the score completely (IH-064).
 - **Health score:** weighted average of the check scores, weight 5 for P1, 3 for P2, 1 for P3.
 - **Knock-out cap:** if a P1 check scores 0, the health score is at most 60 (`score_uncapped` keeps the value without cap).
 - **Sub-scores:** per priority and per category (security, performance, manageability, upgradability), same weighting.
@@ -54,7 +57,7 @@ Agreed with the user on 2026-11-06 (proposal accepted, knock-out cap at 60 added
 - **Knowledge articles (user request 2026-11-06):** knowledge base "Instance Health" with two published articles, in `src/fluent/health-score/knowledge.now.ts`: "How to use Instance Health" (menu, scan, dashboard, findings, FAQ, scoring mechanism at the end) and "Instance Health: all scan checks" (all 73 checks with priority, what it finds and why it matters, in four topic groups). The bodies are the HTML files in `docs/kb/` (BitHawk KB style, English), read at build time with `Now.include`. When a check is added, changed or dropped, or the scoring changes, update `docs/kb/kb-instance-health-all-checks.html` or `kb-how-to-use-instance-health.html`. Deployed to bithawkdemo1 (confirmed by the user 2026-11-09).
 - **Later step:** for checks with large populations (IH-017, IH-030, IH-042, IH-064) base the score on the share instead of the absolute count, so instance size does not distort it.
 
-**Priorities (2026-11-06, user request):** by impact on instance health instead of by category. 1 = largest impact (instance-wide or all users, data exposure without login or ACL, breaks upgrades), 2 = noticeable impact (single processes, users or areas), 3 = everything else (data quality, housekeeping, maintainability). Priority 1: IH-001 public reports, IH-005 global UI scripts, IH-006 global client scripts, IH-008 gs.sql, IH-014 global business rules, IH-017 tables without ACLs, IH-018 read ACLs with queries, IH-021 skipped upgrade items, IH-033 impersonation in production, IH-036 call stack logging, IH-057 unsecured scripted REST, IH-061 jobs longer than their interval, IH-063 cache flush. The column `Prio` holds the value per check (13 × 1, 31 × 2, 29 × 3); `tools/set-priorities.js` holds the same list with a short reason for each priority 1 and applies it to the code. This replaces the earlier rule "2 for security and upgrade risks, 3 for the rest"; the priorities named in the check sections below are from before. Deployed and verified on bithawkdemo1 the same day (13 / 31 / 29).
+**Priorities (2026-11-06, user request):** by impact on instance health instead of by category. 1 = largest impact (instance-wide or all users, data exposure without login or ACL, breaks upgrades), 2 = noticeable impact (single processes, users or areas), 3 = everything else (data quality, housekeeping, maintainability). Priority 1: IH-001 public reports, IH-005 global UI scripts, IH-006 global client scripts, IH-008 gs.sql, IH-014 global business rules, IH-017 tables without ACLs, IH-018 read ACLs with queries, IH-036 call stack logging, IH-057 unsecured scripted REST, IH-061 jobs longer than their interval, IH-063 cache flush. The column `Prio` holds the value per check (13 × 1, 31 × 2, 29 × 3 (2026-11-20: IH-021 moved to priority 2, now 11 / 34 / 29 for 74 checks after IH-021 and IH-033 moved to priority 2)); `tools/set-priorities.js` holds the same list with a short reason for each priority 1 and applies it to the code. This replaces the earlier rule "2 for security and upgrade risks, 3 for the rest"; the priorities named in the check sections below are from before. Deployed and verified on bithawkdemo1 the same day (13 / 31 / 29).
 
 **Renumbering (2026-11-06, user request):** the visible numbers were made consecutive (no gaps for dropped checks). Only the names changed; `$id` keys (`ih-NNN-…`) and export names (`ihNNN…`) keep the original number, so the records kept their sys_ids, findings and suite links. Visible number → key number: IH-001 to IH-005 unchanged; IH-006 to IH-043 = key number + 1 (e.g. IH-006 = `ih-007-global-client-scripts`); IH-044 to IH-063 = + 2 (e.g. IH-044 = `ih-046-…`); IH-064 to IH-073 = + 3 (e.g. IH-073 = `ih-076-…`). Texts in this catalogue use the new numbers, also for decisions made before; git history and commit messages before 2026-11-06 use the old ones. Done with `tools/renumber-checks.js`. Deployed and verified on bithawkdemo1 the same day: 73 checks IH-001 to IH-073 without gaps, sys_ids unchanged (e.g. key `ih-001` still `1887f48f…`), suite still 73 checks; test data recreated with the new numbers (132 records).
 
@@ -80,7 +83,7 @@ Agreed with the user on 2026-11-06 (proposal accepted, knock-out cap at 60 added
 | IH-018 | Read ACLs with GlideRecord / GlideAggregate | Performance | performance | TableCheck (advanced) | 1 | validated |
 | IH-019 | SLA engine runs synchronously | Performance | performance | ScriptOnlyCheck | 2 | built |
 | IH-020 | Business rules with outbound REST/SOAP must be async | Performance | performance | TableCheck (advanced) | 2 | validated |
-| IH-021 | Skipped items in the last upgrade | Maintenance | upgradability | ScriptOnlyCheck | 1 | validated |
+| IH-021 | Skipped items in the last upgrade | Maintenance | upgradability | ScriptOnlyCheck | 2 | validated |
 | IH-022 | Default rows per page at most 50 | Performance | performance | TableCheck (advanced) | 2 | built |
 | IH-023 | Long running (slow) scripts | Performance | performance | TableCheck (advanced) | 2 | validated |
 | IH-024 | Differs from baseline: business rules | Maintenance | upgradability | ScriptOnlyCheck | 2 | validated |
@@ -92,7 +95,7 @@ Agreed with the user on 2026-11-06 (proposal accepted, knock-out cap at 60 added
 | IH-030 | Computers and network gear without serial number | Administration | manageability | TableCheck | 3 | validated |
 | IH-031 | Create Asset business rules active | Administration | manageability | ScriptOnlyCheck | 2 | built |
 | IH-032 | CIs with an invalid discovery source | Administration | manageability | TableCheck (advanced) | 3 | validated |
-| IH-033 | Impersonation in production | Administration | security | ScriptOnlyCheck | 1 | validated |
+| IH-033 | Impersonation in production | Administration | security | ScriptOnlyCheck | 2 | validated |
 | IH-034 | Update sets with duplicate names | Maintenance | manageability | ScriptOnlyCheck | 3 | validated |
 | IH-035 | Knowledge bases without retire workflow | Administration | manageability | TableCheck (advanced) | 3 | validated |
 | IH-036 | Business rule call stack logging enabled | Performance | performance | TableCheck | 1 | built |
@@ -272,8 +275,8 @@ Measured on bithawkdemo1 (2026-11-06): no OOB Instance Scan check covers these t
 ## IH-017 Tables without ACLs
 
 - **Ideal:** Every table is secured by ACLs, its own or inherited from a parent table.
-- **Logic:** All tables in `sys_db_object`. Finding if no active record ACL (`sys_security_acl`, `type=record`) has `name` = the table or `<table>.<field>`, on the table itself or on any parent table (`super_class` chain). Table rotation shards (name ends in 4 digits, e.g. `syslog0001`) are excluded. Wildcard `*` ACLs do not count. Link to the `sys_db_object` record.
-- **Decision:** all tables, not only custom ones; inherited ACLs count as protection (agreed 2026-11-06).
+- **Logic:** All custom tables in `sys_db_object` (`IHScanUtil.isCustom`, OOTB excluded since 2026-11-20). Finding if no active record ACL (`sys_security_acl`, `type=record`) has `name` = the table or `<table>.<field>`, on the table itself or on any parent table (`super_class` chain). Table rotation shards (name ends in 4 digits, e.g. `syslog0001`) are excluded. Wildcard `*` ACLs do not count. Link to the `sys_db_object` record.
+- **Decision:** inherited ACLs count as protection (agreed 2026-11-06). ~~All tables, not only custom ones~~ superseded 2026-11-20: out-of-the-box tables are excluded; only custom tables are reported (`IHScanUtil.isCustom` on the `sys_db_object` record: scoped customer apps, or global tables with a customer update; store and plugin tables are skipped). Changed, not yet built or re-validated.
 - **Measured:** 10,010 tables; 2,358 without own ACL; 167 without own or inherited ACL after excluding 520 rotation shards (3 custom), e.g. `cmn_building`, `sys_phone_territory`, `x_bits2_quackology_family`.
 - **Resolution:** Create table ACLs (at least read, write, create, delete) for the required roles.
 
@@ -316,6 +319,7 @@ Measured on bithawkdemo1 (2026-11-06): no OOB Instance Scan check covers these t
 - **Decision:** one finding per unreviewed item (agreed 2026-11-06).
 - **Blocked (2026-11-06):** `sys_upgrade_history_log` has "Can read" from other scopes switched off (`read_access=0`, as `sys_storage_alias` for IH-016); the app scope gets no rows, so per-item findings are not possible. `sys_upgrade_history` is readable and holds summary counts per upgrade ✔: `skipped`, `skipped_and_different`, `skipped_and_not_different`, `skipped_error`, `skipped_manual_merge`, `changes_skipped`. Last upgrade on bithawkdemo1: skipped 311, of which **311 not different** (the customized record already matches the new version, no review needed) and 0 different; skipped_error 2; skipped_manual_merge 0. Proposal: one finding per upgrade (latest platform upgrade) when `skipped_and_different + skipped_error + skipped_manual_merge > 0`, linked to the upgrade history record, counts in the details.
 - **Decision (2026-11-06):** one summary finding as proposed, replacing "one finding per item". Skipped items that already match the new version are only mentioned in the details. Built and deployed the same day; dry run on bithawkdemo1: 1 finding (2 skipped with error).
+- **Priority (2026-11-20, user decision):** lowered from 1 to 2. As a setting check with priority 1, one finding (even 2 skipped-with-error items) scored 0 and caused the knock-out cap at 60 for the whole instance. With priority 2 it keeps the setting-check score of 0 but weight 3 and no knock-out. Applied with `tools/set-priorities.js`; counts now 12 × priority 1, 33 × priority 2, 29 × priority 3. Not yet built or deployed.
 - **Resolution:** Review each skipped item in the upgrade history: revert to the base system, merge, or keep the customization and mark it reviewed.
 
 ## IH-022 Default rows per page at most 50
@@ -331,6 +335,7 @@ Measured on bithawkdemo1 (2026-11-06): no OOB Instance Scan check covers these t
 - **Logic:** `sys_script_pattern` ✔ (Slow Scripts: `average` in ms, `count`, `last`, `label`, `script_source_table`, `script_source`) where `average > threshold` and `last` within the period. Link to the script record (`script_source_table` + `script_source`), falling back to the pattern record (as IH-002).
 - **Measured:** average > 5 s: 49 overall, 20 seen in the last 30 days; > 10 s: 26 / 15. Mostly OOB: script actions 18, scripted REST 11, scheduled jobs 4, script includes 3, our own scan checks 3.
 - **Decision:** average > 5 s, last seen within 30 days, all scripts including ServiceNow code (agreed 2026-11-06).
+- **Change (2026-11-20, user request):** out-of-the-box scripts are excluded. A finding needs a resolvable script record (`script_source_table` + `script_source`) that `IHScanUtil.isCustom` accepts (scoped customer apps, global records with a customer update); ServiceNow, store and plugin scripts, our own app and statistics records without a resolvable script are skipped. Supersedes "including ServiceNow code". Built, not yet deployed or re-validated; the 20 findings of the 30-day measurement drop to the custom scripts only.
 - **Resolution:** Optimize the script (queries, loops, indexes) or move it to an async context.
 
 ## IH-024 to IH-028 Differs from baseline
@@ -389,6 +394,7 @@ Overlap with OOB checks (bithawkdemo1, 2026-11-06): `sn_access_analyzer` "Users 
 - **Logic:** if `glide.installation.production` ✔ is `true` and `glide.ui.impersonate_button.enable` ✔ is not `false`: finding linked to the property `glide.ui.impersonate_button.enable`. Details list the users with the `impersonator` role.
 - **Measured:** bithawkdemo1 is flagged production (`glide.installation.production=true`), impersonate button enabled, 2 `impersonator` role entries (Nextwave Service User, one inherited).
 - **Note:** the property hides the impersonate button; admins can still impersonate by other means. The role holders are the second lever.
+- **Priority (2026-11-20, user decision):** lowered from 1 to 2, so it no longer triggers the knock-out cap. Still a setting check (one finding scores 0), weight 3. Applied with `tools/set-priorities.js`; counts now 11 / 34 / 29. Built, not yet deployed.
 - **Resolution:** Set `glide.ui.impersonate_button.enable` to `false` on production and remove the `impersonator` role where it is not needed.
 
 ## IH-034 Update sets with duplicate names
@@ -650,6 +656,7 @@ Overlaps with own checks: IH-002 (slow reports > 5 s) vs IH-065, IH-013 (before 
 - **Logic:** `sys_user` where `active=true^web_service_access_only=false` and the last login is older than the limit, or never logged in and created before the limit. Link to the user.
 - **Measured (90 days):** 27 with a last login older than 90 days, 120 never logged in and created more than 90 days ago (713 active users, 664 never logged in, many demo users).
 - **Decision:** 90 days, users who never logged in included when created more than 90 days ago (agreed 2026-11-06).
+- **Information only (2026-11-20, user decision):** the check still runs and its findings are shown in Instance Scan, but it is not part of the health score (`INFO_CHECKS` in `IHHealthScore`: skipped before weighting, so it is not in any sub-score, `checks_evaluated`, `findings` or the details). Priority and `scoreScale` are unchanged, so Instance Scan still shows its own per-check score. Built, not yet deployed.
 - **Resolution:** Deactivate the account (and remove roles and group memberships through offboarding).
 
 ## IH-065 Slow list reports with group by

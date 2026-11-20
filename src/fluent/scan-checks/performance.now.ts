@@ -598,7 +598,7 @@ export const ih023DefaultRowsPerPage = TableCheck({
         'Set the value of the system preference rowcount to 50 or less.',
 })
 
-// IH-023: slow script patterns (average in ms) seen in the last 30 days, all scripts
+// IH-023: slow script patterns (average in ms) seen in the last 30 days, custom scripts only
 export const ih024SlowScripts = TableCheck({
     $id: Now.ID['ih-024-slow-scripts'],
     name: 'IH-023 Long running scripts',
@@ -608,7 +608,7 @@ export const ih024SlowScripts = TableCheck({
     scoreScale: 5,
     shortDescription: 'Finds scripts that ran in the last 30 days with an average run time over 5 seconds',
     description:
-        'Uses the slow script statistics of the platform. A script is reported when its average run time is over 5 seconds and it ran in the last 30 days. ServiceNow scripts are included, because slow runs are often caused by data volume or configuration. Ideal state: no script runs longer than 5 seconds on average.',
+        'Uses the slow script statistics of the platform. A script is reported when its average run time is over 5 seconds and it ran in the last 30 days. Only custom scripts are reported; out-of-the-box scripts are excluded. Ideal state: no custom script runs longer than 5 seconds on average.',
     table: 'sys_script_pattern',
     conditions: 'average>5000',
     advanced: true,
@@ -622,13 +622,12 @@ export const ih024SlowScripts = TableCheck({
     var avgSeconds = parseFloat(current.getValue('average')) / 1000;
     var details = 'Average run time ' + avgSeconds.toFixed(1) + ' s over ' + current.getValue('count') + ' run(s), last run ' + current.getValue('last') + ': ' + current.getValue('label');
 
-    // Link the finding to the script itself, falling back to the statistics record
+    // Custom scripts only: resolve the script itself, skip out-of-the-box scripts and scripts that cannot be resolved
     var sourceTable = current.getValue('script_source_table');
     var source = sourceTable ? new GlideRecord(sourceTable) : null;
-    if (source && source.isValid() && source.get(current.getValue('script_source')))
-        engine.finding.setCurrentSource(source);
-    else
-        engine.finding.setCurrentSource(current);
+    if (!source || !source.isValid() || !source.get(current.getValue('script_source'))) return;
+    if (!new x_bits2_inst_hlth.IHScanUtil().isCustom(source)) return;
+    engine.finding.setCurrentSource(source);
     engine.finding.setValue('finding_details', details);
     engine.finding.increment();
 })(engine, current);`,

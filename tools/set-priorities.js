@@ -15,14 +15,12 @@ const priorities = {
     '014': 1, // global business rules: evaluated on every transaction
     '017': 1, // tables without ACLs: data only protected by wildcard rules
     '018': 1, // read ACLs with queries: run for every record and field read
-    '021': 1, // skipped upgrade items to review: fixes of the upgrade are missing
-    '033': 1, // impersonation in production: act with any user's rights
     '036': 1, // business rule call stack logging: slows down every transaction
     '057': 1, // scripted REST without authentication or ACL: public or open API
     '061': 1, // jobs longer than their interval: block scheduler workers
     '063': 1, // cache flush in scripts: every user is slower until the cache is rebuilt
     // 2: noticeable impact
-    '002': 2, '007': 2, '010': 2, '013': 2, '015': 2, '016': 2, '019': 2, '020': 2, '022': 2, '023': 2,
+    '002': 2, '007': 2, '010': 2, '013': 2, '015': 2, '016': 2, '019': 2, '020': 2, '021': 2, '022': 2, '033': 2, '023': 2,
     '024': 2, '025': 2, '026': 2, '027': 2, '028': 2, '031': 2, '037': 2, '042': 2, '047': 2, '048': 2,
     '050': 2, '051': 2, '052': 2, '053': 2, '058': 2, '062': 2, '064': 2, '065': 2, '066': 2, '069': 2,
     '073': 2, '074': 2,
@@ -34,6 +32,7 @@ const priorities = {
 
 // Points per finding for the per-check score (score = 100 - findings x scoreScale, at least 0),
 // used by Instance Scan and by IHHealthScore. Setting checks: one finding means the setting is wrong.
+// Information-only checks (INFO_CHECKS in IHHealthScore, e.g. IH-064) keep their priority and scoreScale but are not part of the health score.
 // Keep SETTING_CHECKS in sync with IHHealthScore (src/fluent/health-score/health-score.now.ts).
 const scaleByPriority = { 1: 20, 2: 5, 3: 2 };
 const settingChecks = ['007', '019', '021', '022', '031', '033', '036', '050', '051', '058', '067'];

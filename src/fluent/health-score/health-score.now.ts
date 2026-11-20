@@ -152,6 +152,8 @@ IHHealthScore.prototype = {
     SETTING_CHECKS: ['IH-007', 'IH-019', 'IH-021', 'IH-022', 'IH-031', 'IH-033', 'IH-036', 'IH-050', 'IH-051', 'IH-058', 'IH-067'],
     // The finding carries a share in %: score = share ('value') or 100 - share ('inverse')
     SHARE_CHECKS: { 'IH-056': 'inverse', 'IH-070': 'value', 'IH-074': 'inverse' },
+    // Information only: the findings are shown in Instance Scan but the check is not part of the health score
+    INFO_CHECKS: ['IH-064'],
 
     initialize: function() {},
 
@@ -200,6 +202,7 @@ IHHealthScore.prototype = {
             if (!check.get(link.getValue('check')) || check.active != true) continue;
             var id = (check.getValue('name') || '').substring(0, 6);
             var priority = check.getValue('priority') || '3';
+            if (this.INFO_CHECKS.indexOf(id) > -1) continue;
 
             // A check that did not run or failed is not counted (a failed run gets score 100 from the platform)
             var execution = new GlideRecord('scan_check_execution');
@@ -220,7 +223,7 @@ IHHealthScore.prototype = {
             this._add(this._bucket(byPriority, priority), weight, score);
             this._add(this._bucket(byCategory, check.getValue('category')), weight, score);
             if (score < 100)
-                deductions.push(id + ' (P' + priority + ', ' + check.getValue('category') + '): ' + count + ' finding(s), score ' + this._round(score));
+                deductions.push(check.getValue('name') + ' (P' + priority + ', ' + check.getValue('category') + '): ' + count + ' finding(s), score ' + this._round(score));
             if (priority == '1' && score == 0) knockOut.push(id);
         }
         if (all.weight == 0) return null;
