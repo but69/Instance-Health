@@ -4,7 +4,7 @@ import { Form } from '@servicenow/sdk/core'
 // Fields that are not listed here (checks_failed) are not shown on the form.
 export const ihHealthScoreForm = Form({
     table: 'x_bits2_inst_hlth_health_score',
-    view: 'default_view',
+    view: Now.ref('sys_ui_view', 'Default view'),
     sections: [
         {
             caption: 'General',
@@ -26,6 +26,7 @@ export const ihHealthScoreForm = Form({
         },
         {
             caption: 'Scan check groups',
+            header: true,
             content: [
                 {
                     layout: 'two-column',
@@ -45,6 +46,7 @@ export const ihHealthScoreForm = Form({
         },
         {
             caption: 'Details',
+            header: true,
             content: [
                 {
                     layout: 'one-column',
