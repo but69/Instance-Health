@@ -1,7 +1,8 @@
 import { Form } from '@servicenow/sdk/core'
 
-// Form of the health score (user request 2026-11-20): three sections General, Scan check groups, Details.
-// Fields that are not listed here (checks_failed) are not shown on the form.
+// Form of the health score (user request 2026-11-20): one section without tabs. The groups General,
+// Scan check groups and Details are separated by annotation headings, because every further section
+// would be shown as a tab. Fields that are not listed here (checks_failed) are not shown on the form.
 export const ihHealthScoreForm = Form({
     table: 'x_bits2_inst_hlth_health_score',
     view: Now.ref('sys_ui_view', 'Default view'),
@@ -22,12 +23,17 @@ export const ihHealthScoreForm = Form({
                         { field: 'knock_out', type: 'table_field' },
                     ],
                 },
-            ],
-        },
-        {
-            caption: 'Scan check groups',
-            header: true,
-            content: [
+                {
+                    layout: 'one-column',
+                    elements: [
+                        {
+                            type: 'annotation',
+                            annotationId: Now.ID['ih-form-annotation-scan-check-groups'],
+                            text: 'Scan check groups',
+                            annotationType: 'Section_Separator',
+                        },
+                    ],
+                },
                 {
                     layout: 'two-column',
                     leftElements: [
@@ -42,12 +48,17 @@ export const ihHealthScoreForm = Form({
                         { field: 'score_security', type: 'table_field' },
                     ],
                 },
-            ],
-        },
-        {
-            caption: 'Details',
-            header: true,
-            content: [
+                {
+                    layout: 'one-column',
+                    elements: [
+                        {
+                            type: 'annotation',
+                            annotationId: Now.ID['ih-form-annotation-details'],
+                            text: 'Details',
+                            annotationType: 'Section_Separator',
+                        },
+                    ],
+                },
                 {
                     layout: 'one-column',
                     elements: [
