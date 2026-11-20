@@ -350,6 +350,14 @@ declare global {
                         table: 'par_dashboard_widget'
                         id: '4509dfe29f894b2fa1b6cdf054892dc0'
                     }
+                    'ih-form-annotation-details': {
+                        table: 'sys_ui_annotation'
+                        id: 'd054cda1a86f49a8b3e7df390bb1ebcc'
+                    }
+                    'ih-form-annotation-scan-check-groups': {
+                        table: 'sys_ui_annotation'
+                        id: 'b66439eb2de34b9db58de2552e6d1d01'
+                    }
                     'ih-health-score': {
                         table: 'sys_script_include'
                         id: '69e8c8bfb88847528cfbc953d47a4c9e'
@@ -807,6 +815,40 @@ declare global {
                 }
                 composite: [
                     {
+                        table: 'sys_ui_element'
+                        id: '0048212f6b3c41ca8d86be885d89731e'
+                        key: {
+                            sys_ui_section: {
+                                id: '0ca1b725e2cc47edbb59fca98e313c9d'
+                                key: {
+                                    name: 'x_bits2_inst_hlth_health_score'
+                                    caption: 'General'
+                                    view: 'Default view'
+                                    sys_domain: 'global'
+                                }
+                            }
+                            element: 'score_priority_2'
+                            position: '12'
+                        }
+                    },
+                    {
+                        table: 'sys_ui_element'
+                        id: '011d1a10b0394459aa30d0acdca5278e'
+                        key: {
+                            sys_ui_section: {
+                                id: '0ca1b725e2cc47edbb59fca98e313c9d'
+                                key: {
+                                    name: 'x_bits2_inst_hlth_health_score'
+                                    caption: 'General'
+                                    view: 'Default view'
+                                    sys_domain: 'global'
+                                }
+                            }
+                            element: '.begin_split'
+                            position: '10'
+                        }
+                    },
+                    {
                         table: 'sys_dictionary'
                         id: '01dd88296d2347a2916ca99783d25e85'
                         key: {
@@ -817,6 +859,7 @@ declare global {
                     {
                         table: 'sys_ui_element'
                         id: '03b06fb8c1b041c3979c17e3131eb5a9'
+                        deleted: true
                         key: {
                             sys_ui_section: {
                                 id: '91e8a46fe2024a1a87735d41243d5def'
@@ -851,7 +894,52 @@ declare global {
                     },
                     {
                         table: 'sys_ui_element'
+                        id: '0753fa531fb54cc7938a66168e02e504'
+                        key: {
+                            sys_ui_section: {
+                                id: '0ca1b725e2cc47edbb59fca98e313c9d'
+                                key: {
+                                    name: 'x_bits2_inst_hlth_health_score'
+                                    caption: 'General'
+                                    view: 'Default view'
+                                    sys_domain: 'global'
+                                }
+                            }
+                            element: 'scan_result'
+                            position: '1'
+                        }
+                    },
+                    {
+                        table: 'sys_ui_element'
+                        id: '07cb3ba01ed64402a143a42311bf8908'
+                        key: {
+                            sys_ui_section: {
+                                id: '0ca1b725e2cc47edbb59fca98e313c9d'
+                                key: {
+                                    name: 'x_bits2_inst_hlth_health_score'
+                                    caption: 'General'
+                                    view: 'Default view'
+                                    sys_domain: 'global'
+                                }
+                            }
+                            element: 'knock_out_checks'
+                            position: '22'
+                        }
+                    },
+                    {
+                        table: 'sys_ui_section'
+                        id: '0ca1b725e2cc47edbb59fca98e313c9d'
+                        key: {
+                            name: 'x_bits2_inst_hlth_health_score'
+                            caption: 'General'
+                            view: 'Default view'
+                            sys_domain: 'global'
+                        }
+                    },
+                    {
+                        table: 'sys_ui_element'
                         id: '0d0185af3009431a975a89c280d6306b'
+                        deleted: true
                         key: {
                             sys_ui_section: {
                                 id: '91e8a46fe2024a1a87735d41243d5def'
@@ -881,6 +969,23 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_ui_element'
+                        id: '136a7ca8351442f1ba34414f84299318'
+                        key: {
+                            sys_ui_section: {
+                                id: '0ca1b725e2cc47edbb59fca98e313c9d'
+                                key: {
+                                    name: 'x_bits2_inst_hlth_health_score'
+                                    caption: 'General'
+                                    view: 'Default view'
+                                    sys_domain: 'global'
+                                }
+                            }
+                            element: 'b66439eb2de34b9db58de2552e6d1d01'
+                            position: '9'
+                        }
+                    },
+                    {
                         table: 'sys_documentation'
                         id: '1388052f1a3b4cbb9cab72fc8212b1cf'
                         key: {
@@ -898,8 +1003,18 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_ui_form'
+                        id: '148b0dec1afa43178c80425a27046ae8'
+                        key: {
+                            name: 'x_bits2_inst_hlth_health_score'
+                            view: 'Default view'
+                            sys_domain: 'global'
+                        }
+                    },
+                    {
                         table: 'sys_ui_element'
                         id: '14ca02227c8946fda38809644337abf8'
+                        deleted: true
                         key: {
                             sys_ui_section: {
                                 id: '91e8a46fe2024a1a87735d41243d5def'
@@ -936,6 +1051,17 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_ui_section'
+                        id: '16f1d17a7a0b4fdfa59a49fce02c5a27'
+                        deleted: true
+                        key: {
+                            name: 'x_bits2_inst_hlth_health_score'
+                            caption: 'Scan check groups'
+                            view: 'Default view'
+                            sys_domain: 'global'
+                        }
+                    },
+                    {
                         table: 'sys_dictionary'
                         id: '173c232a57e24ed3bfbd65386dd4f364'
                         key: {
@@ -946,6 +1072,7 @@ declare global {
                     {
                         table: 'sys_ui_element'
                         id: '1c3859720af845bf9692653f39f7707b'
+                        deleted: true
                         key: {
                             sys_ui_section: {
                                 id: '2b92797b372147e28e83654f63d25ee7'
@@ -1009,6 +1136,7 @@ declare global {
                     {
                         table: 'sys_ui_section'
                         id: '2b92797b372147e28e83654f63d25ee7'
+                        deleted: true
                         key: {
                             name: 'x_bits2_inst_hlth_health_score'
                             caption: 'General'
@@ -1031,6 +1159,59 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_ui_element'
+                        id: '31276908b64a481daf15700c377a1348'
+                        deleted: true
+                        key: {
+                            sys_ui_section: {
+                                id: '61b7e31931ff4c9182eb245060b87e17'
+                                key: {
+                                    name: 'x_bits2_inst_hlth_health_score'
+                                    caption: 'Details'
+                                    view: 'Default view'
+                                    sys_domain: 'global'
+                                }
+                            }
+                            element: 'details'
+                            position: '0'
+                        }
+                    },
+                    {
+                        table: 'sys_ui_element'
+                        id: '337de3b781c049e9b9b1ae6ee261e1c9'
+                        deleted: true
+                        key: {
+                            sys_ui_section: {
+                                id: '16f1d17a7a0b4fdfa59a49fce02c5a27'
+                                key: {
+                                    name: 'x_bits2_inst_hlth_health_score'
+                                    caption: 'Scan check groups'
+                                    view: 'Default view'
+                                    sys_domain: 'global'
+                                }
+                            }
+                            element: '.end_split'
+                            position: '9'
+                        }
+                    },
+                    {
+                        table: 'sys_ui_element'
+                        id: '3afb2f5dd5d04bad88e9d184a08cc2b7'
+                        key: {
+                            sys_ui_section: {
+                                id: '0ca1b725e2cc47edbb59fca98e313c9d'
+                                key: {
+                                    name: 'x_bits2_inst_hlth_health_score'
+                                    caption: 'General'
+                                    view: 'Default view'
+                                    sys_domain: 'global'
+                                }
+                            }
+                            element: 'score_priority_3'
+                            position: '13'
+                        }
+                    },
+                    {
                         table: 'sys_choice_set'
                         id: '3cdd1dd8aab344e183f3c6bd66c00afd'
                         key: {
@@ -1040,7 +1221,26 @@ declare global {
                     },
                     {
                         table: 'sys_ui_element'
+                        id: '3e502370ae50465598fbc6664dd30d7a'
+                        deleted: true
+                        key: {
+                            sys_ui_section: {
+                                id: '16f1d17a7a0b4fdfa59a49fce02c5a27'
+                                key: {
+                                    name: 'x_bits2_inst_hlth_health_score'
+                                    caption: 'Scan check groups'
+                                    view: 'Default view'
+                                    sys_domain: 'global'
+                                }
+                            }
+                            element: 'score_upgradability'
+                            position: '5'
+                        }
+                    },
+                    {
+                        table: 'sys_ui_element'
                         id: '3e8372b7d050407ca45cbc18b71dfc65'
+                        deleted: true
                         key: {
                             sys_ui_section: {
                                 id: '2b92797b372147e28e83654f63d25ee7'
@@ -1058,6 +1258,81 @@ declare global {
                             }
                             element: '.split'
                             position: '4'
+                        }
+                    },
+                    {
+                        table: 'sys_ui_element'
+                        id: '4170aff8ba744fdcba1fda844515126b'
+                        key: {
+                            sys_ui_section: {
+                                id: '0ca1b725e2cc47edbb59fca98e313c9d'
+                                key: {
+                                    name: 'x_bits2_inst_hlth_health_score'
+                                    caption: 'General'
+                                    view: 'Default view'
+                                    sys_domain: 'global'
+                                }
+                            }
+                            element: 'scan_date'
+                            position: '2'
+                        }
+                    },
+                    {
+                        table: 'sys_ui_form_section'
+                        id: '43cf67f157ac4dc1a733786e8f968449'
+                        deleted: true
+                        key: {
+                            sys_ui_form: {
+                                id: '148b0dec1afa43178c80425a27046ae8'
+                                key: {
+                                    name: 'x_bits2_inst_hlth_health_score'
+                                    view: 'Default view'
+                                    sys_domain: 'global'
+                                }
+                            }
+                            sys_ui_section: {
+                                id: '16f1d17a7a0b4fdfa59a49fce02c5a27'
+                                key: {
+                                    name: 'x_bits2_inst_hlth_health_score'
+                                    caption: 'Scan check groups'
+                                    view: 'Default view'
+                                    sys_domain: 'global'
+                                }
+                            }
+                        }
+                    },
+                    {
+                        table: 'sys_ui_element'
+                        id: '443d92aede184e82bba67330546b3676'
+                        key: {
+                            sys_ui_section: {
+                                id: '0ca1b725e2cc47edbb59fca98e313c9d'
+                                key: {
+                                    name: 'x_bits2_inst_hlth_health_score'
+                                    caption: 'General'
+                                    view: 'Default view'
+                                    sys_domain: 'global'
+                                }
+                            }
+                            element: '.split'
+                            position: '14'
+                        }
+                    },
+                    {
+                        table: 'sys_ui_element'
+                        id: '4692fda2a9a04c53890146158597af6b'
+                        key: {
+                            sys_ui_section: {
+                                id: '0ca1b725e2cc47edbb59fca98e313c9d'
+                                key: {
+                                    name: 'x_bits2_inst_hlth_health_score'
+                                    caption: 'General'
+                                    view: 'Default view'
+                                    sys_domain: 'global'
+                                }
+                            }
+                            element: 'score_performance'
+                            position: '16'
                         }
                     },
                     {
@@ -1087,6 +1362,7 @@ declare global {
                     {
                         table: 'sys_ui_element'
                         id: '4a4dad7b6dbb4bf78dc9772478fbcd82'
+                        deleted: true
                         key: {
                             sys_ui_section: {
                                 id: '91e8a46fe2024a1a87735d41243d5def'
@@ -1133,6 +1409,7 @@ declare global {
                     {
                         table: 'sys_ui_element'
                         id: '4d5e85d2bdf84c6ea446bac641e780f4'
+                        deleted: true
                         key: {
                             sys_ui_section: {
                                 id: '7c29fec76ad64ada94a6dced776a3ccd'
@@ -1150,6 +1427,23 @@ declare global {
                             }
                             element: 'knock_out_checks'
                             position: '1'
+                        }
+                    },
+                    {
+                        table: 'sys_ui_element'
+                        id: '510003f5462841a2bb8c8f53c7d02c96'
+                        key: {
+                            sys_ui_section: {
+                                id: '0ca1b725e2cc47edbb59fca98e313c9d'
+                                key: {
+                                    name: 'x_bits2_inst_hlth_health_score'
+                                    caption: 'General'
+                                    view: 'Default view'
+                                    sys_domain: 'global'
+                                }
+                            }
+                            element: '.end_split'
+                            position: '19'
                         }
                     },
                     {
@@ -1182,7 +1476,26 @@ declare global {
                     },
                     {
                         table: 'sys_ui_element'
+                        id: '57d0e943eb404b9ca287acde8a754121'
+                        deleted: true
+                        key: {
+                            sys_ui_section: {
+                                id: '16f1d17a7a0b4fdfa59a49fce02c5a27'
+                                key: {
+                                    name: 'x_bits2_inst_hlth_health_score'
+                                    caption: 'Scan check groups'
+                                    view: 'Default view'
+                                    sys_domain: 'global'
+                                }
+                            }
+                            element: 'score_security'
+                            position: '8'
+                        }
+                    },
+                    {
+                        table: 'sys_ui_element'
                         id: '588533165eca4d179e90e0d14913bd80'
+                        deleted: true
                         key: {
                             sys_ui_section: {
                                 id: '2b92797b372147e28e83654f63d25ee7'
@@ -1235,6 +1548,7 @@ declare global {
                     {
                         table: 'sys_ui_element'
                         id: '5d5b852677a648a5bde473100de9824f'
+                        deleted: true
                         key: {
                             sys_ui_section: {
                                 id: '91e8a46fe2024a1a87735d41243d5def'
@@ -1268,11 +1582,58 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_ui_section'
+                        id: '61b7e31931ff4c9182eb245060b87e17'
+                        deleted: true
+                        key: {
+                            name: 'x_bits2_inst_hlth_health_score'
+                            caption: 'Details'
+                            view: 'Default view'
+                            sys_domain: 'global'
+                        }
+                    },
+                    {
+                        table: 'sys_ui_element'
+                        id: '657b776089484f478a719c96b73f5dc4'
+                        deleted: true
+                        key: {
+                            sys_ui_section: {
+                                id: '16f1d17a7a0b4fdfa59a49fce02c5a27'
+                                key: {
+                                    name: 'x_bits2_inst_hlth_health_score'
+                                    caption: 'Scan check groups'
+                                    view: 'Default view'
+                                    sys_domain: 'global'
+                                }
+                            }
+                            element: 'score_performance'
+                            position: '6'
+                        }
+                    },
+                    {
                         table: 'sys_dictionary'
                         id: '663725fd989542cba138c6cf4eb11dd5'
                         key: {
                             name: 'x_bits2_inst_hlth_health_score'
                             element: 'scan_result'
+                        }
+                    },
+                    {
+                        table: 'sys_ui_element'
+                        id: '6b11d2418f2c4a06aa428edde71c6513'
+                        deleted: true
+                        key: {
+                            sys_ui_section: {
+                                id: '16f1d17a7a0b4fdfa59a49fce02c5a27'
+                                key: {
+                                    name: 'x_bits2_inst_hlth_health_score'
+                                    caption: 'Scan check groups'
+                                    view: 'Default view'
+                                    sys_domain: 'global'
+                                }
+                            }
+                            element: 'score_priority_1'
+                            position: '1'
                         }
                     },
                     {
@@ -1294,6 +1655,7 @@ declare global {
                     {
                         table: 'sys_ui_element'
                         id: '6f6aa99cc67e489992f9b99da5679ca5'
+                        deleted: true
                         key: {
                             sys_ui_section: {
                                 id: '91e8a46fe2024a1a87735d41243d5def'
@@ -1329,6 +1691,7 @@ declare global {
                     {
                         table: 'sys_ui_element'
                         id: '75d9221860aa42cbbdea838df639168d'
+                        deleted: true
                         key: {
                             sys_ui_section: {
                                 id: '2b92797b372147e28e83654f63d25ee7'
@@ -1351,6 +1714,7 @@ declare global {
                     {
                         table: 'sys_ui_form'
                         id: '7602b707280b4bcb8cc32a57ed84f445'
+                        deleted: true
                         key: {
                             name: 'x_bits2_inst_hlth_health_score'
                             view: {
@@ -1363,6 +1727,23 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_ui_element'
+                        id: '76a364b3af264c559977f0f3de72ea43'
+                        key: {
+                            sys_ui_section: {
+                                id: '0ca1b725e2cc47edbb59fca98e313c9d'
+                                key: {
+                                    name: 'x_bits2_inst_hlth_health_score'
+                                    caption: 'General'
+                                    view: 'Default view'
+                                    sys_domain: 'global'
+                                }
+                            }
+                            element: 'score_uncapped'
+                            position: '6'
+                        }
+                    },
+                    {
                         table: 'sys_documentation'
                         id: '7a29fa470e0f49f5816dc8d14c6eddf1'
                         key: {
@@ -1372,8 +1753,27 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_ui_element'
+                        id: '7bb7fcfe43544fe5b52e0715869cf939'
+                        deleted: true
+                        key: {
+                            sys_ui_section: {
+                                id: '16f1d17a7a0b4fdfa59a49fce02c5a27'
+                                key: {
+                                    name: 'x_bits2_inst_hlth_health_score'
+                                    caption: 'Scan check groups'
+                                    view: 'Default view'
+                                    sys_domain: 'global'
+                                }
+                            }
+                            element: '.begin_split'
+                            position: '0'
+                        }
+                    },
+                    {
                         table: 'sys_ui_section'
                         id: '7c29fec76ad64ada94a6dced776a3ccd'
+                        deleted: true
                         key: {
                             name: 'x_bits2_inst_hlth_health_score'
                             caption: 'Details'
@@ -1389,6 +1789,7 @@ declare global {
                     {
                         table: 'sys_ui_element'
                         id: '7d60eaa7d11a483db9d28e36c04a8bcc'
+                        deleted: true
                         key: {
                             sys_ui_section: {
                                 id: '2b92797b372147e28e83654f63d25ee7'
@@ -1411,6 +1812,7 @@ declare global {
                     {
                         table: 'sys_ui_element'
                         id: '8573e8faf9d44dc9b8275bf3a0a8e593'
+                        deleted: true
                         key: {
                             sys_ui_section: {
                                 id: '7c29fec76ad64ada94a6dced776a3ccd'
@@ -1442,6 +1844,7 @@ declare global {
                     {
                         table: 'sys_ui_element'
                         id: '879ab459d3954b6c8bda0681306fd846'
+                        deleted: true
                         key: {
                             sys_ui_section: {
                                 id: '91e8a46fe2024a1a87735d41243d5def'
@@ -1459,6 +1862,30 @@ declare global {
                             }
                             element: '.split'
                             position: '4'
+                        }
+                    },
+                    {
+                        table: 'sys_ui_form_section'
+                        id: '87ebf56654704bc6a1a32ee3b71f6450'
+                        deleted: true
+                        key: {
+                            sys_ui_form: {
+                                id: '148b0dec1afa43178c80425a27046ae8'
+                                key: {
+                                    name: 'x_bits2_inst_hlth_health_score'
+                                    view: 'Default view'
+                                    sys_domain: 'global'
+                                }
+                            }
+                            sys_ui_section: {
+                                id: '61b7e31931ff4c9182eb245060b87e17'
+                                key: {
+                                    name: 'x_bits2_inst_hlth_health_score'
+                                    caption: 'Details'
+                                    view: 'Default view'
+                                    sys_domain: 'global'
+                                }
+                            }
                         }
                     },
                     {
@@ -1495,6 +1922,7 @@ declare global {
                     {
                         table: 'sys_ui_element'
                         id: '8b5d7d6552a34ff9b7a0cc5eac833550'
+                        deleted: true
                         key: {
                             sys_ui_section: {
                                 id: '91e8a46fe2024a1a87735d41243d5def'
@@ -1524,6 +1952,57 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_ui_element'
+                        id: '8cf32a9940084a43aedadb45c36086ec'
+                        key: {
+                            sys_ui_section: {
+                                id: '0ca1b725e2cc47edbb59fca98e313c9d'
+                                key: {
+                                    name: 'x_bits2_inst_hlth_health_score'
+                                    caption: 'General'
+                                    view: 'Default view'
+                                    sys_domain: 'global'
+                                }
+                            }
+                            element: 'score_manageability'
+                            position: '17'
+                        }
+                    },
+                    {
+                        table: 'sys_ui_element'
+                        id: '8dbe63402c3445d5b729c6940f2885c7'
+                        key: {
+                            sys_ui_section: {
+                                id: '0ca1b725e2cc47edbb59fca98e313c9d'
+                                key: {
+                                    name: 'x_bits2_inst_hlth_health_score'
+                                    caption: 'General'
+                                    view: 'Default view'
+                                    sys_domain: 'global'
+                                }
+                            }
+                            element: '.end_split'
+                            position: '8'
+                        }
+                    },
+                    {
+                        table: 'sys_ui_element'
+                        id: '8dcc820457694112a101ca9e6221b104'
+                        key: {
+                            sys_ui_section: {
+                                id: '0ca1b725e2cc47edbb59fca98e313c9d'
+                                key: {
+                                    name: 'x_bits2_inst_hlth_health_score'
+                                    caption: 'General'
+                                    view: 'Default view'
+                                    sys_domain: 'global'
+                                }
+                            }
+                            element: 'findings'
+                            position: '3'
+                        }
+                    },
+                    {
                         table: 'par_dashboard_canvas'
                         id: '8ee820a4174842099526ce6b753d4145'
                         key: {
@@ -1534,6 +2013,7 @@ declare global {
                     {
                         table: 'sys_ui_section'
                         id: '91e8a46fe2024a1a87735d41243d5def'
+                        deleted: true
                         key: {
                             name: 'x_bits2_inst_hlth_health_score'
                             caption: 'Scan check groups'
@@ -1574,6 +2054,7 @@ declare global {
                     {
                         table: 'sys_ui_element'
                         id: '96ef7da6e3314f6a8ccb62d099bb3fa6'
+                        deleted: true
                         key: {
                             sys_ui_section: {
                                 id: '91e8a46fe2024a1a87735d41243d5def'
@@ -1605,6 +2086,7 @@ declare global {
                     {
                         table: 'sys_ui_element'
                         id: '99520fbc1c704b14af7fd2ecf0152838'
+                        deleted: true
                         key: {
                             sys_ui_section: {
                                 id: '91e8a46fe2024a1a87735d41243d5def'
@@ -1645,6 +2127,7 @@ declare global {
                     {
                         table: 'sys_ui_element'
                         id: 'a2ee6ef45e964345b7d3c091bffdacf8'
+                        deleted: true
                         key: {
                             sys_ui_section: {
                                 id: '2b92797b372147e28e83654f63d25ee7'
@@ -1665,6 +2148,24 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_ui_element'
+                        id: 'a3c7d46ed7864558a4955723ff7c1d03'
+                        deleted: true
+                        key: {
+                            sys_ui_section: {
+                                id: '16f1d17a7a0b4fdfa59a49fce02c5a27'
+                                key: {
+                                    name: 'x_bits2_inst_hlth_health_score'
+                                    caption: 'Scan check groups'
+                                    view: 'Default view'
+                                    sys_domain: 'global'
+                                }
+                            }
+                            element: 'score_priority_3'
+                            position: '3'
+                        }
+                    },
+                    {
                         table: 'sys_security_acl_role'
                         id: 'a40c6982c98e49f0ad2e3f04a4d3b9c1'
                         key: {
@@ -1675,6 +2176,23 @@ declare global {
                                     name: 'admin'
                                 }
                             }
+                        }
+                    },
+                    {
+                        table: 'sys_ui_element'
+                        id: 'a44da209ff5f4e90ab6a38c197ca1c47'
+                        key: {
+                            sys_ui_section: {
+                                id: '0ca1b725e2cc47edbb59fca98e313c9d'
+                                key: {
+                                    name: 'x_bits2_inst_hlth_health_score'
+                                    caption: 'General'
+                                    view: 'Default view'
+                                    sys_domain: 'global'
+                                }
+                            }
+                            element: 'checks_evaluated'
+                            position: '23'
                         }
                     },
                     {
@@ -1697,8 +2215,49 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_ui_element'
+                        id: 'a86ea213e44447f5bc100bec92d301c8'
+                        key: {
+                            sys_ui_section: {
+                                id: '0ca1b725e2cc47edbb59fca98e313c9d'
+                                key: {
+                                    name: 'x_bits2_inst_hlth_health_score'
+                                    caption: 'General'
+                                    view: 'Default view'
+                                    sys_domain: 'global'
+                                }
+                            }
+                            element: 'score_security'
+                            position: '18'
+                        }
+                    },
+                    {
+                        table: 'sys_ui_form_section'
+                        id: 'adfcf279d0944c93a2faf7bd18d50811'
+                        key: {
+                            sys_ui_form: {
+                                id: '148b0dec1afa43178c80425a27046ae8'
+                                key: {
+                                    name: 'x_bits2_inst_hlth_health_score'
+                                    view: 'Default view'
+                                    sys_domain: 'global'
+                                }
+                            }
+                            sys_ui_section: {
+                                id: '0ca1b725e2cc47edbb59fca98e313c9d'
+                                key: {
+                                    name: 'x_bits2_inst_hlth_health_score'
+                                    caption: 'General'
+                                    view: 'Default view'
+                                    sys_domain: 'global'
+                                }
+                            }
+                        }
+                    },
+                    {
                         table: 'sys_ui_form_section'
                         id: 'b16cef81e7fc43eaa9bf3ea829b67b2c'
+                        deleted: true
                         key: {
                             sys_ui_form: {
                                 id: '7602b707280b4bcb8cc32a57ed84f445'
@@ -1730,6 +2289,41 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_ui_element'
+                        id: 'b174775a1cd741e68a2dbefec6ea3cb3'
+                        key: {
+                            sys_ui_section: {
+                                id: '0ca1b725e2cc47edbb59fca98e313c9d'
+                                key: {
+                                    name: 'x_bits2_inst_hlth_health_score'
+                                    caption: 'General'
+                                    view: 'Default view'
+                                    sys_domain: 'global'
+                                }
+                            }
+                            element: 'health_score'
+                            position: '5'
+                        }
+                    },
+                    {
+                        table: 'sys_ui_element'
+                        id: 'b2a4613d64ae44af851c7efd421b2de8'
+                        deleted: true
+                        key: {
+                            sys_ui_section: {
+                                id: '61b7e31931ff4c9182eb245060b87e17'
+                                key: {
+                                    name: 'x_bits2_inst_hlth_health_score'
+                                    caption: 'Details'
+                                    view: 'Default view'
+                                    sys_domain: 'global'
+                                }
+                            }
+                            element: 'checks_evaluated'
+                            position: '2'
+                        }
+                    },
+                    {
                         table: 'sys_documentation'
                         id: 'b35c902a711d4e7ebf61549c9a4daeba'
                         key: {
@@ -1758,6 +2352,7 @@ declare global {
                     {
                         table: 'sys_ui_element'
                         id: 'b5f812e1a30a48758b3c820bd1257755'
+                        deleted: true
                         key: {
                             sys_ui_section: {
                                 id: '2b92797b372147e28e83654f63d25ee7'
@@ -1802,6 +2397,24 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_ui_element'
+                        id: 'ba8839d87e264cc6a4e26cf4cba52d1a'
+                        deleted: true
+                        key: {
+                            sys_ui_section: {
+                                id: '16f1d17a7a0b4fdfa59a49fce02c5a27'
+                                key: {
+                                    name: 'x_bits2_inst_hlth_health_score'
+                                    caption: 'Scan check groups'
+                                    view: 'Default view'
+                                    sys_domain: 'global'
+                                }
+                            }
+                            element: 'score_manageability'
+                            position: '7'
+                        }
+                    },
+                    {
                         table: 'sys_documentation'
                         id: 'bcbaef6bde124d57b55ff55d9feab7b8'
                         key: {
@@ -1813,6 +2426,7 @@ declare global {
                     {
                         table: 'sys_ui_element'
                         id: 'bdb374ef61bb44b381126d7487a0faa7'
+                        deleted: true
                         key: {
                             sys_ui_section: {
                                 id: '2b92797b372147e28e83654f63d25ee7'
@@ -1859,6 +2473,23 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_ui_element'
+                        id: 'c1f14ba2f72c4989a8ff0d8ab713974b'
+                        key: {
+                            sys_ui_section: {
+                                id: '0ca1b725e2cc47edbb59fca98e313c9d'
+                                key: {
+                                    name: 'x_bits2_inst_hlth_health_score'
+                                    caption: 'General'
+                                    view: 'Default view'
+                                    sys_domain: 'global'
+                                }
+                            }
+                            element: '.begin_split'
+                            position: '0'
+                        }
+                    },
+                    {
                         table: 'sys_dictionary'
                         id: 'c2c2d123d9144559bfa605840978fca7'
                         key: {
@@ -1895,6 +2526,7 @@ declare global {
                     {
                         table: 'sys_ui_form_section'
                         id: 'caa04c7b09474fe6be82a5d24dcb6357'
+                        deleted: true
                         key: {
                             sys_ui_form: {
                                 id: '7602b707280b4bcb8cc32a57ed84f445'
@@ -1927,7 +2559,76 @@ declare global {
                     },
                     {
                         table: 'sys_ui_element'
+                        id: 'cbb77735b4a741b8be3e868859cd9431'
+                        key: {
+                            sys_ui_section: {
+                                id: '0ca1b725e2cc47edbb59fca98e313c9d'
+                                key: {
+                                    name: 'x_bits2_inst_hlth_health_score'
+                                    caption: 'General'
+                                    view: 'Default view'
+                                    sys_domain: 'global'
+                                }
+                            }
+                            element: 'score_upgradability'
+                            position: '15'
+                        }
+                    },
+                    {
+                        table: 'sys_ui_element'
+                        id: 'ccad00a199eb4f86bac986c6f44f54f8'
+                        key: {
+                            sys_ui_section: {
+                                id: '0ca1b725e2cc47edbb59fca98e313c9d'
+                                key: {
+                                    name: 'x_bits2_inst_hlth_health_score'
+                                    caption: 'General'
+                                    view: 'Default view'
+                                    sys_domain: 'global'
+                                }
+                            }
+                            element: '.split'
+                            position: '4'
+                        }
+                    },
+                    {
+                        table: 'sys_ui_element'
+                        id: 'cf94ebc68f8442f6a23707c1ac8fc0b6'
+                        key: {
+                            sys_ui_section: {
+                                id: '0ca1b725e2cc47edbb59fca98e313c9d'
+                                key: {
+                                    name: 'x_bits2_inst_hlth_health_score'
+                                    caption: 'General'
+                                    view: 'Default view'
+                                    sys_domain: 'global'
+                                }
+                            }
+                            element: 'score_priority_1'
+                            position: '11'
+                        }
+                    },
+                    {
+                        table: 'sys_ui_element'
+                        id: 'd0db45325fb6444db46f88e630af7bab'
+                        key: {
+                            sys_ui_section: {
+                                id: '0ca1b725e2cc47edbb59fca98e313c9d'
+                                key: {
+                                    name: 'x_bits2_inst_hlth_health_score'
+                                    caption: 'General'
+                                    view: 'Default view'
+                                    sys_domain: 'global'
+                                }
+                            }
+                            element: 'details'
+                            position: '21'
+                        }
+                    },
+                    {
+                        table: 'sys_ui_element'
                         id: 'd25c7184c46b428b96d107d09ede354e'
+                        deleted: true
                         key: {
                             sys_ui_section: {
                                 id: '7c29fec76ad64ada94a6dced776a3ccd'
@@ -1978,6 +2679,23 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_ui_element'
+                        id: 'd9e709d5e982437b87b6cc0e5bc0aa03'
+                        key: {
+                            sys_ui_section: {
+                                id: '0ca1b725e2cc47edbb59fca98e313c9d'
+                                key: {
+                                    name: 'x_bits2_inst_hlth_health_score'
+                                    caption: 'General'
+                                    view: 'Default view'
+                                    sys_domain: 'global'
+                                }
+                            }
+                            element: 'knock_out'
+                            position: '7'
+                        }
+                    },
+                    {
                         table: 'sys_dictionary'
                         id: 'de1a901c5cf745cfa54daeae32a55fe4'
                         key: {
@@ -1994,6 +2712,24 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_ui_element'
+                        id: 'e897a2cc658e4d929963d90a91ce3366'
+                        deleted: true
+                        key: {
+                            sys_ui_section: {
+                                id: '61b7e31931ff4c9182eb245060b87e17'
+                                key: {
+                                    name: 'x_bits2_inst_hlth_health_score'
+                                    caption: 'Details'
+                                    view: 'Default view'
+                                    sys_domain: 'global'
+                                }
+                            }
+                            element: 'knock_out_checks'
+                            position: '1'
+                        }
+                    },
+                    {
                         table: 'sys_dictionary'
                         id: 'ea18dce066ae47e6b37e6e552b39e28f'
                         key: {
@@ -2004,6 +2740,7 @@ declare global {
                     {
                         table: 'sys_ui_element'
                         id: 'efa5ac09fd8e49119ecf9acf1045b729'
+                        deleted: true
                         key: {
                             sys_ui_section: {
                                 id: '2b92797b372147e28e83654f63d25ee7'
@@ -2026,6 +2763,7 @@ declare global {
                     {
                         table: 'sys_ui_form_section'
                         id: 'f3e66b36eda041b5b29764a8bf5bd5e0'
+                        deleted: true
                         key: {
                             sys_ui_form: {
                                 id: '7602b707280b4bcb8cc32a57ed84f445'
@@ -2057,10 +2795,45 @@ declare global {
                         }
                     },
                     {
+                        table: 'sys_ui_element'
+                        id: 'f51155a65e454d8fb2e47865e777ea8b'
+                        deleted: true
+                        key: {
+                            sys_ui_section: {
+                                id: '16f1d17a7a0b4fdfa59a49fce02c5a27'
+                                key: {
+                                    name: 'x_bits2_inst_hlth_health_score'
+                                    caption: 'Scan check groups'
+                                    view: 'Default view'
+                                    sys_domain: 'global'
+                                }
+                            }
+                            element: 'score_priority_2'
+                            position: '2'
+                        }
+                    },
+                    {
                         table: 'ua_table_licensing_config'
                         id: 'f5aebb93cc80415ba84dc07f148020bc'
                         key: {
                             name: 'x_bits2_inst_hlth_health_score'
+                        }
+                    },
+                    {
+                        table: 'sys_ui_element'
+                        id: 'f5cd8b709f784a608fea9424f2f1917e'
+                        key: {
+                            sys_ui_section: {
+                                id: '0ca1b725e2cc47edbb59fca98e313c9d'
+                                key: {
+                                    name: 'x_bits2_inst_hlth_health_score'
+                                    caption: 'General'
+                                    view: 'Default view'
+                                    sys_domain: 'global'
+                                }
+                            }
+                            element: 'd054cda1a86f49a8b3e7df390bb1ebcc'
+                            position: '20'
                         }
                     },
                     {
@@ -2069,6 +2842,24 @@ declare global {
                         key: {
                             name: 'x_bits2_inst_hlth_health_score'
                             element: 'knock_out'
+                        }
+                    },
+                    {
+                        table: 'sys_ui_element'
+                        id: 'faa879d78b48438da1c4d2b64f46af7c'
+                        deleted: true
+                        key: {
+                            sys_ui_section: {
+                                id: '16f1d17a7a0b4fdfa59a49fce02c5a27'
+                                key: {
+                                    name: 'x_bits2_inst_hlth_health_score'
+                                    caption: 'Scan check groups'
+                                    view: 'Default view'
+                                    sys_domain: 'global'
+                                }
+                            }
+                            element: '.split'
+                            position: '4'
                         }
                     },
                     {
